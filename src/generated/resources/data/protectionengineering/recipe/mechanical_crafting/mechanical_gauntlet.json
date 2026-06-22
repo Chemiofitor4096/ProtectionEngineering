@@ -1,0 +1,25 @@
+{
+  "type": "create:mechanical_crafting",
+  "accept_mirrored": true,
+  "category": "misc",
+  "key": {
+    "I": {
+      "item": "create:iron_sheet"
+    },
+    "S": {
+      "item": "create:sturdy_sheet"
+    },
+    "W": {
+      "item": "minecraft:red_wool"
+    }
+  },
+  "pattern": [
+    " W W ",
+    " I I ",
+    " S S "
+  ],
+  "result": {
+    "count": 1,
+    "id": "protectionengineering:mechanical_gauntlet"
+  }
+}

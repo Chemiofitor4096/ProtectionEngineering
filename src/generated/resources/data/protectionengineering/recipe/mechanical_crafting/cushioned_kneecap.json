@@ -1,0 +1,25 @@
+{
+  "type": "create:mechanical_crafting",
+  "accept_mirrored": true,
+  "category": "misc",
+  "key": {
+    "I": {
+      "item": "create:iron_sheet"
+    },
+    "M": {
+      "item": "minecraft:slime_block"
+    },
+    "W": {
+      "item": "minecraft:white_wool"
+    }
+  },
+  "pattern": [
+    " W W ",
+    " M M ",
+    " I I "
+  ],
+  "result": {
+    "count": 1,
+    "id": "protectionengineering:cushioned_kneecap"
+  }
+}

@@ -1,0 +1,289 @@
+package com.chemiofitor.protection_engineering.item;
+
+import com.chemiofitor.protection_engineering.api.IAttachment;
+import com.chemiofitor.protection_engineering.api.SlotType;
+import com.chemiofitor.protection_engineering.registry.PEDataComponents;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.Holder;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+
+import javax.annotation.Nullable;
+import java.util.List;
+import java.util.Set;
+
+import static com.chemiofitor.protection_engineering.registry.PEDataComponents.ATTACHMENT_COOLDOWN;
+import static com.chemiofitor.protection_engineering.registry.PEDataComponents.ATTACHMENT_STATE;
+
+/**
+ * 附件物品的抽象基类 — 统一状态机。
+ */
+public abstract class AttachmentItem extends Item implements IAttachment {
+
+    private final Set<SlotType> compatibleSlots;
+    private final Set<Holder<MobEffect>> immunities;
+
+    /** 无状态效果免疫的附件 */
+    public AttachmentItem(Properties properties, SlotType... slots) {
+        this(properties, Set.of(), slots);
+    }
+
+    /** 带状态效果免疫的附件 */
+    public AttachmentItem(Properties properties, Set<Holder<MobEffect>> immunities, SlotType... slots) {
+        super(properties);
+        this.compatibleSlots = Set.of(slots);
+        this.immunities = Set.copyOf(immunities);
+        if (compatibleSlots.isEmpty()) {
+            throw new IllegalArgumentException("AttachmentItem must declare at least one compatible slot");
+        }
+    }
+
+    @Override
+    public Set<SlotType> compatibleSlots() { return compatibleSlots; }
+
+    @Override
+    public Set<Holder<MobEffect>> getImmunities() { return immunities; }
+
+    // ── 状态机：读写 ──────────────────────────────────────────
+
+    public int getState(ItemStack stack) {
+        Integer s = stack.get(ATTACHMENT_STATE.get());
+        if (s != null) return s;
+        return migrateState(stack);
+    }
+
+    protected void setState(ItemStack stack, int state) {
+        stack.set(ATTACHMENT_STATE.get(), state);
+        // 进入无限状态时清计时器
+        if (state == STATE_DISABLED || state == STATE_READY) {
+            stack.remove(ATTACHMENT_COOLDOWN.get());
+        }
+    }
+
+    public long getTimer(ItemStack stack) {
+        return stack.getOrDefault(ATTACHMENT_COOLDOWN.get(), 0L);
+    }
+
+    protected void setTimer(ItemStack stack, long endTick) {
+        stack.set(ATTACHMENT_COOLDOWN.get(), endTick);
+    }
+
+    // ── 旧存档迁移 ────────────────────────────────────────────
+
+    private int migrateState(ItemStack stack) {
+        Boolean active = stack.get(PEDataComponents.ATTACHMENT_ACTIVE.get());
+        if (active == null) {
+            return getControlPattern() == ControlPattern.ALWAYS_ON ? STATE_READY : STATE_DISABLED;
+        }
+        switch (getControlPattern()) {
+            case ACTIVE_COOLDOWN:
+                // 保守迁移为 READY，首个 tick 修正
+                return STATE_READY;
+            case ONE_SHOT_COOLDOWN:
+                return active ? STATE_READY : STATE_COOLING;
+            case FREE_TOGGLE:
+                return active ? STATE_READY : STATE_DISABLED;
+            default:
+                return STATE_DISABLED;
+        }
+    }
+
+    // ── 统一查询 ──────────────────────────────────────────────
+
+    public boolean isActive(ItemStack stack) {
+        int s = getState(stack);
+        return s == STATE_READY || s == STATE_ACTIVE;
+    }
+
+    @Override
+    public boolean isFoil(ItemStack stack) {
+        int s = getState(stack);
+        return s == STATE_READY || s == STATE_ACTIVE;
+    }
+
+    /** 是否处于激活窗口中（仅 ACTIVE_COOLDOWN 模式有意义） */
+    public boolean isInActiveWindow(ItemStack stack) {
+        return getControlPattern() == ControlPattern.ACTIVE_COOLDOWN
+                && getState(stack) == STATE_ACTIVE;
+    }
+
+    // ── HUD 用 ────────────────────────────────────────────────
+
+    public char getStateSymbol(ItemStack stack) {
+        return switch (getState(stack)) {
+            case STATE_READY -> '●';   // ●
+            case STATE_ACTIVE -> '⚡';  // ⚡
+            case STATE_COOLING -> '⌛'; // ⌛
+            default -> '○';            // ○
+        };
+    }
+
+    public int getStateColor(ItemStack stack) {
+        return switch (getState(stack)) {
+            case STATE_READY -> 0xFF55FF55;
+            case STATE_ACTIVE -> 0xFF55FFFF;
+            case STATE_COOLING -> 0xFFFFAA00;
+            default -> 0xFF888888;
+        };
+    }
+
+    // ── 生命周期：onEquip ─────────────────────────────────────
+
+    @Override
+    public void onEquip(ItemStack attachment, ItemStack host, LivingEntity entity) {
+        if (attachment.has(ATTACHMENT_STATE.get())) return;
+        if (attachment.has(PEDataComponents.ATTACHMENT_ACTIVE.get())) return; // 旧数据，等迁移
+
+        switch (getControlPattern()) {
+            case FREE_TOGGLE, ONE_SHOT_COOLDOWN, ACTIVE_COOLDOWN, ALWAYS_ON ->
+                    setState(attachment, STATE_READY);
+            default -> {}
+        }
+    }
+
+    // ── 生命周期：onTick 计时器到期的状态转换 ──────────────────
+
+    @Override
+    public void onTick(ItemStack attachment, ItemStack host, LivingEntity entity, SlotType slot) {
+        ControlPattern pattern = getControlPattern();
+        if (pattern == ControlPattern.PASSIVE || pattern == ControlPattern.ALWAYS_ON) return;
+        if (entity.level().isClientSide()) return;
+
+        long now = entity.level().getGameTime();
+        long timer = getTimer(attachment);
+        int state = getState(attachment);
+
+        if (timer == 0) return;
+
+        switch (state) {
+            case STATE_ACTIVE:
+                if (now >= timer) {
+                    // 激活窗口到期 → 进入冷却
+                    setState(attachment, STATE_COOLING);
+                    setTimer(attachment, now + getCooldownDuration());
+                    onStateExit(attachment, STATE_ACTIVE, entity);
+                }
+                break;
+
+            case STATE_COOLING:
+                if (now >= timer) {
+                    // 冷却到期 → 回到就绪
+                    setState(attachment, STATE_READY);
+                    onStateEnter(attachment, STATE_READY, entity);
+                }
+                break;
+
+            default:
+                // READY/DISABLED 无计时器，忽略
+                break;
+        }
+    }
+
+    // ── 热键：统一 onActivatePress ────────────────────────────
+
+    public void onActivatePress(ItemStack stack, ItemStack host, LivingEntity entity) {
+        ControlPattern pattern = getControlPattern();
+        if (pattern == ControlPattern.PASSIVE || pattern == ControlPattern.ALWAYS_ON) return;
+
+        boolean isCreative = entity instanceof Player p && p.getAbilities().instabuild;
+        long now = entity.level().getGameTime();
+        int state = getState(stack);
+
+        switch (pattern) {
+            case FREE_TOGGLE -> {
+                if (state == STATE_DISABLED) {
+                    setState(stack, STATE_READY);
+                    onStateEnter(stack, STATE_READY, entity);
+                } else {
+                    onStateExit(stack, STATE_READY, entity);
+                    setState(stack, STATE_DISABLED);
+                }
+            }
+
+            case ACTIVE_COOLDOWN -> {
+                if (isCreative) {
+                    // 创造模式：自由切换 READY ↔ ACTIVE
+                    if (state == STATE_READY) {
+                        setState(stack, STATE_ACTIVE);
+                        onStateEnter(stack, STATE_ACTIVE, entity);
+                    } else if (state == STATE_ACTIVE) {
+                        onStateExit(stack, STATE_ACTIVE, entity);
+                        setState(stack, STATE_READY);
+                    }
+                    return;
+                }
+                if (state != STATE_READY) return;
+                setState(stack, STATE_ACTIVE);
+                setTimer(stack, now + getActiveDuration());
+                onStateEnter(stack, STATE_ACTIVE, entity);
+            }
+
+            case ONE_SHOT_COOLDOWN -> {
+                if (isCreative) {
+                    onActivateOnce(stack, host, entity);
+                    return;
+                }
+                if (state != STATE_READY) return;
+                onActivateOnce(stack, host, entity);
+                setState(stack, STATE_COOLING);
+                setTimer(stack, now + getCooldownDuration());
+            }
+        }
+    }
+
+    // ── 子类钩子 ──────────────────────────────────────────────
+
+    /** ONE_SHOT_COOLDOWN 激活时的效果（子类覆写） */
+    protected void onActivateOnce(ItemStack stack, ItemStack host, LivingEntity entity) {}
+
+    /** 进入某状态时调用（子类覆写） */
+    protected void onStateEnter(ItemStack stack, int newState, LivingEntity entity) {}
+
+    /** 离开某状态时调用（子类覆写） */
+    protected void onStateExit(ItemStack stack, int oldState, LivingEntity entity) {}
+
+    // ── Tooltip ────────────────────────────────────────────────
+
+    @Override
+    public void appendHoverText(ItemStack stack, TooltipContext context,
+                                List<Component> tooltip, TooltipFlag flag) {
+        super.appendHoverText(stack, context, tooltip, flag);
+
+        tooltip.add(Component.translatable("tooltip.protectionengineering.slot")
+                .withStyle(ChatFormatting.GOLD));
+
+        for (SlotType slot : compatibleSlots) {
+            tooltip.add(Component.literal("  ")
+                    .append(Component.translatable(slot.getTranslationKey()))
+                    .withStyle(ChatFormatting.GRAY));
+        }
+
+        if (!immunities.isEmpty()) {
+            MutableComponent line = Component.literal("  ");
+            boolean first = true;
+            for (Holder<MobEffect> effect : immunities) {
+                if (!first) line.append(Component.literal(" "));
+                first = false;
+                line.append(Component.translatable(effect.value().getDescriptionId()));
+            }
+            tooltip.add(Component.translatable("tooltip.protectionengineering.immunities")
+                    .withStyle(ChatFormatting.GOLD));
+            tooltip.add(line.withStyle(ChatFormatting.AQUA));
+        }
+
+        String featureKey = getFeatureKey();
+        if (featureKey != null) {
+            tooltip.add(Component.translatable("tooltip.protectionengineering.feature")
+                    .withStyle(ChatFormatting.GOLD));
+            tooltip.add(Component.literal("  ")
+                    .append(Component.translatable(featureKey))
+                    .withStyle(ChatFormatting.BLUE));
+        }
+    }
+}

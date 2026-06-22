@@ -1,0 +1,50 @@
+{
+  "attach_1": {
+    "sounds": ["protectionengineering:attach_1"]
+  },
+  "attach_2": {
+    "sounds": ["protectionengineering:attach_2"]
+  },
+  "equip_engineer_armor": {
+    "sounds": []
+  },
+  "night_vision_on": {
+    "sounds": ["protectionengineering:night_vision_on"]
+  },
+  "night_vision_off": {
+    "sounds": ["protectionengineering:night_vision_off"]
+  },
+  "hormone_inject": {
+    "sounds": ["protectionengineering:hormone_inject"]
+  },
+  "thrust_jetpack": {
+    "sounds": ["protectionengineering:thrust_jetpack"]
+  },
+  "aps_activate": {
+    "sounds": ["protectionengineering:aps_activate"]
+  },
+  "missile_launch": {
+    "sounds": ["protectionengineering:missile_launch"]
+  },
+  "missile_lock": {
+    "sounds": ["protectionengineering:missile_lock"]
+  },
+  "missile_flight": {
+    "sounds": ["protectionengineering:missile_flight"]
+  },
+  "missile_warning": {
+    "sounds": ["protectionengineering:missile_warning"]
+  },
+  "rocket_launch": {
+    "sounds": ["protectionengineering:rocket_launch"]
+  },
+  "launch_fail": {
+    "sounds": ["protectionengineering:launch_fail"]
+  },
+  "dodge_warning": {
+    "sounds": ["protectionengineering:dodge_warning"]
+  },
+  "dodge_jet": {
+    "sounds": ["protectionengineering:dodge_jet"]
+  }
+}

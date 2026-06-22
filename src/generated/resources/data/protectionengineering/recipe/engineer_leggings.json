@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "I": {
+      "item": "create:iron_sheet"
+    },
+    "L": {
+      "item": "minecraft:diamond_leggings"
+    },
+    "P": {
+      "item": "create:precision_mechanism"
+    },
+    "S": {
+      "item": "create:sturdy_sheet"
+    }
+  },
+  "pattern": [
+    "SPS",
+    "SLS",
+    "I I"
+  ],
+  "result": {
+    "count": 1,
+    "id": "protectionengineering:engineer_leggings"
+  }
+}

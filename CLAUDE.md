@@ -1,0 +1,264 @@
+# Protection Engineering - 开发指南
+
+Minecraft NeoForge 1.21.1 模组。工程师护甲系统 — 护甲可安装附件，附件提供被动免疫/主动技能。
+
+## 项目结构
+
+```
+src/main/java/com/chemiofitor/protection_engineering/
+├── ProtectionEngineering.java       # 主类 (MODID, Registrate, 构造器组装)
+├── api/                             # 接口层
+│   ├── IAttachment.java             # 附件接口 (ControlPattern + state 常量 + 生命周期钩子)
+│   ├── IAttachmentHost.java         # 宿主接口 (护甲实现)
+│   ├── AttachmentsData.java         # 附件数据组件 record
+│   ├── SlotType.java                # 槽位类型 record (含注册表)
+│   └── SlotTypes.java               # 内置槽位常量
+├── item/                            # 物品类 (共 24 个)
+│   ├── AttachmentItem.java          # 附件抽象基类 ★ 统一状态机
+│   ├── SimpleAttachmentItem.java    # 纯被动附件
+│   ├── AttachmentHostArmorItem.java # 护甲基类
+│   ├── EngineerHoodItem.java        # 兜帽 (EYES+MOUTH)
+│   ├── EngineerChestplateItem.java  # 胸甲 (SHOULDER+CHESTPLATE+BACK+ARM)
+│   ├── EngineerLeggingsItem.java    # 护腿 (LEG+KNEE)
+│   ├── EngineerBootsItem.java       # 靴子 (FOOT)
+│   ├── NightVisionGogglesItem.java  # 夜视眼镜 (FREE_TOGGLE)
+│   ├── SpyglassItem.java            # 单筒望远镜 (FREE_TOGGLE, Z 键)
+│   ├── EngineerGogglesItem.java     # 工程师眼镜 (Create 集成)
+│   ├── AirFilterItem.java           # 空气过滤器 (免疫中毒/凋零)
+│   ├── DivingDeviceItem.java        # 潜水设备 (永久水下呼吸)
+│   ├── HormoneInjectorItem.java     # 激素针 (ONE_SHOT_COOLDOWN)
+│   ├── ApsItem.java                 # 主动防御系统 (ACTIVE_COOLDOWN)
+│   ├── AdvancedApsItem.java         # 高级主动防御系统 (继承 ApsItem)
+│   ├── RocketLauncherItem.java      # 火箭发射器 (ONE_SHOT_COOLDOWN, 霰弹)
+│   ├── DodgeJetpackItem.java        # 应激反馈背包 (事件触发 ONE_SHOT)
+│   ├── JetpackItem.java             # 喷气背包 (ALWAYS_ON, 鞘翅)
+│   ├── MomentumJetpackItem.java     # 动量背包 (继承 JetpackItem, 速度+20%)
+│   ├── MissilePackItem.java         # 导弹背包 (ONE_SHOT_COOLDOWN)
+│   ├── MissileItem.java             # 制导导弹 (消耗品)
+│   ├── SturdyPlateItem.java         # 坚固防护板 (护甲+2, 减伤10%)
+│   ├── NetheritePlateItem.java      # 下界合金防护板 (护甲+4, 减伤15%)
+│   ├── HeavyExoskeletonItem.java    # 重型外骨骼 (护甲+2, 跨1格, 摔落-20%)
+│   ├── LightExoskeletonItem.java    # 轻型外骨骼 (速度+10%, 跳跃+0.5, 跨1格)
+│   ├── ExtraMechanicalArmItem.java  # 额外机械臂 (触及+2)
+│   ├── MechaKnuckleItem.java        # 机械拳套 (近战+20%)
+│   ├── CushionedKneecapItem.java    # 缓冲护膝 (摔落-10%)
+│   ├── CushionedSolesItem.java      # 缓冲鞋底 (摔落-20%, 高度-1)
+│   └── ImprovedSolesItem.java       # 改良鞋底 (防滑/免疫粘液/细雪行走)
+├── entity/                          # 自定义实体
+│   ├── MissileEntity.java           # 制导导弹 (导向+粒子+音效)
+│   ├── RocketProjectile.java        # 火箭射弹 (直线+爆炸)
+│   └── ThrustEntity.java            # 推力实体 (不可见, 挂载助推)
+├── registry/
+│   ├── PEDataComponents.java        # 数据组件 (ATTACHMENT_STATE, COOLDOWN, ATTACHMENTS)
+│   ├── PEArmorMaterials.java
+│   ├── PEItems.java                 # 物品注册 (Registrate)
+│   ├── PEEntities.java              # 实体类型注册
+│   ├── PESounds.java                # 音效事件注册
+│   └── PEWorkbench.java             # 改装台注册
+├── config/
+│   ├── PEConfig.java                # 客户端配置 (HUD 位置)
+│   └── PEServerConfig.java          # 服务端配置 (APS/导弹/闪避/激素/火箭参数)
+├── event/
+│   ├── PEGameEvents.java            # 伤害/摔落/效果免疫/附魔禁用
+│   └── PENetworkEvents.java         # 网络包处理 (附件开关+喷气推进)
+├── network/
+│   ├── ToggleAttachmentPayload.java # 附件开关包
+│   └── ThrustJetpackPayload.java    # 喷气推进包
+├── client/
+│   ├── PEKeyBindings.java           # 热键 (N/H/J/K/R/G/Z)
+│   ├── PEClientExtensions.java
+│   ├── PEModelLayers.java           # 模型层注册
+│   ├── PEEntityRenderers.java       # 实体渲染器注册
+│   ├── layer/PEArmorLayer.java      # 护甲+附件渲染 (含对称肢体镜像)
+│   ├── PEHormoneOverlay.java        # 激素针 HUD+FOV+望远镜遮罩
+│   ├── PECooldownOverlay.java       # 统一状态 HUD (●/⚡/⌛)
+│   ├── renderer/                    # 实体渲染器
+│   └── model/                       # Blockbench 导出模型
+├── mixin/
+│   ├── LivingEntityMixin.java       # 减伤(上限100%) + 改良鞋底防滑
+│   └── ItemStackMixin.java          # 改良鞋底细雪行走
+├── block/                           # 改装台方块
+├── menu/                            # 改装台 GUI
+└── data/
+    ├── PEDataGen.java               # 语言文件 + 配方生成入口
+    ├── PERecipeProvider.java        # 工作台/锻造台配方
+    └── PEMechanicalCraftingRecipeGen.java  # 动力合成配方
+```
+
+## 数据组件 (`PEDataComponents`)
+
+| 组件 | 类型 | 用途 |
+|------|------|------|
+| `ATTACHMENTS` | `AttachmentsData` | 护甲上的附件列表 |
+| `ATTACHMENT_STATE` | `Integer` | **统一状态** 0=DISABLED, 1=READY, 2=ACTIVE, 3=COOLING |
+| `ATTACHMENT_COOLDOWN` | `Long` | 当前阶段结束 tick (0=无计时器) |
+| `ATTACHMENT_ACTIVE` | `Boolean` | ⚠️ 已废弃，仅用于旧存档迁移 |
+
+## 统一状态机
+
+### 控制模式 (`ControlPattern`)
+
+| 模式 | 状态流转 | 典型附件 |
+|------|---------|---------|
+| `FREE_TOGGLE` | DISABLED ↔ READY | 夜视眼镜, 单筒望远镜 |
+| `ACTIVE_COOLDOWN` | READY → ACTIVE → COOLING → READY | APS, 高级APS |
+| `ONE_SHOT_COOLDOWN` | READY → COOLING → READY | 激素针, 导弹, 火箭, 应激背包 |
+| `ALWAYS_ON` | 始终 READY | 喷气背包, 动量背包 |
+| `PASSIVE` | 无状态 | 防护板, 外骨骼等 |
+
+### HUD 显示规则
+
+| 状态 | 符号 | 生存颜色 | 创造颜色 |
+|------|------|------|------|
+| READY | ● | 绿 `#55FF55` | 紫 `#FF55FF` |
+| ACTIVE | ⚡ + 剩余时间 | 青 `#55FFFF` | 紫 |
+| COOLING | ⌛ + 剩余时间 | 灰→黄→红 | 紫 |
+| DISABLED | ○ | 灰 | 紫 |
+
+### 创建新附件 (按模式)
+
+```java
+// FREE_TOGGLE — 自由开关
+public class XItem extends AttachmentItem {
+    public XItem(Properties p) { super(p, SlotTypes.EYES); }
+    @Override public ControlPattern getControlPattern() { return ControlPattern.FREE_TOGGLE; }
+    @Override protected void onStateEnter(ItemStack s, int state, LivingEntity e) {
+        if (state == STATE_READY) { /* 开启时 */ }
+    }
+    @Override protected void onStateExit(ItemStack s, int state, LivingEntity e) {
+        if (state == STATE_READY) { /* 关闭时 */ }
+    }
+}
+
+// ACTIVE_COOLDOWN — 激活窗口+冷却
+public class XItem extends AttachmentItem {
+    @Override public ControlPattern getControlPattern() { return ControlPattern.ACTIVE_COOLDOWN; }
+    @Override public long getActiveDuration() { return 200; }
+    @Override public long getCooldownDuration() { return 600; }
+    @Override public void onTick(ItemStack a, ItemStack h, LivingEntity e, SlotType s) {
+        super.onTick(a, h, e, s);
+        if (!isInActiveWindow(a)) return;
+        // 仅激活窗口内执行
+    }
+}
+
+// ONE_SHOT_COOLDOWN — 一次性触发+冷却
+public class XItem extends AttachmentItem {
+    @Override public ControlPattern getControlPattern() { return ControlPattern.ONE_SHOT_COOLDOWN; }
+    @Override public long getCooldownDuration() { return 1200; }
+    @Override protected void onActivateOnce(ItemStack s, ItemStack h, LivingEntity e) {
+        // 一次性效果
+    }
+}
+```
+
+### 状态机钩子
+
+| 钩子 | 用途 |
+|------|------|
+| `onActivateOnce(stack, host, entity)` | ONE_SHOT 触发时 |
+| `onStateEnter(stack, newState, entity)` | 进入状态时 (播音效) |
+| `onStateExit(stack, oldState, entity)` | 离开状态时 (清除效果) |
+
+**不要**覆写 `onEquip` / `onActivatePress` / `onTick` 做状态管理 — 基类 `AttachmentItem` 已统一处理。必须覆写 `onTick` 时先调 `super.onTick(...)`。
+
+## 槽位类型 (`SlotTypes`)
+
+| 护甲 | 槽位 (各1个) |
+|------|------|
+| 兜帽 | `EYES`, `MOUTH` |
+| 胸甲 | `SHOULDER`, `CHESTPLATE`, `BACK`, `ARM` |
+| 护腿 | `LEG`, `KNEE` |
+| 靴子 | `FOOT` |
+| 武器(预留) | `BLADE`, `HILT`, `GUARD` |
+
+## 配置系统 (`PEServerConfig`)
+
+生成到 `protectionengineering-server.toml`，运行时修改即时生效。
+
+| 分类 | 配置项 | 默认 | 范围 |
+|------|------|------|------|
+| aps | `interceptRange` | 5.0 | 1-32 |
+| | `activeDuration` | 200 | 20-1200 |
+| | `cooldownTicks` | 600 | 20-3600 |
+| missile | `targetRange` | 512 | 20-1024 |
+| | `flightSpeed` | 3.0 | 1-10 |
+| | `closeSpeed` | 4.5 | 1-15 |
+| | `maxLife` | 200 | 40-600 |
+| rocket | `cooldownTicks` | 200 | 20-3600 |
+| hormone | `cooldownTicks` | 1200 | 20-7200 |
+| dodge | `dodgeStrength` | 1.0 | 0.2-10 |
+| | `cooldownTicks` | 200 | 20-3600 |
+
+## 热键
+
+| 键 | 常量 | 目标 |
+|------|------|------|
+| N | `TOGGLE_NIGHT_VISION` | NightVisionGogglesItem |
+| H | `ACTIVATE_HORMONE` | HormoneInjectorItem |
+| J | `THRUST_JETPACK` | JetpackItem / MomentumJetpackItem |
+| K | `TOGGLE_APS` | ApsItem |
+| R | `ACTIVATE_ROCKET_LAUNCHER` | RocketLauncherItem |
+| G | `ACTIVATE_MISSILE` | MissilePackItem |
+| Z | `TOGGLE_SPYGLASS` | SpyglassItem |
+
+添加热键：在 `PEKeyBindings` 加 KeyMapping + `registerKeys` + `onClientTick` 中 `tryActivateAttachment(YourClass.class)`。
+
+## 减伤系统
+
+无上限叠加，最终 clamp 到 100%（防负伤害）。
+
+| 位置 | 事件 | 类型 |
+|------|------|------|
+| `LivingEntityMixin` | `hurt` 通用减伤 | `getDamageReduction()` |
+| `PEGameEvents.onLivingFall` | 摔落距离减免 | `getFallDistanceReduction()` |
+| `PEGameEvents.onLivingFall` | 摔落伤害倍率 | `getFallDamageReduction()` |
+
+## 配方系统
+
+| 生成器 | 配方类型 | 文件 |
+|------|------|------|
+| `PERecipeProvider` | 工作台 (Shaped) + 锻造台 (SmithingTransform) | `data/PERecipeProvider.java` |
+| `PEMechanicalCraftingRecipeGen` | Create 动力合成 (MechanicalCrafting) | `data/PEMechanicalCraftingRecipeGen.java` |
+
+Create 物品引用：`AllItems.STURDY_SHEET`, `AllItems.BRASS_SHEET`, `AllItems.IRON_SHEET`, `AllItems.COPPER_SHEET`, `AllItems.PRECISION_MECHANISM`, `AllItems.POWDERED_OBSIDIAN`, `AllItems.ELECTRON_TUBE`, `AllItems.GOGGLES`, `AllBlocks.MECHANICAL_ARM`, `AllBlocks.DISPLAY_BOARD`, `AllBlocks.DEPOT`, `AllBlocks.BRASS_CASING`, `AllBlocks.SHAFT`, `AllBlocks.ENCASED_FAN`, `AllBlocks.STEAM_WHISTLE`, `AllBlocks.REDSTONE_CONTACT`
+
+## 翻译 key 规范
+
+- 物品: `item.protectionengineering.<name>`
+- 槽位: `slot.protectionengineering.<name>`
+- Tooltip: `tooltip.protectionengineering.<name>`
+- 功能: `tooltip.protectionengineering.feature.<name>`
+- 消息: `message.protectionengineering.<name>`
+- 按键: `key.protectionengineering.<name>`
+- 字幕: `subtitles.protectionengineering.<name>`
+- HUD: `hud.protectionengineering.<name>`
+
+中文翻译手动维护在 `src/main/resources/assets/protectionengineering/lang/zh_cn.json`。
+英文翻译通过 `PEDataGen.java` 的 `ProviderType.LANG` 生成。运行 `runData` 更新。
+
+## Mixin
+
+| Mixin | 目标 | 用途 |
+|-------|------|------|
+| `LivingEntityMixin` | `LivingEntity` | `hurt` 减伤(上限100%) + `getBlockSpeedFactor` 防滑 |
+| `ItemStackMixin` | `ItemStack` | `canWalkOnPowderedSnow` 细雪行走 |
+
+## 事件系统 (`PEGameEvents`)
+
+| 事件 | 用途 |
+|------|------|
+| `LivingIncomingDamageEvent` | 应激反馈背包 (近战) / APS 拦截 (投射物) |
+| `LivingFallEvent` | 摔落距离减免 + 伤害倍率减免 |
+| `MobEffectEvent.Applicable` / `Added` | 状态效果免疫 |
+| `ItemAttributeModifierEvent` | 附件属性修饰符 |
+
+## 文档
+
+| 文档 | 路径 |
+|------|------|
+| 实现文档 | `doc/IMPLEMENTATION_DOCS.md` |
+| API 指南 | `doc/API_GUIDE.md` |
+| 毕业搭配 | `doc/BEST_LAYOUTS.md` |
+| 改装台 | `doc/改装台.md` |
+| 合成配方 | 记忆: `mechanical-crafting-recipes.md` `create-recipe-items.md` |

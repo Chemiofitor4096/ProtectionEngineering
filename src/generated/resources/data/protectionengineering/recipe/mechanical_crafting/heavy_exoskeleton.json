@@ -1,0 +1,30 @@
+{
+  "type": "create:mechanical_crafting",
+  "accept_mirrored": true,
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "create:brass_sheet"
+    },
+    "P": {
+      "item": "create:precision_mechanism"
+    },
+    "R": {
+      "item": "create:shaft"
+    },
+    "S": {
+      "item": "create:sturdy_sheet"
+    }
+  },
+  "pattern": [
+    "BSPSB",
+    "BB BB",
+    " R R ",
+    " S S ",
+    " S S "
+  ],
+  "result": {
+    "count": 1,
+    "id": "protectionengineering:heavy_exoskeleton"
+  }
+}

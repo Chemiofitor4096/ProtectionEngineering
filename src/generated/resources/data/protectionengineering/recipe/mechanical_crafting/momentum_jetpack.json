@@ -1,0 +1,28 @@
+{
+  "type": "create:mechanical_crafting",
+  "accept_mirrored": true,
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "create:brass_sheet"
+    },
+    "E": {
+      "item": "minecraft:end_crystal"
+    },
+    "J": {
+      "item": "protectionengineering:jetpack"
+    },
+    "S": {
+      "item": "create:sturdy_sheet"
+    }
+  },
+  "pattern": [
+    " SES ",
+    "SBJBS",
+    " B B "
+  ],
+  "result": {
+    "count": 1,
+    "id": "protectionengineering:momentum_jetpack"
+  }
+}

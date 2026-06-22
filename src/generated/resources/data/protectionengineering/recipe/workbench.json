@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "create:brass_casing"
+    },
+    "D": {
+      "item": "create:display_board"
+    },
+    "M": {
+      "item": "create:mechanical_arm"
+    },
+    "P": {
+      "item": "create:precision_mechanism"
+    },
+    "S": {
+      "item": "create:depot"
+    }
+  },
+  "pattern": [
+    " D ",
+    "MSM",
+    "BPB"
+  ],
+  "result": {
+    "count": 1,
+    "id": "protectionengineering:workbench"
+  }
+}
