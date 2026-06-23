@@ -19,9 +19,9 @@ displayName="${mod_name}" #mandatory
 # A text field displayed in the mod UI
 #credits="" #optional
 
-authors="Chemiofitor"
+authors="Rhodes_Koei,Chemiofitor"
 description='''
-Example mod description.
+Provide installable attachments for the engineer's armor system, and each attachment is installed in a specific slot of armor to provide passive immunity, attribute bonus or active skills.
 '''
 
 config="${mod_id}.mixins.json"
@@ -55,5 +55,11 @@ config="${mod_id}.mixins.json"
     type="required"
     # This version range declares a minimum of the current minecraft version up to but not including the next major version
     versionRange="${minecraft_version_range}"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.${mod_id}]]
+    modId="create"
+    type="required"
+    versionRange="${create_version_range}"
     ordering="NONE"
     side="BOTH"
