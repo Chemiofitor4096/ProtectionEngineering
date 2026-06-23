@@ -1,48 +1,13 @@
 package com.chemiofitor.protection_engineering.registry;
 
-import com.chemiofitor.protection_engineering.item.AdvancedApsItem;
-import com.chemiofitor.protection_engineering.item.AirFilterItem;
-import com.chemiofitor.protection_engineering.item.ApsItem;
-import com.chemiofitor.protection_engineering.item.SimpleAttachmentItem;
-import com.chemiofitor.protection_engineering.api.SlotTypes;
-import com.chemiofitor.protection_engineering.item.DivingDeviceItem;
-import com.chemiofitor.protection_engineering.item.EngineerBootsItem;
-import com.chemiofitor.protection_engineering.item.EngineerChestplateItem;
-import com.chemiofitor.protection_engineering.item.EngineerGogglesItem;
-import com.chemiofitor.protection_engineering.item.EngineerHoodItem;
-import com.chemiofitor.protection_engineering.item.EngineerLeggingsItem;
-import com.chemiofitor.protection_engineering.item.DodgeJetpackItem;
-import com.chemiofitor.protection_engineering.item.JetpackItem;
-import com.chemiofitor.protection_engineering.item.MomentumJetpackItem;
-import com.chemiofitor.protection_engineering.item.ExtraMechanicalArmItem;
-import com.chemiofitor.protection_engineering.item.CushionedKneecapItem;
-import com.chemiofitor.protection_engineering.item.CushionedSolesItem;
-import com.chemiofitor.protection_engineering.item.ImprovedSolesItem;
-import com.chemiofitor.protection_engineering.item.InsulatedSolesItem;
-import com.chemiofitor.protection_engineering.item.HeavyExoskeletonItem;
-import com.chemiofitor.protection_engineering.item.HormoneInjectorItem;
-import com.chemiofitor.protection_engineering.item.SpyglassItem;
-import com.chemiofitor.protection_engineering.item.LightExoskeletonItem;
-import com.chemiofitor.protection_engineering.item.MechaKnuckleItem;
-import com.chemiofitor.protection_engineering.item.MissileItem;
-import com.chemiofitor.protection_engineering.item.MissilePackItem;
-import com.chemiofitor.protection_engineering.item.NetheritePlateItem;
-import com.chemiofitor.protection_engineering.item.NightVisionGogglesItem;
-import com.chemiofitor.protection_engineering.item.RocketLauncherItem;
-import com.chemiofitor.protection_engineering.item.SturdyPlateItem;
+import com.chemiofitor.protection_engineering.item.*;
+import com.simibubi.create.foundation.data.AssetLookup;
 import com.tterrag.registrate.util.entry.ItemEntry;
-import net.minecraft.core.Holder;
-import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.item.Item;
-
 import net.minecraft.world.item.ArmorItem;
 
-import java.util.Set;
-
+import static com.chemiofitor.protection_engineering.ProtectionEngineering.REGISTRATE;
 import static com.chemiofitor.protection_engineering.registry.PEArmorMaterials.DURABILITY_FACTOR;
 import static com.chemiofitor.protection_engineering.registry.PEArmorMaterials.ENGINEER_ARMOR;
-import static com.chemiofitor.protection_engineering.ProtectionEngineering.REGISTRATE;
 
 /**
  * 所有物品的集中注册点。
@@ -186,6 +151,13 @@ public class PEItems {
             .properties(p -> p.stacksTo(16))
             .register();
 
+    public static final ItemEntry<EngineerSawSwordItem> ENGINEER_SAW_SWORD = REGISTRATE
+            .item("engineer_saw_sword", EngineerSawSwordItem::new)
+            .lang("Engineer Saw Sword")
+            .model(AssetLookup.existingItemModel())
+            .properties(p -> p.stacksTo(1).fireResistant())
+            .register();
+
     // ══════════════════════════════════════════════════════════════
     //  胸甲附件 — 手臂 (2) — ARM
     // ══════════════════════════════════════════════════════════════
@@ -235,6 +207,18 @@ public class PEItems {
 
     public static final ItemEntry<InsulatedSolesItem> INSULATED_SOLES = REGISTRATE
             .item("insulated_soles", InsulatedSolesItem::new)
+            .properties(p -> p.stacksTo(1))
+            .register();
+
+    // ══════════════════════════════════════════════════════════════
+    //  武器 / 工具 (2)
+    // ══════════════════════════════════════════════════════════════
+
+    public static final ItemEntry<EngineerShieldItem> ENGINEER_SHIELD = REGISTRATE
+            .item("engineer_shield", p -> new EngineerShieldItem(
+                    p.durability(1008)))  // 336 × 3
+            .lang("Engineer Shield")
+            .model(AssetLookup.existingItemModel())
             .properties(p -> p.stacksTo(1))
             .register();
 
