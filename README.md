@@ -1,5 +1,6 @@
 # Protection Engineering · 工程防护
 
+![展示](doc/展示.png)
 Minecraft NeoForge 1.21.1 模组。为工程师护甲系统提供**可安装附件**，每个附件安装在护甲的特定槽位上，提供被动免疫、属性加成或主动技能。依赖 **Create** 模组。
 
 策划/美术：Rhodes_Koei  
