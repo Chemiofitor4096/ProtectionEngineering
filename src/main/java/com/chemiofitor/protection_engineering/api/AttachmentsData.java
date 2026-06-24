@@ -6,26 +6,44 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
- * 宿主物品上的附件数据。
- * <p>
- * 用 {@link Map}{@code <SlotType, ItemStack>} 存储，只存非空值。
- * 不同宿主物品（头盔、胸甲、锯剑）各自只存自己支持的槽位子集，
- * 没有"定长 N"的限制。
- * <p>
- * 不可变 —— {@link #with} / {@link #without} 返回新实例。
+ * 宿主物品上的附件数据。自定义 equals/hashCode 用 ItemStack.matches 做值比较。
  */
-public record AttachmentsData(Map<SlotType, ItemStack> slots) {
+public final class AttachmentsData {
+
+    private final Map<SlotType, ItemStack> slots;
 
     public static final AttachmentsData EMPTY = new AttachmentsData(Map.of());
 
-    /** 防御性拷贝，确保不可变 */
-    public AttachmentsData {
-        slots = Map.copyOf(slots);
+    public AttachmentsData(Map<SlotType, ItemStack> slots) {
+        this.slots = Map.copyOf(slots);
+    }
+
+    public Map<SlotType, ItemStack> slots() { return slots; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof AttachmentsData other)) return false;
+        if (slots.size() != other.slots.size()) return false;
+        for (var entry : slots.entrySet()) {
+            ItemStack otherStack = other.slots.get(entry.getKey());
+            if (otherStack == null) return false;
+            // 仅比较物品类型，忽略组件变化（防止状态更新触发装备音效）
+            if (!ItemStack.matches(entry.getValue(), otherStack)) return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int h = 0;
+        for (var entry : slots.entrySet()) {
+            h += Objects.hash(entry.getKey(), ItemStack.hashItemAndComponents(entry.getValue()));
+        }
+        return h;
     }
 
     // ── Codec ──────────────────────────────────────────────────

@@ -1,5 +1,6 @@
 package com.chemiofitor.protection_engineering;
 
+import com.chemiofitor.protection_engineering.compat.DetailArmorBarCompat;
 import com.chemiofitor.protection_engineering.config.PEConfig;
 import com.chemiofitor.protection_engineering.config.PEServerConfig;
 import com.chemiofitor.protection_engineering.data.PEDataGen;
@@ -12,11 +13,13 @@ import com.chemiofitor.protection_engineering.registry.PESounds;
 import com.chemiofitor.protection_engineering.registry.PEWorkbench;
 import com.mojang.logging.LogUtils;
 import com.tterrag.registrate.Registrate;
+import net.neoforged.neoforge.common.NeoForge;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import org.slf4j.Logger;
@@ -56,6 +59,13 @@ public class ProtectionEngineering {
 
         modEventBus.addListener(EventPriority.HIGHEST, PEDataGen::gatherDataHighPriority);
         modEventBus.addListener(EventPriority.LOWEST, PEDataGen::gatherData);
+
+        if (ModList.get().isLoaded("detailab")) {
+            modEventBus.addListener(DetailArmorBarCompat::onClientSetup);
+        }
+
+        NeoForge.EVENT_BUS.register(
+                new com.chemiofitor.protection_engineering.event.PEGameEvents.EquipmentHandler());
     }
 
     // ── Helpers ─────────────────────────────────────────────────

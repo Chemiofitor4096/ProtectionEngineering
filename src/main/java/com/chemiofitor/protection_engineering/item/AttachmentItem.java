@@ -82,9 +82,12 @@ public abstract class AttachmentItem extends Item implements IAttachment {
             return getControlPattern() == ControlPattern.ALWAYS_ON ? STATE_READY : STATE_DISABLED;
         }
         switch (getControlPattern()) {
-            case ACTIVE_COOLDOWN:
-                // 保守迁移为 READY，首个 tick 修正
-                return STATE_READY;
+            case ACTIVE_COOLDOWN: {
+                // 有旧冷却计时器 → 迁移到 COOLING
+                long oldTimer = stack.getOrDefault(ATTACHMENT_COOLDOWN.get(), 0L);
+                if (!active && oldTimer > 0) return STATE_COOLING;
+                return STATE_READY; // 激活窗口中或就绪，下个 tick 修正
+            }
             case ONE_SHOT_COOLDOWN:
                 return active ? STATE_READY : STATE_COOLING;
             case FREE_TOGGLE:
@@ -159,12 +162,17 @@ public abstract class AttachmentItem extends Item implements IAttachment {
         long timer = getTimer(attachment);
         int state = getState(attachment);
 
-        if (timer == 0) return;
+        // 损坏恢复：需要计时器但没有 → 回到就绪
+        if (timer == 0) {
+            if (state == STATE_ACTIVE || state == STATE_COOLING) {
+                setState(attachment, STATE_READY);
+            }
+            return;
+        }
 
         switch (state) {
             case STATE_ACTIVE:
                 if (now >= timer) {
-                    // 激活窗口到期 → 进入冷却
                     setState(attachment, STATE_COOLING);
                     setTimer(attachment, now + getCooldownDuration());
                     onStateExit(attachment, STATE_ACTIVE, entity);
@@ -173,7 +181,6 @@ public abstract class AttachmentItem extends Item implements IAttachment {
 
             case STATE_COOLING:
                 if (now >= timer) {
-                    // 冷却到期 → 回到就绪
                     setState(attachment, STATE_READY);
                     onStateEnter(attachment, STATE_READY, entity);
                 }

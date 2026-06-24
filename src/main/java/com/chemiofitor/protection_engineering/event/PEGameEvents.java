@@ -15,6 +15,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
@@ -202,5 +203,44 @@ public class PEGameEvents {
             }
         }
         return false;
+    }
+
+    // ── 装备变更（LivingEquipmentChangeEvent） ──────────────────
+
+    /** 由 ProtectionEngineering 构造器注册到 NeoForge.EVENT_BUS */
+    public static final class EquipmentHandler {
+        @SubscribeEvent
+        public void onEquipmentChange(net.neoforged.neoforge.event.entity.living.LivingEquipmentChangeEvent event) {
+            var slot = event.getSlot();
+            if (slot.getType() != EquipmentSlot.Type.HUMANOID_ARMOR) return;
+
+            ItemStack from = event.getFrom();
+            ItemStack to = event.getTo();
+
+
+            LivingEntity entity = event.getEntity();
+
+            // 卸下
+            if (from.getItem() instanceof IAttachmentHost) {
+                for (var entry : ((IAttachmentHost) from.getItem()).getAttachments(from).slots().entrySet()) {
+                    if (entry.getValue().getItem() instanceof IAttachment att) {
+                        att.onUnequip(entry.getValue(), from, entity);
+                    }
+                }
+            }
+
+            // 装备
+            if (to.getItem() instanceof IAttachmentHost host) {
+                var data = host.getAttachments(to);
+                for (var entry : data.slots().entrySet()) {
+                    var attStack = entry.getValue();
+                    if (attStack.getItem() instanceof IAttachment att) {
+                        att.onEquip(attStack, to, entity);
+                        data = data.with(entry.getKey(), attStack);
+                    }
+                }
+                host.setAttachments(to, data);
+            }
+        }
     }
 }

@@ -6,7 +6,12 @@
     "sounds": ["protectionengineering:attach_2"]
   },
   "equip_engineer_armor": {
-    "sounds": []
+    "sounds": [
+      "item/armor/equip_netherite1",
+      "item/armor/equip_netherite2",
+      "item/armor/equip_netherite3",
+      "item/armor/equip_netherite4"
+    ]
   },
   "night_vision_on": {
     "sounds": ["protectionengineering:night_vision_on"]

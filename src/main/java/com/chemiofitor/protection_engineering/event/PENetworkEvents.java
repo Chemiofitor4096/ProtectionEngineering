@@ -31,7 +31,9 @@ public class PENetworkEvents {
                 (payload, context) -> context.enqueueWork(() -> {
                     var player = context.player();
 
-                    EquipmentSlot slot = EquipmentSlot.values()[payload.armorIndex()];
+                    int idx = payload.armorIndex();
+                    if (idx < 0 || idx >= EquipmentSlot.values().length) return;
+                    EquipmentSlot slot = EquipmentSlot.values()[idx];
                     ItemStack armor = player.getItemBySlot(slot);
                     if (!(armor.getItem() instanceof IAttachmentHost host)) return;
 
@@ -44,8 +46,6 @@ public class PENetworkEvents {
                         attItem.onActivatePress(attachment, armor, player);
                     }
                     host.setAttachments(armor, data.with(type, attachment));
-                    // 装备数据修改后须写回槽位，触发客户端同步
-                    player.setItemSlot(slot, armor);
                 })
         );
 
