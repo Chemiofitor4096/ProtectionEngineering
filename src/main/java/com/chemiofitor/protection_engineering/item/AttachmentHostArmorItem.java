@@ -8,7 +8,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ArmorItem;
@@ -17,9 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 
-import java.util.IdentityHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static com.chemiofitor.protection_engineering.registry.PEDataComponents.ATTACHMENTS;
@@ -69,71 +66,29 @@ public abstract class AttachmentHostArmorItem extends ArmorItem implements IAtta
     public void setAttachments(ItemStack host, AttachmentsData data) {
         host.set(ATTACHMENTS.get(), data);
     }
-
     // ── Tick ────────────────────────────────────────────────────
-
-    private static final Map<ItemStack, Boolean> WORN_TRACKER = new IdentityHashMap<>();
 
     @Override
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
         if (!(entity instanceof LivingEntity living)) return;
-
-        boolean isWorn = living.getItemBySlot(getEquipmentSlot()) == stack;
-        boolean wasWorn = WORN_TRACKER.getOrDefault(stack, false);
-
-        if (!wasWorn && isWorn) {
-            // 刚穿上 → 通知所有附件
-            AttachmentsData data = getAttachments(stack);
-            for (var entry : data.slots().entrySet()) {
-                ItemStack attached = entry.getValue();
-                if (attached.getItem() instanceof IAttachment att) {
-                    att.onEquip(attached, stack, living);
-                    data = data.with(entry.getKey(), attached);
-                }
-            }
-            setAttachments(stack, data);
-            syncEquipmentIfPlayer(living, stack);
-        } else if (wasWorn && !isWorn) {
-            // 刚脱下 → 通知所有附件
-            AttachmentsData data = getAttachments(stack);
-            for (var entry : data.slots().entrySet()) {
-                ItemStack attached = entry.getValue();
-                if (attached.getItem() instanceof IAttachment att) {
-                    att.onUnequip(attached, stack, living);
-                }
-            }
-        }
-
-        WORN_TRACKER.put(stack, isWorn);
-
-        if (!isWorn) return;
-
-        // 服务端 tick + 写回；客户端自动从 networkSynchronized 数据组件同步
+        if (living.getItemBySlot(getEquipmentSlot()) != stack) return;
         if (level.isClientSide()) return;
 
         AttachmentsData data = getAttachments(stack);
         boolean mutated = false;
         for (var entry : data.slots().entrySet()) {
-            ItemStack attachmentStack = entry.getValue();
+            var key = entry.getKey();
+            ItemStack attachmentStack = entry.getValue().copy();
             if (attachmentStack.getItem() instanceof IAttachment attachment) {
-                attachment.onTick(attachmentStack, stack, living, entry.getKey());
-                data = data.with(entry.getKey(), attachmentStack);
-                mutated = true;
+                attachment.onTick(attachmentStack, stack, living, key);
+                if (!ItemStack.matches(entry.getValue(), attachmentStack)) {
+                    data = data.with(key, attachmentStack);
+                    mutated = true;
+                }
             }
         }
         if (mutated) {
             setAttachments(stack, data);
-            syncEquipmentIfPlayer(living, stack);
-        }
-    }
-
-    /** 数据组件变更后强制同步到客户端 */
-    private void syncEquipmentIfPlayer(LivingEntity living, ItemStack stack) {
-        if (living instanceof ServerPlayer sp) {
-            sp.connection.send(new net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket(
-                    sp.getId(), List.of(
-                            com.mojang.datafixers.util.Pair.of(getEquipmentSlot(), stack.copy())
-                    )));
         }
     }
 

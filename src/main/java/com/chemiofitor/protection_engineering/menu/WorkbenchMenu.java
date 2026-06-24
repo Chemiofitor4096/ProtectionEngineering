@@ -126,7 +126,7 @@ public class WorkbenchMenu extends AbstractContainerMenu {
     }
 
     private void playAttachSound() {
-        if (be == null) return;
+        if (be == null || be.getLevel() == null) return;
         var sound = RandomSource.create().nextBoolean()
                 ? PESounds.ATTACH_1.get() : PESounds.ATTACH_2.get();
         be.getLevel().playSound(null, be.getBlockPos(), sound, SoundSource.BLOCKS, 0.8F, 1.0F);
@@ -142,17 +142,6 @@ public class WorkbenchMenu extends AbstractContainerMenu {
         ItemStack updatedArmor = be.getItem(WorkbenchBlockEntity.SLOT_ARMOR).copy();
         container.setItem(WorkbenchBlockEntity.SLOT_ARMOR, updatedArmor);
         syncing = false;
-    }
-
-    /** 菜单关闭 → 写回 BE 并清空 */
-    public void onClosed() {
-        if (be == null) return;
-        // 附件写入护甲
-        for (int i = 0; i < WorkbenchBlockEntity.SLOT_COUNT; i++)
-            be.setItem(i, container.getItem(i).copy());
-        be.applyAttachments();
-        // 清空 BE 物品栏（不持久化）
-        be.clearContent();
     }
 
     // ── Screen ─────────────────────────────────────────────────

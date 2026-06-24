@@ -358,6 +358,8 @@ public class MissileEntity extends Projectile {
     protected void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         this.life = tag.getInt("Life");
+        this.engineSoundTimer = tag.getInt("EngineSound");
+        this.warningSoundTimer = tag.getInt("WarningSound");
         if (tag.hasUUID("TargetUUID")) {
             this.targetEntityUUID = tag.getUUID("TargetUUID");
         }
@@ -376,6 +378,8 @@ public class MissileEntity extends Projectile {
     protected void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.putInt("Life", life);
+        tag.putInt("EngineSound", engineSoundTimer);
+        tag.putInt("WarningSound", warningSoundTimer);
         if (targetEntityUUID != null) {
             tag.putUUID("TargetUUID", targetEntityUUID);
         }

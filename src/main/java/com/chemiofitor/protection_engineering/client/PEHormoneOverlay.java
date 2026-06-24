@@ -3,6 +3,7 @@ package com.chemiofitor.protection_engineering.client;
 import com.chemiofitor.protection_engineering.ProtectionEngineering;
 import com.chemiofitor.protection_engineering.api.IAttachment;
 import com.chemiofitor.protection_engineering.api.IAttachmentHost;
+import com.chemiofitor.protection_engineering.config.PEServerConfig;
 import com.chemiofitor.protection_engineering.item.SpyglassItem;
 import com.chemiofitor.protection_engineering.registry.PEDataComponents;
 import com.chemiofitor.protection_engineering.registry.PEItems;
@@ -121,7 +122,7 @@ public class PEHormoneOverlay {
         long cooldownEnd = getHormoneCooldownEnd(player);
         if (cooldownEnd <= 0) return 0;
 
-        long activatedAt = cooldownEnd - 1200; // COOLDOWN_TICKS
+        long activatedAt = cooldownEnd - PEServerConfig.HORMONE_COOLDOWN_TICKS.get();
         long elapsed = now - activatedAt;
         if (elapsed < 0 || elapsed >= 200) return 0; // EFFECT_DURATION = 200
 
@@ -156,7 +157,7 @@ public class PEHormoneOverlay {
             long cooldownEnd = getHormoneCooldownEnd(player);
             if (cooldownEnd <= 0) return 0;
 
-            long activatedAt = cooldownEnd - 1200;
+            long activatedAt = cooldownEnd - PEServerConfig.HORMONE_COOLDOWN_TICKS.get();
             long elapsed = now - activatedAt;
             if (elapsed < 0 || elapsed >= 60) return 0;
 

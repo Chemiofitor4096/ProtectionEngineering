@@ -36,7 +36,7 @@ public class PEArmorMaterials {
                             ArmorItem.Type.BOOTS,       3
                     ),
                     15,                                 // 附魔值同下界合金
-                    PESounds.EQUIP_ENGINEER_ARMOR,       // 工程师护甲音效（复用下界合金音频）
+                    PESounds.EQUIP_ENGINEER_ARMOR,       // 工程师护甲音效
                     () -> Ingredient.of(Items.IRON_INGOT),
                     List.of(new ArmorMaterial.Layer(ProtectionEngineering.asResource("engineer"))),
                     3.0F,                               // 韧性同下界合金

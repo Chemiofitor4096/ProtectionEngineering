@@ -54,12 +54,16 @@ public class ThrustEntity extends Entity {
     public boolean shouldRender(double x, double y, double z) { return false; }
 
     @Override
+    public void remove(RemovalReason reason) {
+        if (target != null) ACTIVE.remove(target.getUUID());
+        super.remove(reason);
+    }
+
+    @Override
     public void tick() {
         super.tick();
         if (target == null || !target.isAlive() || life >= maxLife) {
-            ProtectionEngineering.LOGGER.info("Thrust DISCARD life={}/{} targetNull={} targetDead={}",
-                life, maxLife, target == null, target != null && !target.isAlive());
-            if (target != null) ACTIVE.remove(target.getUUID());
+            ProtectionEngineering.LOGGER.debug("Thrust DISCARD life={}/{}", life, maxLife);
             this.discard();
             return;
         }
@@ -75,11 +79,6 @@ public class ThrustEntity extends Entity {
                     look.x * 0.1 + (look.x * targetSpeed - vel.x) * 0.5,
                     look.y * 0.1 + (look.y * targetSpeed - vel.y) * 0.5,
                     look.z * 0.1 + (look.z * targetSpeed - vel.z) * 0.5));
-            if (life % 20 == 0) {
-                Vec3 v = target.getDeltaMovement();
-                ProtectionEngineering.LOGGER.info("Thrust life={}/{} thrust={} vx={} vy={} vz={} fly={}",
-                    life, maxLife, targetSpeed, v.x, v.y, v.z, target.isFallFlying());
-            }
 
             // 粒子
             if (target.level() instanceof ServerLevel sl) {
@@ -89,7 +88,6 @@ public class ThrustEntity extends Entity {
                         pos.x, pos.y, pos.z, 3, 0.3, 0.05, 0.3, 0.02);
             }
         } else {
-            ACTIVE.remove(target.getUUID());
             this.discard();
             return;
         }
