@@ -2,26 +2,26 @@ package com.chemiofitor.protection_engineering.event;
 
 import com.chemiofitor.protection_engineering.ProtectionEngineering;
 import com.chemiofitor.protection_engineering.api.IAttachment;
-import com.chemiofitor.protection_engineering.config.PEServerConfig;
 import com.chemiofitor.protection_engineering.api.IAttachmentHost;
 import com.chemiofitor.protection_engineering.api.SlotTypes;
-
-import static com.chemiofitor.protection_engineering.api.IAttachment.STATE_COOLING;
+import com.chemiofitor.protection_engineering.config.PEServerConfig;
 import com.chemiofitor.protection_engineering.item.ApsItem;
 import com.chemiofitor.protection_engineering.item.DodgeJetpackItem;
 import com.chemiofitor.protection_engineering.item.InsulatedSolesItem;
+import com.chemiofitor.protection_engineering.item.SilentSolesItem;
 import com.chemiofitor.protection_engineering.registry.PEDataComponents;
 import net.minecraft.core.Holder;
+import net.minecraft.tags.GameEventTags;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.ItemAttributeModifierEvent;
+import net.neoforged.neoforge.event.VanillaGameEvent;
 import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
@@ -29,6 +29,8 @@ import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+
+import static com.chemiofitor.protection_engineering.api.IAttachment.STATE_COOLING;
 
 /**
  * 游戏事件。
@@ -39,20 +41,6 @@ public class PEGameEvents {
     /** 来自客户端的喷气背包推力请求 — JetpackItem.onTick 消费 */
     public static final Set<UUID> thrustRequests = new HashSet<>();
 
-    // ── 属性修饰符 ──────────────────────────────────────────
-
-    @SubscribeEvent
-    public static void onItemAttributeModifier(ItemAttributeModifierEvent event) {
-        ItemStack stack = event.getItemStack();
-        if (!(stack.getItem() instanceof IAttachmentHost host)) return;
-
-        for (var entry : host.getAttachments(stack).slots().entrySet()) {
-            if (entry.getValue().getItem() instanceof IAttachment attachment) {
-                attachment.addAttributeModifiers(event);
-            }
-        }
-    }
-
     // ── 应激反馈背包 ──────────────────────────────────────────
 
     @SubscribeEvent
@@ -61,8 +49,8 @@ public class PEGameEvents {
 
         var source = event.getSource();
 
-        // ── 隔热鞋底：免疫岩浆块伤害 ──────────────────────
-        if (source.is(net.minecraft.world.damagesource.DamageTypes.HOT_FLOOR)
+        // ── 隔热鞋底：免疫脚下热源伤害 ──────────────────────
+        if ((source.is(DamageTypes.HOT_FLOOR) || source.is(DamageTypes.CAMPFIRE))
                 && player.getItemBySlot(EquipmentSlot.FEET).getItem() instanceof IAttachmentHost host) {
             for (var entry : host.getAttachments(player.getItemBySlot(EquipmentSlot.FEET)).slots().entrySet()) {
                 if (entry.getValue().getItem() instanceof InsulatedSolesItem) {
@@ -205,42 +193,23 @@ public class PEGameEvents {
         return false;
     }
 
-    // ── 装备变更（LivingEquipmentChangeEvent） ──────────────────
+    // ── 静音鞋底：阻止 Warden 振动探测 ──────────────────────────
 
-    /** 由 ProtectionEngineering 构造器注册到 NeoForge.EVENT_BUS */
-    public static final class EquipmentHandler {
-        @SubscribeEvent
-        public void onEquipmentChange(net.neoforged.neoforge.event.entity.living.LivingEquipmentChangeEvent event) {
-            var slot = event.getSlot();
-            if (slot.getType() != EquipmentSlot.Type.HUMANOID_ARMOR) return;
+    /** 静音鞋底抑制的 GameEvent — 与潜行抑制行为一致 (见 GameEventTagsProvider.IGNORE_VIBRATIONS_SNEAKING) */
+    private static boolean isSilencedGameEvent(Holder<GameEvent> event) {
+        return event.is(GameEventTags.IGNORE_VIBRATIONS_SNEAKING);
+    }
 
-            ItemStack from = event.getFrom();
-            ItemStack to = event.getTo();
+    @SubscribeEvent
+    public static void onVanillaGameEvent(VanillaGameEvent event) {
+        if (!(event.getCause() instanceof Player player)) return;
+        if (!isSilencedGameEvent(event.getVanillaEvent())) return;
 
-
-            LivingEntity entity = event.getEntity();
-
-            // 卸下
-            if (from.getItem() instanceof IAttachmentHost) {
-                for (var entry : ((IAttachmentHost) from.getItem()).getAttachments(from).slots().entrySet()) {
-                    if (entry.getValue().getItem() instanceof IAttachment att) {
-                        att.onUnequip(entry.getValue(), from, entity);
-                    }
-                }
-            }
-
-            // 装备
-            if (to.getItem() instanceof IAttachmentHost host) {
-                var data = host.getAttachments(to);
-                for (var entry : data.slots().entrySet()) {
-                    var attStack = entry.getValue();
-                    if (attStack.getItem() instanceof IAttachment att) {
-                        att.onEquip(attStack, to, entity);
-                        data = data.with(entry.getKey(), attStack);
-                    }
-                }
-                host.setAttachments(to, data);
-            }
+        ItemStack boots = player.getItemBySlot(EquipmentSlot.FEET);
+        if (boots.getItem() instanceof IAttachmentHost host
+                && host.getAttachments(boots).get(SlotTypes.FOOT).getItem() instanceof SilentSolesItem) {
+            event.setCanceled(true);
         }
     }
+
 }

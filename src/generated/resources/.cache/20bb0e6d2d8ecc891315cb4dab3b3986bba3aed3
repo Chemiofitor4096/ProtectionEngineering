@@ -1,7 +1,7 @@
-// 1.21.1	2026-06-24T00:07:46.5949336	Registrate Provider for protectionengineering [Registries, Data Maps, Recipes, Advancements, Loot Tables, Tags (blocks), Tags (enchantments), Tags (items), Tags (fluids), Tags (entity_types), generic_server_provider, Blockstates, Item models, Lang (en_us/en_ud), generic_client_provider]
+// 1.21.1	2026-06-30T17:50:23.7319338	Registrate Provider for protectionengineering [Registries, Data Maps, Recipes, Advancements, Loot Tables, Tags (blocks), Tags (enchantments), Tags (items), Tags (fluids), Tags (entity_types), generic_server_provider, Blockstates, Item models, Lang (en_us/en_ud), generic_client_provider]
 9548b733d8408aab37f04a6ccfcda663b4d8e229 assets/protectionengineering/blockstates/workbench.json
-3ebc6bada8dee1c71143cd590a503026603d9e78 assets/protectionengineering/lang/en_ud.json
-50483ba261acea55871e79e9c15e6255fd297291 assets/protectionengineering/lang/en_us.json
+34bc8909145a831d136942fde78bc97be1efe417 assets/protectionengineering/lang/en_ud.json
+c561e67e7b22c830150867c551368eb0f4c8e74a assets/protectionengineering/lang/en_us.json
 de432a9aaddd8bf94d4ff0714405d45b68482019 assets/protectionengineering/models/item/advanced_aps.json
 fd6421744d19fc737d2db860c16f73d268b23727 assets/protectionengineering/models/item/air_filter.json
 d83a0d8a91c9426b9002ffad467f65ec884026bb assets/protectionengineering/models/item/aps.json
@@ -28,6 +28,7 @@ ce07e6c86032946d2b13fbd0232631c386a4e546 assets/protectionengineering/models/ite
 6601c5d1a96e40aa4273aca7c0c7514559c4a0f5 assets/protectionengineering/models/item/netherite_plate.json
 914aeca5309b30bea99bfdf718d88d4a654787eb assets/protectionengineering/models/item/night_vision_goggles.json
 af6628e86678c209a6ea7e307d7c9ff8aeb0b48d assets/protectionengineering/models/item/rocket_launcher.json
+388bb26baa3f70830529b39d016bf01ed5fb9a32 assets/protectionengineering/models/item/silent_soles.json
 585c71e4897b058ed334aef67be481b272f870e9 assets/protectionengineering/models/item/spyglass.json
 a77d04174c7f8d1fbf0947adcf2a19c42fa3d9c3 assets/protectionengineering/models/item/sturdy_plate.json
 c44852c88a1dbe2a21e75f32839d5239677e0114 assets/protectionengineering/models/item/workbench.json

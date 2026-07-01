@@ -25,16 +25,16 @@ public interface IAttachment {
     Set<SlotType> compatibleSlots();
 
     /**
-     * 附件安装到宿主物品时调用。
+     * 宿主护甲被玩家穿上时调用（非附件安装/拆卸）。
      *
      * @param attachment 附件自身的 ItemStack
-     * @param host       被安装到的宿主物品 ItemStack（护甲/武器等）
-     * @param entity     装备者
+     * @param host       宿主护甲 ItemStack
+     * @param entity     装备者（玩家）
      */
     default void onEquip(ItemStack attachment, ItemStack host, LivingEntity entity) {}
 
     /**
-     * 附件从宿主物品卸下时调用。
+     * 宿主护甲被玩家脱下时调用（非附件安装/拆卸）。
      */
     default void onUnequip(ItemStack attachment, ItemStack host, LivingEntity entity) {}
 

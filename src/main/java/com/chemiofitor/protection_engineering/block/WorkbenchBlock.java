@@ -3,9 +3,10 @@ package com.chemiofitor.protection_engineering.block;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -27,6 +28,8 @@ public class WorkbenchBlock extends BaseEntityBlock {
 
     public static final MapCodec<WorkbenchBlock> CODEC = simpleCodec(WorkbenchBlock::new);
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+
+    private static final Component TITLE = Component.translatable("block.protectionengineering.workbench");
 
     public WorkbenchBlock(Properties properties) {
         super(properties);
@@ -68,7 +71,8 @@ public class WorkbenchBlock extends BaseEntityBlock {
 
         BlockEntity be = level.getBlockEntity(pos);
         if (be instanceof WorkbenchBlockEntity wbe && player instanceof ServerPlayer sp) {
-            sp.openMenu(wbe, pos);
+            sp.openMenu(new SimpleMenuProvider(
+                    (windowId, inv, p) -> wbe.createMenu(windowId, inv), TITLE), pos);
         }
         return InteractionResult.CONSUME;
     }
@@ -77,10 +81,6 @@ public class WorkbenchBlock extends BaseEntityBlock {
     protected void onRemove(BlockState state, Level level, BlockPos pos,
                             BlockState newState, boolean moved) {
         if (!state.is(newState.getBlock())) {
-            if (level.getBlockEntity(pos) instanceof WorkbenchBlockEntity wbe) {
-                wbe.applyAttachments();
-                Containers.dropContents(level, pos, wbe);
-            }
             super.onRemove(state, level, pos, newState, moved);
         }
     }

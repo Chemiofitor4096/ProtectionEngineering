@@ -3,7 +3,10 @@ package com.chemiofitor.protection_engineering.client;
 import com.chemiofitor.protection_engineering.ProtectionEngineering;
 import com.chemiofitor.protection_engineering.client.layer.PEArmorLayer;
 import com.chemiofitor.protection_engineering.client.model.*;
+import net.minecraft.client.renderer.entity.ArmorStandRenderer;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.world.entity.EntityType;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -34,8 +37,7 @@ public class PEModelLayers {
         event.registerLayerDefinition(HormoneInjectorAttachmentModel.LAYER_LOCATION, HormoneInjectorAttachmentModel::createBodyLayer);
         event.registerLayerDefinition(ExtraMechArmLeftAttachmentModel.LAYER_LOCATION, ExtraMechArmLeftAttachmentModel::createBodyLayer);
         event.registerLayerDefinition(ExtraMechArmRightAttachmentModel.LAYER_LOCATION, ExtraMechArmRightAttachmentModel::createBodyLayer);
-        event.registerLayerDefinition(SturdyPlateAttachmentModel.LAYER_LOCATION, SturdyPlateAttachmentModel::createBodyLayer);
-        event.registerLayerDefinition(NetheritePlateAttachmentModel.LAYER_LOCATION, NetheritePlateAttachmentModel::createBodyLayer);
+        event.registerLayerDefinition(PlateAttachmentModel.LAYER_LOCATION, PlateAttachmentModel::createBodyLayer);
         event.registerLayerDefinition(MechaKnuckleLeftAttachmentModel.LAYER_LOCATION, MechaKnuckleLeftAttachmentModel::createBodyLayer);
         event.registerLayerDefinition(MechaKnuckleRightAttachmentModel.LAYER_LOCATION, MechaKnuckleRightAttachmentModel::createBodyLayer);
         event.registerLayerDefinition(HeavyExoskeletonLeftModel.LAYER_LOCATION, HeavyExoskeletonLeftModel::createBodyLayer);
@@ -51,13 +53,17 @@ public class PEModelLayers {
         event.registerLayerDefinition(SpyglassAttachmentModel.LAYER_LOCATION, SpyglassAttachmentModel::createBodyLayer);
     }
 
-    @SuppressWarnings({"unchecked"})
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @SubscribeEvent
     public static void addLayers(EntityRenderersEvent.AddLayers event) {
         event.getSkins().forEach(skin -> {
             if (event.getSkin(skin) instanceof PlayerRenderer pr) {
-                pr.addLayer(new PEArmorLayer(pr, event.getEntityModels()));
+                pr.addLayer((RenderLayer) new PEArmorLayer(pr, event.getEntityModels()));
             }
         });
+
+        if (event.getRenderer(EntityType.ARMOR_STAND) instanceof ArmorStandRenderer asr) {
+            asr.addLayer((RenderLayer) new PEArmorLayer(asr, event.getEntityModels()));
+        }
     }
 }

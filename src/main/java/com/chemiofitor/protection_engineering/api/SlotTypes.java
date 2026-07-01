@@ -41,6 +41,12 @@ public final class SlotTypes {
     public static final SlotType FOOT       = register("foot",       SlotType.SlotCategory.ARMOR);
 
     // ────────────────────────────────────────────────────────────
+    //  通用槽位 (所有护甲均有)
+    // ────────────────────────────────────────────────────────────
+    public static final SlotType LINING     = register("lining",     SlotType.SlotCategory.ARMOR);
+    public static final SlotType DECORATION = register("decoration", SlotType.SlotCategory.ARMOR);
+
+    // ────────────────────────────────────────────────────────────
     //  武器槽位 (预留 —— 锯剑等)
     // ────────────────────────────────────────────────────────────
     public static final SlotType BLADE      = register("blade",      SlotType.SlotCategory.WEAPON);

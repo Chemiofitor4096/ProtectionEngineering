@@ -8,12 +8,12 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.Set;
+import java.util.List;
 
 public class EngineerChestplateItem extends AttachmentHostArmorItem {
 
-    private static final Set<SlotType> SLOTS = Set.of(
-            SlotTypes.SHOULDER, SlotTypes.CHESTPLATE, SlotTypes.BACK, SlotTypes.ARM
+    private static final List<SlotType> SLOTS = List.of(
+            SlotTypes.SHOULDER, SlotTypes.CHESTPLATE, SlotTypes.BACK, SlotTypes.ARM, SlotTypes.LINING, SlotTypes.DECORATION
     );
 
     public EngineerChestplateItem(Holder<ArmorMaterial> material, Properties properties) {
@@ -21,7 +21,7 @@ public class EngineerChestplateItem extends AttachmentHostArmorItem {
     }
 
     @Override
-    public Set<SlotType> supportedSlots() {
+    public List<SlotType> supportedSlots() {
         return SLOTS;
     }
 

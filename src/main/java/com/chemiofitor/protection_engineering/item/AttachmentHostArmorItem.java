@@ -55,7 +55,7 @@ public abstract class AttachmentHostArmorItem extends ArmorItem implements IAtta
     // ── IAttachmentHost ─────────────────────────────────────────
 
     @Override
-    public abstract Set<SlotType> supportedSlots();
+    public abstract List<SlotType> supportedSlots();
 
     @Override
     public AttachmentsData getAttachments(ItemStack host) {

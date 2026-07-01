@@ -2,7 +2,7 @@ package com.chemiofitor.protection_engineering.item;
 
 import com.chemiofitor.protection_engineering.ProtectionEngineering;
 import com.chemiofitor.protection_engineering.api.SlotTypes;
-import com.chemiofitor.protection_engineering.client.model.SturdyPlateAttachmentModel;
+import com.chemiofitor.protection_engineering.client.model.PlateAttachmentModel;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.resources.ResourceLocation;
@@ -47,8 +47,8 @@ public class SturdyPlateItem extends AttachmentItem {
 
     @Override
     public EntityModel<?> createAttachmentModel(EntityModelSet modelSet) {
-        return new SturdyPlateAttachmentModel<>(
-                modelSet.bakeLayer(SturdyPlateAttachmentModel.LAYER_LOCATION));
+        return new PlateAttachmentModel<>(
+                modelSet.bakeLayer(PlateAttachmentModel.LAYER_LOCATION));
     }
 
     @Override

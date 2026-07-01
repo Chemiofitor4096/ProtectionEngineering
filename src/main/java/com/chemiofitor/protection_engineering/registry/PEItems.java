@@ -210,6 +210,11 @@ public class PEItems {
             .properties(p -> p.stacksTo(1))
             .register();
 
+    public static final ItemEntry<SilentSolesItem> SILENT_SOLES = REGISTRATE
+            .item("silent_soles", SilentSolesItem::new)
+            .properties(p -> p.stacksTo(1))
+            .register();
+
     // ══════════════════════════════════════════════════════════════
     //  武器 / 工具 (2)
     // ══════════════════════════════════════════════════════════════

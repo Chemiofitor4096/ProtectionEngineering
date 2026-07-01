@@ -1,125 +1,179 @@
-# Protection Engineering API 指南
+# Protection Engineering (1.21.1) -- API Guide
 
-## 核心概念
+## Package Overview
 
-**附件 (Attachment)** — 可安装到工程师护甲槽位上的物品，提供被动免疫、属性加成或主动技能。
+| Package | Purpose |
+|---|---|
+| `com.chemiofitor.protection_engineering` | Main mod class and client setup |
+| `com.chemiofitor.protection_engineering.api` | Public API: attachment/host interfaces, slot types, data component |
+| `com.chemiofitor.protection_engineering.block` | Workbench block and block entity |
+| `com.chemiofitor.protection_engineering.client` | Keybindings, HUD overlays, model layers, entity renderers |
+| `com.chemiofitor.protection_engineering.client.layer` | `PEArmorLayer` -- 3D armor + attachment rendering on player |
+| `com.chemiofitor.protection_engineering.client.model` | 33 Blockbench-exported model classes |
+| `com.chemiofitor.protection_engineering.client.renderer` | Missile and rocket entity renderers |
+| `com.chemiofitor.protection_engineering.compat` | Detail Armor Bar Reconstructed compatibility |
+| `com.chemiofitor.protection_engineering.config` | Client and server configuration specs |
+| `com.chemiofitor.protection_engineering.data` | Data generation entry point and recipe providers |
+| `com.chemiofitor.protection_engineering.entity` | Custom entity classes (missile, rocket, thrust) |
+| `com.chemiofitor.protection_engineering.event` | Game event handlers and network event registration |
+| `com.chemiofitor.protection_engineering.item` | All item classes (32 total) |
+| `com.chemiofitor.protection_engineering.menu` | Workbench GUI container and screen |
+| `com.chemiofitor.protection_engineering.mixin` | Damage cap, shield behavior, slip/snow walking |
+| `com.chemiofitor.protection_engineering.network` | Custom network payloads (toggle, thrust) |
+| `com.chemiofitor.protection_engineering.registry` | All deferred registers (data components, items, entities, sounds, armor materials) |
 
-**宿主 (Host)** — 实现了 `IAttachmentHost` 接口的护甲物品，承载附件数据。
+## Core Concepts
 
-**槽位 (Slot)** — 附件安装的具体位置。每件护甲有固定槽位集合，每个槽位只能装一个附件。
+**Attachment** -- An item installable into an engineer armor slot, providing passive immunities, attribute bonuses, or active skills.
 
----
+**Host** -- An armor item implementing `IAttachmentHost`, carrying attachment data.
 
-## 一、槽位类型
+**Slot** -- A specific position on an armor piece. Each armor piece has a fixed set of slots, each accepting one attachment.
 
-所有槽位定义在 `SlotTypes`，用 `ResourceLocation` 唯一标识。
+**Control Pattern** -- The state machine behavior that governs how an attachment transitions between states.
 
-| 常量 | ID | 所属护甲 |
-|------|------|------|
-| `EYES` | `protectionengineering:eyes` | 兜帽 |
-| `MOUTH` | `protectionengineering:mouth` | 兜帽 |
-| `SHOULDER` | `protectionengineering:shoulder` | 胸甲 |
-| `CHESTPLATE` | `protectionengineering:chestplate` | 胸甲 |
-| `BACK` | `protectionengineering:back` | 胸甲 |
-| `ARM` | `protectionengineering:arm` | 胸甲 |
-| `LEG` | `protectionengineering:leg` | 护腿 |
-| `KNEE` | `protectionengineering:knee` | 护腿 |
-| `FOOT` | `protectionengineering:foot` | 靴子 |
+## Slot Types
 
-新增槽位：调用 `SlotType.register(ResourceLocation, SlotCategory)`。
+All slots are defined in `SlotTypes` and identified by `ResourceLocation`:
 
----
+| Constant | ID | Armor Piece |
+|---|---|---|
+| `EYES` | `protectionengineering:eyes` | Hood |
+| `MOUTH` | `protectionengineering:mouth` | Hood |
+| `SHOULDER` | `protectionengineering:shoulder` | Chestplate |
+| `CHESTPLATE` | `protectionengineering:chestplate` | Chestplate |
+| `BACK` | `protectionengineering:back` | Chestplate |
+| `ARM` | `protectionengineering:arm` | Chestplate |
+| `LEG` | `protectionengineering:leg` | Leggings |
+| `KNEE` | `protectionengineering:knee` | Leggings |
+| `FOOT` | `protectionengineering:foot` | Boots |
 
-## 二、创建附件
+### Custom Slots
 
-### 2.1 被动附件（仅免疫/属性）
-
-直接使用 `SimpleAttachmentItem`：
+New slots can be registered at runtime:
 
 ```java
-// 注册
-public static final ItemEntry<SimpleAttachmentItem> X = REGISTRATE
-    .item("x", p -> new SimpleAttachmentItem(p,
-        Set.of(MobEffects.POISON),  // 免疫效果（可选）
-        SlotTypes.MOUTH))           // 槽位
+public static final SlotType MY_SLOT = SlotType.register(
+    ResourceLocation.fromNamespaceAndPath("yourmod", "my_slot"),
+    SlotType.SlotCategory.ARMOR
+);
+```
+
+---
+
+## Creating Attachments
+
+### Passive Attachment (Immunity Only)
+
+Use `SimpleAttachmentItem` directly:
+
+```java
+// In your registration class
+public static final ItemEntry<SimpleAttachmentItem> MY_GADGET = REGISTRATE
+    .item("my_gadget", p -> new SimpleAttachmentItem(p,
+        Set.of(MobEffects.POISON),       // immunities
+        SlotTypes.MOUTH))                // compatible slot
     .properties(p -> p.stacksTo(1))
     .register();
 ```
 
-### 2.2 带属性修饰的附件
+### Passive With Attribute Modifiers
 
 ```java
-public class XItem extends AttachmentItem {
-    public XItem(Properties p) { super(p, SlotTypes.ARM); }
+public class MyPlateItem extends AttachmentItem {
+    private static final UUID ARMOR_MODIFIER = UUID.fromString("...");
+
+    public MyPlateItem(Properties p) { super(p, SlotTypes.CHESTPLATE); }
 
     @Override
-    public void addAttributeModifiers(ItemAttributeModifierEvent event) {
-        event.replaceModifier(Attributes.ARMOR,
-            new AttributeModifier(ARMOR_ID, 2.0, AttributeModifier.Operation.ADD_VALUE),
-            EquipmentSlotGroup.CHEST);
+    public ControlPattern getControlPattern() { return ControlPattern.PASSIVE; }
+
+    @Override
+    public void addAttributeModifiers(ItemStack stack, ItemStack armor,
+                                       SlotType slot, LivingEntity entity,
+                                       AttributeMap attributes) {
+        attributes.addTransientAttributeModifier(
+            Attributes.ARMOR,
+            new AttributeModifier(ARMOR_MODIFIER, "My plate bonus", 2.0,
+                AttributeModifier.Operation.ADD_VALUE)
+        );
     }
+
+    @Override
+    public float getDamageReduction() { return 0.10f; }
 }
 ```
 
-### 2.3 可切换附件
-
-必须指定 `ControlPattern` + 覆写钩子：
+### Toggleable Attachment (FREE_TOGGLE)
 
 ```java
-public class XItem extends AttachmentItem {
-    public XItem(Properties p) { super(p, SlotTypes.EYES); }
+public class MyToggleItem extends AttachmentItem {
+    public MyToggleItem(Properties p) { super(p, SlotTypes.EYES); }
 
     @Override
-    public ControlPattern getControlPattern() { return ControlPattern.FREE_TOGGLE; }
+    public ControlPattern getControlPattern() {
+        return ControlPattern.FREE_TOGGLE;
+    }
 
     @Override
     protected void onStateEnter(ItemStack stack, int newState, LivingEntity e) {
         if (newState == STATE_READY) {
-            // 开启时执行
+            // Enable effect
+            e.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION,
+                MobEffectInstance.INFINITE_DURATION, 0, false, false));
         }
     }
 
     @Override
     protected void onStateExit(ItemStack stack, int oldState, LivingEntity e) {
         if (oldState == STATE_READY) {
-            // 关闭时执行
+            // Disable effect
+            e.removeEffect(MobEffects.NIGHT_VISION);
         }
     }
 }
 ```
 
-### 2.4 一次性激活 + 冷却
+### One-Shot With Cooldown (ONE_SHOT_COOLDOWN)
 
 ```java
-public class XItem extends AttachmentItem {
-    private static final int COOLDOWN = 600;
+public class MyGrenadeItem extends AttachmentItem {
+    private static final long COOLDOWN = 600;  // 30 seconds
 
-    public XItem(Properties p) { super(p, SlotTypes.BACK); }
+    public MyGrenadeItem(Properties p) { super(p, SlotTypes.ARM); }
 
     @Override
-    public ControlPattern getControlPattern() { return ControlPattern.ONE_SHOT_COOLDOWN; }
+    public ControlPattern getControlPattern() {
+        return ControlPattern.ONE_SHOT_COOLDOWN;
+    }
 
     @Override
     public long getCooldownDuration() { return COOLDOWN; }
 
     @Override
-    protected void onActivateOnce(ItemStack stack, ItemStack host, LivingEntity e) {
-        // 一次性效果：生成实体、施加药水等
+    protected void onActivateOnce(ItemStack stack, ItemStack host, LivingEntity entity) {
+        if (!entity.level().isClientSide()) {
+            // Spawn projectile, apply area effect, etc.
+            entity.level().explode(entity, entity.getX(), entity.getY(), entity.getZ(),
+                3.0f, Level.ExplosionInteraction.NONE);
+        }
     }
 }
 ```
 
-### 2.5 激活窗口 + 冷却（如 APS）
+### Active Window With Cooldown (ACTIVE_COOLDOWN)
 
 ```java
-public class XItem extends AttachmentItem {
-    private static final int ACTIVE = 200;
-    private static final int COOLDOWN = 600;
+public class MyBeamItem extends AttachmentItem {
+    private static final long ACTIVE = 100;    // 5 seconds
+    private static final long COOLDOWN = 400;  // 20 seconds
 
-    public XItem(Properties p) { super(p, SlotTypes.SHOULDER); }
+    public MyBeamItem(Properties p) { super(p, SlotTypes.SHOULDER); }
 
     @Override
-    public ControlPattern getControlPattern() { return ControlPattern.ACTIVE_COOLDOWN; }
+    public ControlPattern getControlPattern() {
+        return ControlPattern.ACTIVE_COOLDOWN;
+    }
 
     @Override
     public long getActiveDuration() { return ACTIVE; }
@@ -128,156 +182,297 @@ public class XItem extends AttachmentItem {
     public long getCooldownDuration() { return COOLDOWN; }
 
     @Override
-    public void onTick(ItemStack a, ItemStack h, LivingEntity e, SlotType s) {
-        super.onTick(a, h, e, s); // 必须调用基类状态机
-        if (!isInActiveWindow(a)) return; // 仅在激活窗口内执行
-        // 每 tick 逻辑
+    public void onTick(ItemStack stack, ItemStack host, LivingEntity entity, SlotType slot) {
+        super.onTick(stack, host, entity, slot);  // MUST call super
+        if (!isInActiveWindow(stack)) return;
+        // Per-tick logic during active window only
+        // Spawn particles, damage entities within range, etc.
     }
 }
 ```
 
----
+## Control Pattern Reference
 
-## 三、控制模式 (ControlPattern)
+| Pattern | State Flow | Key Press Behavior | Examples |
+|---|---|---|---|
+| `FREE_TOGGLE` | DISABLED <--> READY | Toggle on/off | Night Vision, Spyglass |
+| `ACTIVE_COOLDOWN` | READY -> ACTIVE -> COOLING -> READY | Activate from READY | APS, Advanced APS |
+| `ONE_SHOT_COOLDOWN` | READY -> COOLING -> READY | Fire once, then cooldown | Hormone, Missile, Rocket, Dodge |
+| `ALWAYS_ON` | Always READY | No toggle action | Jetpack, Momentum Jetpack |
+| `PASSIVE` | No state | No toggle action | Plates, Exoskeletons, Soles |
 
-| 模式 | 状态流转 | 按键行为 | 典型附件 |
-|------|---------|---------|---------|
-| `FREE_TOGGLE` | DISABLED ↔ READY | 切换开关 | 夜视眼镜 |
-| `ACTIVE_COOLDOWN` | READY → ACTIVE → COOLING → READY | 从 READY 激活 | APS |
-| `ONE_SHOT_COOLDOWN` | READY → COOLING → READY | 触发后进入冷却 | 激素针/导弹/火箭 |
-| `ALWAYS_ON` | 始终 READY | 无 | 喷气背包 |
-| `PASSIVE` | 无状态 | 无 | 防护板/外骨骼 |
+## State Machine
 
----
-
-## 四、状态机
-
-### 4.1 状态常量
+### State Constants
 
 ```
-STATE_DISABLED  = 0   // 关闭
-STATE_READY     = 1   // 就绪/开启
-STATE_ACTIVE    = 2   // 激活窗口中
-STATE_COOLING   = 3   // 冷却中
+STATE_DISABLED  = 0  -- Not active, can be toggled on
+STATE_READY     = 1  -- Active and ready for use
+STATE_ACTIVE    = 2  -- Within the active ability window
+STATE_COOLING   = 3  -- Cooling down after use
 ```
 
-### 4.2 数据组件
+### Data Components
 
-| 组件 | 类型 | 用途 |
-|------|------|------|
-| `ATTACHMENT_STATE` | Integer | 当前状态 (0-3) |
-| `ATTACHMENT_COOLDOWN` | Long | 当前阶段结束 tick (0=无计时器) |
-| `ATTACHMENTS` | AttachmentsData | 护甲上所有附件映射 |
+| Component | Type | Purpose |
+|---|---|---|
+| `ATTACHMENT_STATE` | `Integer` | Current state (0-3) |
+| `ATTACHMENT_COOLDOWN` | `Long` | Tick at which current phase ends (0 = no timer) |
+| `ATTACHMENTS` | `AttachmentsData` | Map of slot -> attachment on the armor |
+| `ATTACHMENT_ACTIVE` | `Boolean` | Deprecated -- used only for legacy migration |
 
-### 4.3 基类方法
+### Base Class Methods
 
 ```java
-// 状态读写
+// State read/write
 int getState(ItemStack)
 void setState(ItemStack, int)
 
-// 计时器
+// Timer
 long getTimer(ItemStack)
 void setTimer(ItemStack, long)
 
-// 查询
-boolean isActive(ItemStack)        // READY 或 ACTIVE
-boolean isInActiveWindow(ItemStack) // 仅在 ACTIVE 窗口内
+// Queries
+boolean isActive(ItemStack)          // READY or ACTIVE
+boolean isInActiveWindow(ItemStack)  // Only during ACTIVE state
 
-// 钩子（子类覆写）
-void onActivateOnce(ItemStack, ItemStack, LivingEntity)  // 一次性激活
-void onStateEnter(ItemStack, int newState, LivingEntity) // 进入状态
-void onStateExit(ItemStack, int oldState, LivingEntity)  // 离开状态
+// Hooks (override in subclasses)
+void onActivateOnce(ItemStack, ItemStack, LivingEntity)  // One-shot trigger
+void onStateEnter(ItemStack, int newState, LivingEntity) // Entering state
+void onStateExit(ItemStack, int oldState, LivingEntity)  // Exiting state
 ```
 
----
+## Damage Reduction and Immunity System
 
-## 五、减伤与免疫
-
-### 5.1 覆写方法
+### Override Points
 
 ```java
-@Override public float getDamageReduction() { return 0.10f; }      // 通用减伤 10%
-@Override public float getFallDamageReduction() { return 0.20f; }  // 摔落减伤 20%
-@Override public float getFallDistanceReduction() { return 1.0f; }  // 摔落高度递减 1 格
-@Override public Set<Holder<MobEffect>> getImmunities() {           // 状态效果免疫
+@Override
+public float getDamageReduction() { return 0.10f; }        // General damage reduction
+
+@Override
+public float getFallDamageReduction() { return 0.20f; }    // Fall damage multiplier
+
+@Override
+public float getFallDistanceReduction() { return 1.0f; }   // Fall distance reduction (blocks)
+
+@Override
+public Set<Holder<MobEffect>> getImmunities() {
     return Set.of(MobEffects.POISON, MobEffects.WITHER);
 }
 ```
 
-### 5.2 无上限叠加
+### Stacking Rules
 
-所有减伤和距离减免累加，无上限（`PEGameEvents` + `LivingEntityMixin`）。
+All damage reductions and distance reductions from all attachments stack additively with no upper limit. The final damage is clamped to 100% reduction (preventing negative damage). Processing is done in `PEGameEvents` and `LivingEntityMixin`.
 
----
+## HUD Overlay System
 
-## 六、HUD 覆盖层
+The HUD overlay is handled by `PECooldownOverlay`. It reads `ATTACHMENT_STATE` and `ATTACHMENT_COOLDOWN` from each attachment and displays:
 
-基类自动处理。`PECooldownOverlay` 读取 `ATTACHMENT_STATE` + `ATTACHMENT_COOLDOWN`：
+| State | Display | Color |
+|---|---|---|
+| READY | Solid circle | Green `#55FF55` |
+| ACTIVE | Lightning bolt + countdown | Cyan `#55FFFF` |
+| COOLING | Hourglass + countdown | Gray -> Yellow -> Red |
+| DISABLED | Empty circle | Gray |
+| Creative mode | All symbols | Purple |
 
-| 状态 | 显示 |
-|------|------|
-| READY | 绿色 ● |
-| ACTIVE | 青色 ⚡ + 倒计时 |
-| COOLING | ⌛ + 倒计时（灰→黄→红） |
-| 创造模式 | 全部紫色 |
+## Key Bindings
 
----
+Seven key mappings are defined in `PEKeyBindings`:
 
-## 七、热键绑定
+| Key | Constant | Target |
+|---|---|---|
+| N | `TOGGLE_NIGHT_VISION` | NightVisionGogglesItem |
+| H | `ACTIVATE_HORMONE` | HormoneInjectorItem |
+| J | `THRUST_JETPACK` | JetpackItem / MomentumJetpackItem |
+| K | `TOGGLE_APS` | ApsItem |
+| R | `ACTIVATE_ROCKET_LAUNCHER` | RocketLauncherItem |
+| G | `ACTIVATE_MISSILE` | MissilePackItem |
+| Z | `TOGGLE_SPYGLASS` | SpyglassItem |
+
+Usage pattern:
 
 ```java
-// PEKeyBindings.java
-while (TOGGLE_APS.consumeClick()) {
-    tryActivateAttachment(ApsItem.class);
+// Add new keybinding
+public static final KeyMapping MY_KEY = new KeyMapping(
+    "key.protectionengineering.my_key",
+    KeyConflictContext.IN_GAME,
+    InputConstants.Type.KEYSYM,
+    InputConstants.KEY_M,
+    "key.categories.protectionengineering"
+);
+
+// In client tick handler
+while (MY_KEY.consumeClick()) {
+    tryActivateAttachment(MyAttachmentClass.class);
 }
 ```
 
-`tryActivateAttachment(Class)` — 遍历四件护甲，找到指定类的附件，发包到服务端触发 `onActivatePress`。
+## Configuration Reference
 
----
+### Client Config (`protectionengineering-client.toml`)
 
-## 八、配置项 (PEServerConfig)
+| Key | Default | Range | Description |
+|---|---|---|---|
+| `hudOffsetX` | 4 | 0-500 | HUD overlay X offset from right edge |
+| `hudOffsetY` | 4 | 0-500 | HUD overlay Y offset from top |
 
-生成在 `protectionengineering-server.toml`：
+### Server Config (`protectionengineering-server.toml`)
 
-```toml
-[aps]
-interceptRange = 5.0
-activeDuration = 200
-cooldownTicks = 600
+| Category | Key | Default | Range | Description |
+|---|---|---|---|---|
+| aps | interceptRange | 5.0 | 1-32 | APS projectile interception range |
+| aps | activeDuration | 200 | 20-1200 | APS active window in ticks |
+| aps | cooldownTicks | 600 | 20-3600 | APS cooldown in ticks |
+| missile | targetRange | 512 | 20-1024 | Missile lock-on range |
+| missile | flightSpeed | 3.0 | 1-10 | Missile flight speed |
+| missile | closeSpeed | 4.5 | 1-15 | Missile terminal approach speed |
+| missile | maxLife | 200 | 40-600 | Missile maximum lifetime in ticks |
+| rocket | cooldownTicks | 200 | 20-3600 | Rocket launcher cooldown |
+| hormone | cooldownTicks | 1200 | 20-7200 | Hormone injector cooldown |
+| dodge | dodgeStrength | 1.0 | 0.2-10 | Dodge jetpack push strength |
+| dodge | cooldownTicks | 200 | 20-3600 | Dodge jetpack cooldown |
 
-[missile]
-targetRange = 512.0
-flightSpeed = 3.0
-closeSpeed = 4.5
-maxLife = 200
+## 3D Model Integration
 
-[rocket]
-cooldownTicks = 200
+### Model Registration
 
-[hormone]
-cooldownTicks = 1200
+Each attachment with a 3D model must:
 
-[dodge]
-dodgeStrength = 1.0
-cooldownTicks = 200
-```
+1. Export a Java model from Blockbench and place it in `client/model/`
+2. Override the model/texture provider methods in the item class
+3. Register the model layer in `PEModelLayers`
 
----
-
-## 九、3D 模型
+### Model Provider Methods
 
 ```java
 @Override
-public EntityModel<?> createAttachmentModel(EntityModelSet modelSet) {
-    return new XModel<>(modelSet.bakeLayer(XModel.LAYER_LOCATION));
+public ModelPart createAttachmentModel() {
+    return modelSet.bakeLayer(MyModel.LAYER_LOCATION);
 }
 
 @Override
 public ResourceLocation getAttachmentTexture() {
-    return ResourceLocation.fromNamespaceAndPath("protectionengineering", "textures/models/armor/x.png");
+    return ResourceLocation.fromNamespaceAndPath(
+        "protectionengineering",
+        "textures/models/armor/my_attachment.png"
+    );
+}
+
+// For arm/leg attachments, override the left/right variants:
+@Override
+public ModelPart createLeftArmModel() { ... }
+@Override
+public ModelPart createRightArmModel() { ... }
+@Override
+public ResourceLocation getLeftArmTexture() { ... }
+@Override
+public ResourceLocation getRightArmTexture() { ... }
+```
+
+### Layer Registration
+
+```java
+// In PEModelLayers
+public static final ModelLayerLocation MY_GADGET = new ModelLayerLocation(
+    ResourceLocation.fromNamespaceAndPath(MOD_ID, "my_gadget"), "main"
+);
+
+public static void registerLayerDefinitions(RegisterLayerDefinitionsEvent event) {
+    event.registerLayerDefinition(MY_GADGET, MyModel::createBodyLayer);
 }
 ```
 
-模型层在 `PEModelLayers.registerLayerDefinitions()` 注册。
+## Recipe Registration
+
+### Vanilla Shaped Recipe
+
+```java
+// In PERecipeProvider
+ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, PEItems.MY_GADGET.get())
+    .pattern("ABA")
+    .pattern("CDC")
+    .define('A', Items.IRON_INGOT)
+    .define('B', AllItems.STURDY_SHEET.get())
+    .define('C', AllItems.BRASS_SHEET.get())
+    .define('D', AllItems.PRECISION_MECHANISM.get())
+    .unlockedBy("has_sturdy", has(AllItems.STURDY_SHEET.get()))
+    .save(output);
+```
+
+### Create Mechanical Crafting Recipe
+
+```java
+// In PEMechanicalCraftingRecipeGen
+MechanicalCraftingRecipeBuilder.shaped(RecipeCategory.COMBAT, result)
+    .patternLine("AAA")
+    .patternLine("BCD")
+    .patternLine("EFG")
+    .key('A', ingredient)
+    .key('B', ingredient)
+    .build(output);
+```
+
+## Network System
+
+### Toggle Payload (Client -> Server)
+
+```java
+// Record with armorIndex and slotTypeId
+public record ToggleAttachmentPayload(int armorIndex, ResourceLocation slotTypeId) {
+    public static final CustomPacketPayload.Type<ToggleAttachmentPayload> TYPE =
+        new CustomPacketPayload.Type<>(
+            ResourceLocation.fromNamespaceAndPath(MOD_ID, "toggle_attachment")
+        );
+
+    public static final StreamCodec<FriendlyByteBuf, ToggleAttachmentPayload> STREAM_CODEC =
+        StreamCodec.composite(
+            ByteBufCodecs.VAR_INT, ToggleAttachmentPayload::armorIndex,
+            ResourceLocation.STREAM_CODEC, ToggleAttachmentPayload::slotTypeId,
+            ToggleAttachmentPayload::new
+        );
+
+    @Override
+    public Type<? extends CustomPacketPayload> type() { return TYPE; }
+}
+```
+
+### Server Handling
+
+```java
+// In PENetworkEvents
+@SubscribeEvent
+public static void registerPayloads(RegisterPayloadHandlersEvent event) {
+    event.registrar("1.0")
+        .playToServer(
+            ToggleAttachmentPayload.TYPE,
+            ToggleAttachmentPayload.STREAM_CODEC,
+            (payload, context) -> {
+                // Look up armor, find attachment, call onActivatePress()
+            }
+        );
+}
+```
+
+## Integration Checklist
+
+When adding a new attachment or feature:
+
+- [ ] **Item class**: Extend `AttachmentItem` (or `SimpleAttachmentItem` for passives)
+- [ ] **Control pattern**: Implement `getControlPattern()` and any duration methods
+- [ ] **Lifecycle hooks**: Override `onActivateOnce`, `onStateEnter`, `onStateExit`
+- [ ] **Per-tick logic**: Override `onTick()` with `super.onTick()` call
+- [ ] **Immunities**: Pass `Set.of(...)` in constructor for effect immunities
+- [ ] **Combat modifiers**: Override `getDamageReduction()`, `getFallDamageReduction()`, `getFallDistanceReduction()`
+- [ ] **Attributes**: Override `addAttributeModifiers()` for attribute bonuses
+- [ ] **Registration**: Add to `PEItems` via Registrate
+- [ ] **3D model**: Create Blockbench model, override model/texture providers
+- [ ] **Model layer**: Register in `PEModelLayers`
+- [ ] **Translations**: Add English in `PEDataGen.java`, Chinese in `zh_cn.json`
+- [ ] **Recipes**: Add to `PERecipeProvider` or `PEMechanicalCraftingRecipeGen`
+- [ ] **Server config**: Add entries to `PEServerConfig` for tunable parameters
+- [ ] **Game events**: Add handler in `PEGameEvents` if custom damage/interaction needed
+- [ ] **Sound**: Add sound event in `PESounds` and OGG file if custom audio needed
+- [ ] **Keybind**: Register key mapping in `PEKeyBindings` if active ability

@@ -15,16 +15,19 @@ import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 
+/**
+ * 工程护甲 & 附件渲染层 — 同时支持玩家和盔甲架。
+ */
 @SuppressWarnings({"unchecked", "rawtypes"})
-public class PEArmorLayer extends RenderLayer {
+public class PEArmorLayer extends RenderLayer<LivingEntity, HumanoidModel<LivingEntity>> {
 
     private static final ResourceLocation HELMET_TEX = tex("engineer_hood.png");
     private static final ResourceLocation CHEST_TEX  = tex("engineer_chestplate.png");
@@ -39,36 +42,33 @@ public class PEArmorLayer extends RenderLayer {
 
     private final EntityModelSet models;
 
-    public PEArmorLayer(PlayerRenderer renderer, EntityModelSet models) {
-        super(renderer);
+    public PEArmorLayer(LivingEntityRenderer<? extends LivingEntity, ?> renderer, EntityModelSet models) {
+        super((LivingEntityRenderer<LivingEntity, HumanoidModel<LivingEntity>>) (Object) renderer);
         this.models = models;
     }
 
     @Override
     public void render(PoseStack pose, MultiBufferSource buf, int light,
-                       net.minecraft.world.entity.Entity entity, float limbSwing, float limbSwingAmount,
+                       LivingEntity entity, float limbSwing, float limbSwingAmount,
                        float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
-        if (!(entity instanceof Player player)) return;
-        if (!(getParentModel() instanceof HumanoidModel playerModel)) return;
+        if (!(getParentModel() instanceof HumanoidModel humanoidModel)) return;
 
         for (EquipmentSlot slot : EquipmentSlot.values()) {
             if (slot.getType() != EquipmentSlot.Type.HUMANOID_ARMOR) continue;
-            ItemStack armor = player.getItemBySlot(slot);
+            ItemStack armor = entity.getItemBySlot(slot);
             if (!(armor.getItem() instanceof AttachmentHostArmorItem)) continue;
 
             switch (slot) {
-                case HEAD -> renderHelmet(pose, buf, light, playerModel, armor);
-                case CHEST -> renderChestplate(pose, buf, light, playerModel, armor);
-                case LEGS -> renderLeggings(pose, buf, light, playerModel, armor);
-                case FEET -> renderBoots(pose, buf, light, playerModel, armor);
+                case HEAD -> renderHelmet(pose, buf, light, humanoidModel, armor);
+                case CHEST -> renderChestplate(pose, buf, light, humanoidModel, armor);
+                case LEGS -> renderLeggings(pose, buf, light, humanoidModel, armor);
+                case FEET -> renderBoots(pose, buf, light, humanoidModel, armor);
             }
         }
     }
 
     // ── 渲染辅助 ──────────────────────────────────────────────
 
-    /** 在 body part 锚点处施加旋转，然后平移回原点。
-     *  Blockbench 模型自带 PartPose.offset，设计在实体原点渲染。 */
     private static void rotateAtPart(PoseStack pose, ModelPart part) {
         float px = part.x / 16f, py = part.y / 16f, pz = part.z / 16f;
         pose.translate(px, py, pz);
@@ -90,7 +90,7 @@ public class PEArmorLayer extends RenderLayer {
     // ── 各部位 ────────────────────────────────────────────────
 
     private void renderHelmet(PoseStack pose, MultiBufferSource buf, int light,
-                              HumanoidModel<Player> m, ItemStack armor) {
+                              HumanoidModel<?> m, ItemStack armor) {
         renderModel(pose, buf, light,
                 new EngineerHoodModel<>(models.bakeLayer(EngineerHoodModel.LAYER_LOCATION)),
                 HELMET_TEX, m.head);
@@ -98,7 +98,7 @@ public class PEArmorLayer extends RenderLayer {
     }
 
     private void renderChestplate(PoseStack pose, MultiBufferSource buf, int light,
-                                  HumanoidModel<Player> m, ItemStack armor) {
+                                  HumanoidModel<?> m, ItemStack armor) {
         renderModel(pose, buf, light,
                 new EngineerChestplateModel<>(models.bakeLayer(EngineerChestplateModel.LAYER_LOCATION)),
                 CHEST_TEX, m.body);
@@ -113,7 +113,7 @@ public class PEArmorLayer extends RenderLayer {
     }
 
     private void renderLeggings(PoseStack pose, MultiBufferSource buf, int light,
-                                HumanoidModel<Player> m, ItemStack armor) {
+                                HumanoidModel<?> m, ItemStack armor) {
         renderModel(pose, buf, light,
                 new EngineerLeggingsRightModel<>(models.bakeLayer(EngineerLeggingsRightModel.LAYER_LOCATION)),
                 LEGS_TEX, m.rightLeg);
@@ -125,7 +125,7 @@ public class PEArmorLayer extends RenderLayer {
     }
 
     private void renderBoots(PoseStack pose, MultiBufferSource buf, int light,
-                             HumanoidModel<Player> m, ItemStack armor) {
+                             HumanoidModel<?> m, ItemStack armor) {
         renderModel(pose, buf, light,
                 new EngineerBootsRightModel<>(models.bakeLayer(EngineerBootsRightModel.LAYER_LOCATION)),
                 BOOTS_TEX, m.rightLeg);
@@ -135,7 +135,6 @@ public class PEArmorLayer extends RenderLayer {
         renderAttachments(armor, pose, buf, light, m.rightLeg);
     }
 
-    /** 渲染左右臂附件模型（如额外机械臂） */
     private void renderArmAttachments(ItemStack armor, PoseStack pose, MultiBufferSource buf,
                                       int light, ModelPart rightArm, ModelPart leftArm) {
         if (!(armor.getItem() instanceof IAttachmentHost host)) return;
@@ -167,7 +166,6 @@ public class PEArmorLayer extends RenderLayer {
         }
     }
 
-    /** 渲染左右腿附件模型（如外骨骼辅助设备）。右腿通过 X 轴镜像复用左腿模型。 */
     private void renderLegAttachments(ItemStack armor, PoseStack pose, MultiBufferSource buf,
                                       int light, ModelPart rightLeg, ModelPart leftLeg) {
         if (!(armor.getItem() instanceof IAttachmentHost host)) return;
@@ -200,7 +198,6 @@ public class PEArmorLayer extends RenderLayer {
 
     // ── 附件渲染（通用路径）──────────────────────────────────
 
-    /** 遍历已安装附件，调用各附件自己的模型和贴图接口进行渲染 */
     private void renderAttachments(ItemStack armor, PoseStack pose, MultiBufferSource buf,
                                    int light, ModelPart part) {
         if (!(armor.getItem() instanceof IAttachmentHost host)) return;

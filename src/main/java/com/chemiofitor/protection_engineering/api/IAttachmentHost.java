@@ -2,41 +2,21 @@ package com.chemiofitor.protection_engineering.api;
 
 import net.minecraft.world.item.ItemStack;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  * 可安装附件的宿主物品接口。
  * <p>
  * 宿主物品（护甲、武器、工具）实现此接口来声明：
  * <ul>
- *   <li>它支持哪些附件槽位</li>
+ *   <li>它支持哪些附件槽位（有序列表）</li>
  *   <li>如何读写附件的持久化数据</li>
  * </ul>
- * <p>
- * 使用示例：
- * <pre>{@code
- * public class EngineerChestplateItem extends ArmorItem implements IAttachmentHost {
- *     private static final Set<SlotType> SLOTS = Set.of(
- *         SlotTypes.SHOULDER, SlotTypes.CHESTPLATE,
- *         SlotTypes.BACK, SlotTypes.ARM
- *     );
- *
- *     public Set<SlotType> supportedSlots() { return SLOTS; }
- *
- *     public AttachmentsData getAttachments(ItemStack host) {
- *         return host.getOrDefault(ModDataComponents.ATTACHMENTS, AttachmentsData.EMPTY);
- *     }
- *
- *     public void setAttachments(ItemStack host, AttachmentsData data) {
- *         host.set(ModDataComponents.ATTACHMENTS, data);
- *     }
- * }
- * }</pre>
  */
 public interface IAttachmentHost {
 
-    /** 该宿主物品支持的附件槽位集合 */
-    Set<SlotType> supportedSlots();
+    /** 该宿主物品支持的附件槽位（有序） */
+    List<SlotType> supportedSlots();
 
     /** 读取该宿主物品已安装的附件数据 */
     AttachmentsData getAttachments(ItemStack host);

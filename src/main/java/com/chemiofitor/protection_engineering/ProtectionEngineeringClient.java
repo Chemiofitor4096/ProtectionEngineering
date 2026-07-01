@@ -4,10 +4,10 @@ import com.chemiofitor.protection_engineering.registry.PEItems;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.bus.api.SubscribeEvent;
 
 @Mod(value = ProtectionEngineering.MODID, dist = Dist.CLIENT)
 public class ProtectionEngineeringClient {
