@@ -1,6 +1,7 @@
 package com.chemiofitor.protection_engineering.event;
 
 import com.chemiofitor.protection_engineering.ProtectionEngineering;
+import com.chemiofitor.protection_engineering.api.AttachmentUtil;
 import com.chemiofitor.protection_engineering.api.IAttachment;
 import com.chemiofitor.protection_engineering.api.IAttachmentHost;
 import com.chemiofitor.protection_engineering.api.SlotTypes;
@@ -32,16 +33,12 @@ import java.util.UUID;
 
 import static com.chemiofitor.protection_engineering.api.IAttachment.STATE_COOLING;
 
-/**
- * 游戏事件。
- */
 @EventBusSubscriber(modid = ProtectionEngineering.MODID)
 public class PEGameEvents {
 
-    /** 来自客户端的喷气背包推力请求 — JetpackItem.onTick 消费 */
     public static final Set<UUID> thrustRequests = new HashSet<>();
 
-    // ── 应激反馈背包 ──────────────────────────────────────────
+    // ── 伤害事件 ──────────────────────────────────────────────
 
     @SubscribeEvent
     public static void onLivingIncomingDamage(LivingIncomingDamageEvent event) {
@@ -51,13 +48,10 @@ public class PEGameEvents {
 
         // ── 隔热鞋底：免疫脚下热源伤害 ──────────────────────
         if ((source.is(DamageTypes.HOT_FLOOR) || source.is(DamageTypes.CAMPFIRE))
-                && player.getItemBySlot(EquipmentSlot.FEET).getItem() instanceof IAttachmentHost host) {
-            for (var entry : host.getAttachments(player.getItemBySlot(EquipmentSlot.FEET)).slots().entrySet()) {
-                if (entry.getValue().getItem() instanceof InsulatedSolesItem) {
-                    event.setCanceled(true);
-                    return;
-                }
-            }
+                && AttachmentUtil.anyOnSlot(player, EquipmentSlot.FEET,
+                        s -> s.getItem() instanceof InsulatedSolesItem)) {
+            event.setCanceled(true);
+            return;
         }
 
         var attacker = source.getEntity();
@@ -70,9 +64,7 @@ public class PEGameEvents {
                 ItemStack backSlot = host.getAttachments(chestplate).get(SlotTypes.BACK);
                 if (backSlot.getItem() instanceof DodgeJetpackItem) {
                     if (DodgeJetpackItem.shouldDodge(player, backSlot, attacker)) {
-                        // 执行闪避
                         DodgeJetpackItem.executeDodge(player, attacker);
-                        // 进入冷却（创造模式跳过）
                         if (!player.getAbilities().instabuild) {
                             long now = player.level().getGameTime();
                             backSlot.set(PEDataComponents.ATTACHMENT_STATE.get(), STATE_COOLING);
@@ -89,7 +81,7 @@ public class PEGameEvents {
             }
         }
 
-        // ── 投射物直接命中 → 主动防御系统拦截 ───────────
+        // ── 投射物 → APS 拦截 ───────────────────────────
         if (attacker instanceof Projectile projectile) {
             if (chestplate.getItem() instanceof IAttachmentHost host) {
                 for (var entry : host.getAttachments(chestplate).slots().entrySet()) {
@@ -103,66 +95,42 @@ public class PEGameEvents {
                 }
             }
         }
+
+        // ── 通用伤害减免 ────────────────────────────────────
+        float reduction = (float) AttachmentUtil.reduce(player, att -> {
+            var types = att.getProtectedDamageTypes();
+            if (!types.isEmpty() && types.stream().noneMatch(source::is)) return 0f;
+            return att.getDamageReduction();
+        });
+        if (reduction > 0) {
+            reduction = Math.min(reduction, 1.0f);
+            event.setAmount(event.getAmount() * (1f - reduction));
+        }
     }
 
-    // ── 摔落伤害减免 ──────────────────────────────────────────
+    // ── 摔落减免 ──────────────────────────────────────────────
 
     @SubscribeEvent
     public static void onLivingFall(LivingFallEvent event) {
         if (!(event.getEntity() instanceof Player player)) return;
 
-        // 距离减免（缓冲鞋底：等效摔落高度 -1）
-        float distReduction = getTotalFallDistanceReduction(player);
+        float distReduction = (float) AttachmentUtil.reduce(player, IAttachment::getFallDistanceReduction);
         if (distReduction > 0) {
             event.setDistance(Math.max(0, event.getDistance() - distReduction));
         }
 
-        // 伤害倍率减免
-        float dmgReduction = Math.min(getTotalFallDamageReduction(player), 1.0f);
+        float dmgReduction = Math.min((float) AttachmentUtil.reduce(player, IAttachment::getFallDamageReduction), 1.0f);
         if (dmgReduction > 0) {
             event.setDamageMultiplier(event.getDamageMultiplier() * (1f - dmgReduction));
         }
     }
 
-    /** 遍历所有护甲附件，累加摔落伤害减免比例 */
-    private static float getTotalFallDamageReduction(Player player) {
-        float total = 0f;
-        for (EquipmentSlot slot : EquipmentSlot.values()) {
-            if (slot.getType() != EquipmentSlot.Type.HUMANOID_ARMOR) continue;
-            ItemStack armor = player.getItemBySlot(slot);
-            if (!(armor.getItem() instanceof IAttachmentHost host)) continue;
-            for (var entry : host.getAttachments(armor).slots().entrySet()) {
-                if (entry.getValue().getItem() instanceof IAttachment att) {
-                    total += att.getFallDamageReduction();
-                }
-            }
-        }
-        return total;
-    }
-
-    private static float getTotalFallDistanceReduction(Player player) {
-        float total = 0f;
-        for (EquipmentSlot slot : EquipmentSlot.values()) {
-            if (slot.getType() != EquipmentSlot.Type.HUMANOID_ARMOR) continue;
-            ItemStack armor = player.getItemBySlot(slot);
-            if (!(armor.getItem() instanceof IAttachmentHost host)) continue;
-            for (var entry : host.getAttachments(armor).slots().entrySet()) {
-                if (entry.getValue().getItem() instanceof IAttachment att) {
-                    total += att.getFallDistanceReduction();
-                }
-            }
-        }
-        return total;
-    }
-
-    // ── 状态效果免疫 ──────────────────────────────────────────
+    // ── 效果免疫 ──────────────────────────────────────────────
 
     @SubscribeEvent
     public static void onMobEffectApplicable(MobEffectEvent.Applicable event) {
         if (!(event.getEntity() instanceof Player player)) return;
-
-        Holder<MobEffect> effect = event.getEffectInstance().getEffect();
-        if (hasImmunity(player, effect)) {
+        if (hasImmunity(player, event.getEffectInstance().getEffect())) {
             event.setResult(MobEffectEvent.Applicable.Result.DO_NOT_APPLY);
         }
     }
@@ -170,46 +138,29 @@ public class PEGameEvents {
     @SubscribeEvent
     public static void onMobEffectAdded(MobEffectEvent.Added event) {
         if (!(event.getEntity() instanceof Player player)) return;
-
-        Holder<MobEffect> effect = event.getEffectInstance().getEffect();
-        if (hasImmunity(player, effect)) {
-            player.removeEffect(effect);
+        if (hasImmunity(player, event.getEffectInstance().getEffect())) {
+            player.removeEffect(event.getEffectInstance().getEffect());
         }
     }
 
     private static boolean hasImmunity(Player player, Holder<MobEffect> effect) {
-        for (EquipmentSlot slot : EquipmentSlot.values()) {
-            if (slot.getType() != EquipmentSlot.Type.HUMANOID_ARMOR) continue;
-            ItemStack armor = player.getItemBySlot(slot);
-            if (!(armor.getItem() instanceof IAttachmentHost host)) continue;
-
-            for (var entry : host.getAttachments(armor).slots().entrySet()) {
-                if (!(entry.getValue().getItem() instanceof IAttachment attachment)) continue;
-                if (attachment.getImmunities().contains(effect)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return AttachmentUtil.any(player, stack ->
+            stack.getItem() instanceof IAttachment att && att.getImmunities().contains(effect));
     }
 
-    // ── 静音鞋底：阻止 Warden 振动探测 ──────────────────────────
-
-    /** 静音鞋底抑制的 GameEvent — 与潜行抑制行为一致 (见 GameEventTagsProvider.IGNORE_VIBRATIONS_SNEAKING) */
-    private static boolean isSilencedGameEvent(Holder<GameEvent> event) {
-        return event.is(GameEventTags.IGNORE_VIBRATIONS_SNEAKING);
-    }
+    // ── 静音鞋底 ──────────────────────────────────────────────
 
     @SubscribeEvent
     public static void onVanillaGameEvent(VanillaGameEvent event) {
         if (!(event.getCause() instanceof Player player)) return;
         if (!isSilencedGameEvent(event.getVanillaEvent())) return;
 
-        ItemStack boots = player.getItemBySlot(EquipmentSlot.FEET);
-        if (boots.getItem() instanceof IAttachmentHost host
-                && host.getAttachments(boots).get(SlotTypes.FOOT).getItem() instanceof SilentSolesItem) {
+        if (AttachmentUtil.get(player, EquipmentSlot.FEET, SlotTypes.FOOT).getItem() instanceof SilentSolesItem) {
             event.setCanceled(true);
         }
     }
 
+    private static boolean isSilencedGameEvent(Holder<GameEvent> event) {
+        return event.is(GameEventTags.IGNORE_VIBRATIONS_SNEAKING);
+    }
 }

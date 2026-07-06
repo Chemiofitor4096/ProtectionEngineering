@@ -2,9 +2,6 @@ package com.chemiofitor.protection_engineering.item;
 
 import com.chemiofitor.protection_engineering.ProtectionEngineering;
 import com.chemiofitor.protection_engineering.api.SlotTypes;
-import com.chemiofitor.protection_engineering.client.model.LightExoskeletonLeftModel;
-import net.minecraft.client.model.EntityModel;
-import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlotGroup;
@@ -27,8 +24,6 @@ public class LightExoskeletonItem extends AttachmentItem {
             ProtectionEngineering.asResource("light_exo_jump");
     private static final ResourceLocation STEP_ID =
             ProtectionEngineering.asResource("light_exo_step");
-    private static final ResourceLocation TEX =
-            ProtectionEngineering.asResource("textures/models/armor/light_exoskeleton.png");
 
     public LightExoskeletonItem(Properties properties) {
         super(properties, Set.of(MobEffects.MOVEMENT_SLOWDOWN), SlotTypes.LEG);
@@ -52,15 +47,4 @@ public class LightExoskeletonItem extends AttachmentItem {
                 new AttributeModifier(STEP_ID, 0.4, AttributeModifier.Operation.ADD_VALUE),
                 EquipmentSlotGroup.LEGS);
     }
-
-    // ── 3D 渲染（共用左腿模型，右腿由渲染层 X 轴镜像）───────
-
-    @Override
-    public EntityModel<?> createLeftLegModel(EntityModelSet modelSet) {
-        return new LightExoskeletonLeftModel<>(
-                modelSet.bakeLayer(LightExoskeletonLeftModel.LAYER_LOCATION));
-    }
-
-    @Override
-    public ResourceLocation getLeftLegTexture() { return TEX; }
 }

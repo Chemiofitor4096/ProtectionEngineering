@@ -43,8 +43,11 @@ public final class SlotTypes {
     // ────────────────────────────────────────────────────────────
     //  通用槽位 (所有护甲均有)
     // ────────────────────────────────────────────────────────────
-    public static final SlotType LINING     = register("lining",     SlotType.SlotCategory.ARMOR);
-    public static final SlotType DECORATION = register("decoration", SlotType.SlotCategory.ARMOR);
+    public static final SlotType LINING               = register("lining",                SlotType.SlotCategory.ARMOR);
+    public static final SlotType HELMET_DECORATION    = register("helmet_decoration",     SlotType.SlotCategory.ARMOR);
+    public static final SlotType CHESTPLATE_DECORATION = register("chestplate_decoration", SlotType.SlotCategory.ARMOR);
+    public static final SlotType LEGGINGS_DECORATION  = register("leggings_decoration",   SlotType.SlotCategory.ARMOR);
+    public static final SlotType BOOTS_DECORATION     = register("boots_decoration",      SlotType.SlotCategory.ARMOR);
 
     // ────────────────────────────────────────────────────────────
     //  武器槽位 (预留 —— 锯剑等)

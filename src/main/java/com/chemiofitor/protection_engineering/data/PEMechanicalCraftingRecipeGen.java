@@ -4,7 +4,6 @@ import com.chemiofitor.protection_engineering.ProtectionEngineering;
 import com.chemiofitor.protection_engineering.registry.PEItems;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllItems;
-import com.simibubi.create.api.data.recipe.MechanicalCraftingRecipeBuilder;
 import com.simibubi.create.api.data.recipe.MechanicalCraftingRecipeGen;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
@@ -180,18 +179,6 @@ public class PEMechanicalCraftingRecipeGen extends MechanicalCraftingRecipeGen {
                         .key('I', AllItems.IRON_SHEET.get())
                 );
 
-        // ── 隔热鞋底 ─────────────────────────────────────────
-        create(PEItems.INSULATED_SOLES::get)
-                .recipe(b -> b
-                        .patternLine("     ")
-                        .patternLine("     ")
-                        .patternLine("     ")
-                        .patternLine(" S S ")
-                        .patternLine("SM MS")
-                        .key('S', AllItems.STURDY_SHEET.get())
-                        .key('M', Items.MAGMA_CREAM)
-                );
-
         // ── 单筒望远镜 ───────────────────────────────────────
         create(PEItems.SPYGLASS::get)
                 .recipe(b -> b
@@ -267,6 +254,18 @@ public class PEMechanicalCraftingRecipeGen extends MechanicalCraftingRecipeGen {
                         .key('P', AllItems.PRECISION_MECHANISM.get())
                 );
 
+        // ── 改良鞋底 ─────────────────────────────────────────
+        create(PEItems.IMPROVED_SOLES::get)
+                .recipe(b -> b
+                        .patternLine("     ")
+                        .patternLine("     ")
+                        .patternLine("     ")
+                        .patternLine(" B B ")
+                        .patternLine("SB BS")
+                        .key('B', AllItems.BRASS_SHEET.get())
+                        .key('S', AllItems.STURDY_SHEET.get())
+                );
+
         // ── 缓冲鞋底 ─────────────────────────────────────────
         create(PEItems.CUSHIONED_SOLES::get)
                 .recipe(b -> b
@@ -279,16 +278,41 @@ public class PEMechanicalCraftingRecipeGen extends MechanicalCraftingRecipeGen {
                         .key('M', Items.SLIME_BLOCK)
                 );
 
-        // ── 改良鞋底 ─────────────────────────────────────────
-        create(PEItems.IMPROVED_SOLES::get)
+        // ── 隔热鞋底 ─────────────────────────────────────────
+        create(PEItems.INSULATED_SOLES::get)
                 .recipe(b -> b
                         .patternLine("     ")
                         .patternLine("     ")
                         .patternLine("     ")
-                        .patternLine(" B B ")
-                        .patternLine("SB BS")
-                        .key('B', AllItems.BRASS_SHEET.get())
+                        .patternLine(" S S ")
+                        .patternLine("SM MS")
                         .key('S', AllItems.STURDY_SHEET.get())
+                        .key('M', Items.MAGMA_CREAM)
+                );
+
+        // ── 静音鞋底 ─────────────────────────────────────────
+        create(PEItems.SILENT_SOLES::get)
+                .recipe(b -> b
+                        .patternLine("     ")
+                        .patternLine("     ")
+                        .patternLine(" S S ")
+                        .patternLine("SC CS")
+                        .patternLine("WW WW")
+                        .key('W', Items.CYAN_WOOL)
+                        .key('S', AllItems.STURDY_SHEET.get())
+                        .key('C', AllItems.CARDBOARD.get())
+                );
+
+        // ── 防爆内衬 ─────────────────────────────────────────
+        create(PEItems.BLAST_LINING::get)
+                .recipe(b -> b
+                        .patternLine("  O  ")
+                        .patternLine(" WWW ")
+                        .patternLine(" BSB ")
+                        .key('O', Items.OBSIDIAN)
+                        .key('W', Items.RED_WOOL)
+                        .key('S', AllItems.STURDY_SHEET.get())
+                        .key('B', AllItems.BRASS_SHEET.get())
                 );
     }
 }

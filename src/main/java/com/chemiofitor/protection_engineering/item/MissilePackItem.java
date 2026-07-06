@@ -1,18 +1,13 @@
 package com.chemiofitor.protection_engineering.item;
 
-import com.chemiofitor.protection_engineering.ProtectionEngineering;
 import com.chemiofitor.protection_engineering.api.SlotType;
 import com.chemiofitor.protection_engineering.api.SlotTypes;
-import com.chemiofitor.protection_engineering.client.model.MissilePackAttachmentModel;
 import com.chemiofitor.protection_engineering.config.PEServerConfig;
 import com.chemiofitor.protection_engineering.entity.MissileEntity;
 import com.chemiofitor.protection_engineering.registry.PEEntities;
 import com.chemiofitor.protection_engineering.registry.PESounds;
-import net.minecraft.client.model.EntityModel;
-import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -49,18 +44,6 @@ public class MissilePackItem extends AttachmentItem {
     public String getFeatureKey() {
         return "tooltip.protectionengineering.feature.missile";
     }
-
-    private static final ResourceLocation TEX =
-            ProtectionEngineering.asResource("textures/models/armor/missile_pack.png");
-
-    @Override
-    public EntityModel<?> createAttachmentModel(EntityModelSet modelSet) {
-        return new MissilePackAttachmentModel<>(
-                modelSet.bakeLayer(MissilePackAttachmentModel.LAYER_LOCATION));
-    }
-
-    @Override
-    public ResourceLocation getAttachmentTexture() { return TEX; }
 
     // ── 一次性激活：锁定目标 → 发射导弹 ──────────────────────
 

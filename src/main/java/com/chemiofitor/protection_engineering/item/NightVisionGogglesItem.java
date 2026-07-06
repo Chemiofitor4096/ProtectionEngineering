@@ -1,13 +1,8 @@
 package com.chemiofitor.protection_engineering.item;
 
-import com.chemiofitor.protection_engineering.ProtectionEngineering;
 import com.chemiofitor.protection_engineering.api.SlotType;
 import com.chemiofitor.protection_engineering.api.SlotTypes;
-import com.chemiofitor.protection_engineering.client.model.NightVisionGogglesAttachmentModel;
 import com.chemiofitor.protection_engineering.registry.PESounds;
-import net.minecraft.client.model.EntityModel;
-import net.minecraft.client.model.geom.EntityModelSet;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -23,9 +18,6 @@ import java.util.Set;
  */
 public class NightVisionGogglesItem extends AttachmentItem {
 
-    private static final ResourceLocation TEXTURE =
-            ProtectionEngineering.asResource("textures/models/armor/night_vision_goggles.png");
-
     public NightVisionGogglesItem(Properties properties) {
         super(properties, Set.of(MobEffects.DARKNESS, MobEffects.BLINDNESS), SlotTypes.EYES);
     }
@@ -37,19 +29,6 @@ public class NightVisionGogglesItem extends AttachmentItem {
     @Nullable
     public String getFeatureKey() {
         return "tooltip.protectionengineering.feature.night_vision";
-    }
-
-    // ── 3D 渲染 ──────────────────────────────────────────────
-
-    @Override
-    public EntityModel<?> createAttachmentModel(EntityModelSet modelSet) {
-        return new NightVisionGogglesAttachmentModel<>(
-                modelSet.bakeLayer(NightVisionGogglesAttachmentModel.LAYER_LOCATION));
-    }
-
-    @Override
-    public ResourceLocation getAttachmentTexture() {
-        return TEXTURE;
     }
 
     // ── 状态钩子 ──────────────────────────────────────────────

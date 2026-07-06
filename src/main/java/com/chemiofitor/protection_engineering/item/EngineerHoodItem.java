@@ -9,7 +9,7 @@ import java.util.List;
 
 public class EngineerHoodItem extends AttachmentHostArmorItem {
 
-    private static final List<SlotType> SLOTS = List.of(SlotTypes.EYES, SlotTypes.MOUTH, SlotTypes.LINING, SlotTypes.DECORATION);
+    private static final List<SlotType> SLOTS = List.of(SlotTypes.EYES, SlotTypes.MOUTH, SlotTypes.LINING, SlotTypes.HELMET_DECORATION);
 
     public EngineerHoodItem(Holder<ArmorMaterial> material, Properties properties) {
         super(material, Type.HELMET, properties);

@@ -1,14 +1,8 @@
 package com.chemiofitor.protection_engineering.item;
 
-import com.chemiofitor.protection_engineering.ProtectionEngineering;
 import com.chemiofitor.protection_engineering.api.SlotTypes;
-import com.chemiofitor.protection_engineering.client.model.HormoneInjectorAttachmentModel;
 import com.chemiofitor.protection_engineering.config.PEServerConfig;
-import com.chemiofitor.protection_engineering.registry.PEDataComponents;
 import com.chemiofitor.protection_engineering.registry.PESounds;
-import net.minecraft.client.model.EntityModel;
-import net.minecraft.client.model.geom.EntityModelSet;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -23,8 +17,6 @@ import javax.annotation.Nullable;
  */
 public class HormoneInjectorItem extends AttachmentItem {
 
-    private static final ResourceLocation TEXTURE =
-            ProtectionEngineering.asResource("textures/models/armor/hormone_injector.png");
     private static final int EFFECT_DURATION = 200;
     private static final int NAUSEA_DURATION = 100;
 
@@ -42,19 +34,6 @@ public class HormoneInjectorItem extends AttachmentItem {
     @Nullable
     public String getFeatureKey() {
         return "tooltip.protectionengineering.feature.hormone_injector";
-    }
-
-    // ── 3D 渲染 ──────────────────────────────────────────────
-
-    @Override
-    public EntityModel<?> createAttachmentModel(EntityModelSet modelSet) {
-        return new HormoneInjectorAttachmentModel<>(
-                modelSet.bakeLayer(HormoneInjectorAttachmentModel.LAYER_LOCATION));
-    }
-
-    @Override
-    public ResourceLocation getAttachmentTexture() {
-        return TEXTURE;
     }
 
     // ── 一次性激活 ────────────────────────────────────────────

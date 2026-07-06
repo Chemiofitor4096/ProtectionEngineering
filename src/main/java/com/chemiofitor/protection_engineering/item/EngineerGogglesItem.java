@@ -1,13 +1,8 @@
 package com.chemiofitor.protection_engineering.item;
 
-import com.chemiofitor.protection_engineering.ProtectionEngineering;
 import com.chemiofitor.protection_engineering.api.SlotTypes;
-import com.chemiofitor.protection_engineering.client.model.EngineerGogglesAttachmentModel;
 import com.chemiofitor.protection_engineering.registry.PEItems;
 import com.simibubi.create.content.equipment.goggles.GogglesItem;
-import net.minecraft.client.model.EntityModel;
-import net.minecraft.client.model.geom.EntityModelSet;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
@@ -22,9 +17,6 @@ import java.util.Set;
  */
 public class EngineerGogglesItem extends AttachmentItem {
 
-    private static final ResourceLocation TEXTURE =
-            ProtectionEngineering.asResource("textures/models/armor/engineer_goggles.png");
-
     public EngineerGogglesItem(Properties properties) {
         super(properties, Set.of(MobEffects.BLINDNESS), SlotTypes.EYES);
     }
@@ -38,19 +30,6 @@ public class EngineerGogglesItem extends AttachmentItem {
     @Nullable
     public String getFeatureKey() {
         return "tooltip.protectionengineering.feature.engineer_goggles";
-    }
-
-    // ── 3D 渲染 ──────────────────────────────────────────────
-
-    @Override
-    public EntityModel<?> createAttachmentModel(EntityModelSet modelSet) {
-        return new EngineerGogglesAttachmentModel<>(
-                modelSet.bakeLayer(EngineerGogglesAttachmentModel.LAYER_LOCATION));
-    }
-
-    @Override
-    public ResourceLocation getAttachmentTexture() {
-        return TEXTURE;
     }
 
     // ── Create 护目镜集成 ────────────────────────────────────

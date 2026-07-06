@@ -1,14 +1,9 @@
 package com.chemiofitor.protection_engineering.item;
 
-import com.chemiofitor.protection_engineering.ProtectionEngineering;
 import com.chemiofitor.protection_engineering.api.SlotTypes;
-import com.chemiofitor.protection_engineering.client.model.DodgeJetpackAttachmentModel;
 import com.chemiofitor.protection_engineering.config.PEServerConfig;
 import com.chemiofitor.protection_engineering.registry.PESounds;
-import net.minecraft.client.model.EntityModel;
-import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -29,8 +24,6 @@ import javax.annotation.Nullable;
  */
 public class DodgeJetpackItem extends AttachmentItem {
 
-    private static final ResourceLocation TEXTURE =
-            ProtectionEngineering.asResource("textures/models/armor/dodge_jetpack.png");
     private static final int DANGER_SCAN_RADIUS = 5;
 
     public DodgeJetpackItem(Properties properties) {
@@ -48,17 +41,6 @@ public class DodgeJetpackItem extends AttachmentItem {
     public String getFeatureKey() {
         return "tooltip.protectionengineering.feature.dodge_jetpack";
     }
-
-    // ── 3D 渲染 ──────────────────────────────────────────────
-
-    @Override
-    public EntityModel<?> createAttachmentModel(EntityModelSet modelSet) {
-        return new DodgeJetpackAttachmentModel<>(
-                modelSet.bakeLayer(DodgeJetpackAttachmentModel.LAYER_LOCATION));
-    }
-
-    @Override
-    public ResourceLocation getAttachmentTexture() { return TEXTURE; }
 
     // ── 应激反馈逻辑 ──────────────────────────────────────────
 

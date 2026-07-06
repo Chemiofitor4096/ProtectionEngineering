@@ -1,10 +1,11 @@
-// 1.21.1	2026-06-30T17:50:23.7319338	Registrate Provider for protectionengineering [Registries, Data Maps, Recipes, Advancements, Loot Tables, Tags (blocks), Tags (enchantments), Tags (items), Tags (fluids), Tags (entity_types), generic_server_provider, Blockstates, Item models, Lang (en_us/en_ud), generic_client_provider]
+// 1.21.1	2026-07-03T05:39:02.4224997	Registrate Provider for protectionengineering [Registries, Data Maps, Recipes, Advancements, Loot Tables, Tags (blocks), Tags (enchantments), Tags (items), Tags (fluids), Tags (entity_types), generic_server_provider, Blockstates, Item models, Lang (en_us/en_ud), generic_client_provider]
 9548b733d8408aab37f04a6ccfcda663b4d8e229 assets/protectionengineering/blockstates/workbench.json
-34bc8909145a831d136942fde78bc97be1efe417 assets/protectionengineering/lang/en_ud.json
-c561e67e7b22c830150867c551368eb0f4c8e74a assets/protectionengineering/lang/en_us.json
+9b90a6ca0e6c83d7c25a4945b770ab560306d23d assets/protectionengineering/lang/en_ud.json
+33ea93899960d125c7290e94c238532230092691 assets/protectionengineering/lang/en_us.json
 de432a9aaddd8bf94d4ff0714405d45b68482019 assets/protectionengineering/models/item/advanced_aps.json
 fd6421744d19fc737d2db860c16f73d268b23727 assets/protectionengineering/models/item/air_filter.json
 d83a0d8a91c9426b9002ffad467f65ec884026bb assets/protectionengineering/models/item/aps.json
+eefa93e73e4292998cc345e1c1e18e5f7eaa3dbc assets/protectionengineering/models/item/blast_lining.json
 cddd2c2f78b45d389174d4e8ae660c51b07b7ea8 assets/protectionengineering/models/item/cushioned_kneecap.json
 239d9830cdccd63507f974190bdbb15385d7b35a assets/protectionengineering/models/item/cushioned_soles.json
 b0c5e032f49e35a0c8684782d33305a55518345a assets/protectionengineering/models/item/diving_device.json
@@ -27,6 +28,7 @@ ce07e6c86032946d2b13fbd0232631c386a4e546 assets/protectionengineering/models/ite
 601e4601972c20e495e83dfc9512dc164f414872 assets/protectionengineering/models/item/momentum_jetpack.json
 6601c5d1a96e40aa4273aca7c0c7514559c4a0f5 assets/protectionengineering/models/item/netherite_plate.json
 914aeca5309b30bea99bfdf718d88d4a654787eb assets/protectionengineering/models/item/night_vision_goggles.json
+ac2ae14c02feb611dde4111f84815c7243c361f1 assets/protectionengineering/models/item/purity_mark.json
 af6628e86678c209a6ea7e307d7c9ff8aeb0b48d assets/protectionengineering/models/item/rocket_launcher.json
 388bb26baa3f70830529b39d016bf01ed5fb9a32 assets/protectionengineering/models/item/silent_soles.json
 585c71e4897b058ed334aef67be481b272f870e9 assets/protectionengineering/models/item/spyglass.json

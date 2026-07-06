@@ -1,11 +1,6 @@
 package com.chemiofitor.protection_engineering.item;
 
-import com.chemiofitor.protection_engineering.ProtectionEngineering;
 import com.chemiofitor.protection_engineering.api.SlotTypes;
-import com.chemiofitor.protection_engineering.client.model.AirFilterAttachmentModel;
-import net.minecraft.client.model.EntityModel;
-import net.minecraft.client.model.geom.EntityModelSet;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffects;
 
 import java.util.Set;
@@ -15,22 +10,8 @@ import java.util.Set;
  */
 public class AirFilterItem extends AttachmentItem {
 
-    private static final ResourceLocation TEXTURE =
-            ProtectionEngineering.asResource("textures/models/armor/air_filter.png");
-
     public AirFilterItem(Properties properties) {
         super(properties, Set.of(MobEffects.POISON, MobEffects.CONFUSION,
                 MobEffects.WEAKNESS, MobEffects.DIG_SLOWDOWN), SlotTypes.MOUTH);
-    }
-
-    @Override
-    public EntityModel<?> createAttachmentModel(EntityModelSet modelSet) {
-        return new AirFilterAttachmentModel<>(
-                modelSet.bakeLayer(AirFilterAttachmentModel.LAYER_LOCATION));
-    }
-
-    @Override
-    public ResourceLocation getAttachmentTexture() {
-        return TEXTURE;
     }
 }

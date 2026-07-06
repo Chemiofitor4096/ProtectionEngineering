@@ -59,8 +59,8 @@ public class WorkbenchMenu extends AbstractContainerMenu {
             public void set(ItemStack s) {
                 ItemStack old = getItem().copy();
                 super.set(s);
-                if (!syncing && !ItemStack.matches(old, s)) {
-                    page = 0; // 换护甲时重置页码
+                if (!syncing && old.getItem() != s.getItem()) {
+                    page = 0; // 换不同护甲时重置页码
                     loadFromArmor();
                 }
             }

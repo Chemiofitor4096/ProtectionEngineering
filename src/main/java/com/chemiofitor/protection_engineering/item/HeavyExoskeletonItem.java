@@ -2,9 +2,6 @@ package com.chemiofitor.protection_engineering.item;
 
 import com.chemiofitor.protection_engineering.ProtectionEngineering;
 import com.chemiofitor.protection_engineering.api.SlotTypes;
-import com.chemiofitor.protection_engineering.client.model.HeavyExoskeletonLeftModel;
-import net.minecraft.client.model.EntityModel;
-import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlotGroup;
@@ -25,8 +22,6 @@ public class HeavyExoskeletonItem extends AttachmentItem {
             ProtectionEngineering.asResource("heavy_exo_armor");
     private static final ResourceLocation STEP_ID =
             ProtectionEngineering.asResource("heavy_exo_step");
-    private static final ResourceLocation TEX =
-            ProtectionEngineering.asResource("textures/models/armor/heavy_exoskeleton.png");
 
     public HeavyExoskeletonItem(Properties properties) {
         super(properties, Set.of(MobEffects.MOVEMENT_SLOWDOWN), SlotTypes.LEG);
@@ -51,15 +46,4 @@ public class HeavyExoskeletonItem extends AttachmentItem {
                 new AttributeModifier(STEP_ID, 0.4, AttributeModifier.Operation.ADD_VALUE),
                 EquipmentSlotGroup.LEGS);
     }
-
-    // ── 3D 渲染（共用左腿模型，右腿由渲染层 X 轴镜像）───────
-
-    @Override
-    public EntityModel<?> createLeftLegModel(EntityModelSet modelSet) {
-        return new HeavyExoskeletonLeftModel<>(
-                modelSet.bakeLayer(HeavyExoskeletonLeftModel.LAYER_LOCATION));
-    }
-
-    @Override
-    public ResourceLocation getLeftLegTexture() { return TEX; }
 }

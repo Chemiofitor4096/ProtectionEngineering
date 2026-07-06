@@ -120,6 +120,11 @@ public class PEItems {
             .properties(p -> p.stacksTo(1))
             .register();
 
+    public static final ItemEntry<PurityMarkItem> PURITY_MARK = REGISTRATE
+            .item("purity_mark", PurityMarkItem::new)
+            .properties(p -> p.stacksTo(1))
+            .register();
+
     // ══════════════════════════════════════════════════════════════
     //  胸甲附件 — 背部 (5) — BACK
     // ══════════════════════════════════════════════════════════════
@@ -188,6 +193,15 @@ public class PEItems {
 
     public static final ItemEntry<CushionedKneecapItem> CUSHIONED_KNEECAP = REGISTRATE
             .item("cushioned_kneecap", CushionedKneecapItem::new)
+            .properties(p -> p.stacksTo(1))
+            .register();
+
+    // ══════════════════════════════════════════════════════════════
+    //  通用附件 (1) — LINING
+    // ══════════════════════════════════════════════════════════════
+
+    public static final ItemEntry<BlastLiningItem> BLAST_LINING = REGISTRATE
+            .item("blast_lining", BlastLiningItem::new)
             .properties(p -> p.stacksTo(1))
             .register();
 

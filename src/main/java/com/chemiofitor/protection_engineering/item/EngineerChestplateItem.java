@@ -13,7 +13,7 @@ import java.util.List;
 public class EngineerChestplateItem extends AttachmentHostArmorItem {
 
     private static final List<SlotType> SLOTS = List.of(
-            SlotTypes.SHOULDER, SlotTypes.CHESTPLATE, SlotTypes.BACK, SlotTypes.ARM, SlotTypes.LINING, SlotTypes.DECORATION
+            SlotTypes.SHOULDER, SlotTypes.CHESTPLATE, SlotTypes.BACK, SlotTypes.ARM, SlotTypes.LINING, SlotTypes.CHESTPLATE_DECORATION
     );
 
     public EngineerChestplateItem(Holder<ArmorMaterial> material, Properties properties) {

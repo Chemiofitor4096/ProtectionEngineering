@@ -5,6 +5,7 @@ import com.chemiofitor.protection_engineering.registry.PEItems;
 import com.chemiofitor.protection_engineering.registry.PEWorkbench;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllItems;
+import com.simibubi.create.content.decoration.palettes.AllPaletteBlocks;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
@@ -56,6 +57,45 @@ public class PERecipeProvider extends RecipeProvider {
                 .unlockedBy("has_gunpowder",
                         InventoryChangeTrigger.TriggerInstance.hasItems(Items.GUNPOWDER))
                 .save(output, rl("missile"));
+
+        // ── 工程师链锯剑 ─────────────────────────────────────
+        ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, PEItems.ENGINEER_SAW_SWORD.get())
+                .pattern(" SI")
+                .pattern("SA ")
+                .pattern("TB ")
+                .define('S', AllItems.IRON_SHEET.get())
+                .define('I', AllItems.STURDY_SHEET.get())
+                .define('A', AllItems.PRECISION_MECHANISM)
+                .define('B', AllItems.BRASS_SHEET.get())
+                .define('T', Items.STICK)
+                .unlockedBy("has_sturdy_sheet",
+                        InventoryChangeTrigger.TriggerInstance.hasItems(AllItems.STURDY_SHEET.get()))
+                .save(output, rl("engineer_saw_sword"));
+
+        // ── 工程师盾牌 ───────────────────────────────────────
+        ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, PEItems.ENGINEER_SHIELD.get())
+                .pattern(" G ")
+                .pattern("BSB")
+                .pattern("I I")
+                .define('S', Items.SHIELD)
+                .define('B', AllItems.BRASS_SHEET.get())
+                .define('I', AllItems.STURDY_SHEET.get())
+                .define('G', AllPaletteBlocks.FRAMED_GLASS_PANE.asItem())
+                .unlockedBy("has_sturdy_sheet",
+                        InventoryChangeTrigger.TriggerInstance.hasItems(AllItems.STURDY_SHEET.get()))
+                .save(output, rl("engineer_shield"));
+
+        // ── 纯洁印记 ───────────────────────────────────────
+        ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, PEItems.PURITY_MARK.get())
+                .pattern(" R ")
+                .pattern("RSW")
+                .pattern(" W ")
+                .define('R', Items.RED_WOOL)
+                .define('W', Items.WHITE_WOOL)
+                .define('S', Items.LILY_OF_THE_VALLEY)
+                .unlockedBy("has_lily_of_the_valley",
+                        InventoryChangeTrigger.TriggerInstance.hasItems(Items.LILY_OF_THE_VALLEY))
+                .save(output, rl("purity_mark"));
     }
 
     private static void buildWorkbench(RecipeOutput output) {

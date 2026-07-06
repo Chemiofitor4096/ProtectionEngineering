@@ -337,53 +337,44 @@ while (MY_KEY.consumeClick()) {
 
 ## 3D Model Integration
 
-### Model Registration
+模型注册通过 `PEAttachmentModelSetup` 集中管理，与物品类解耦（避免服务端加载客户端类）。
 
-Each attachment with a 3D model must:
-
-1. Export a Java model from Blockbench and place it in `client/model/`
-2. Override the model/texture provider methods in the item class
-3. Register the model layer in `PEModelLayers`
-
-### Model Provider Methods
+### 通用模型（躯干附件等）
 
 ```java
-@Override
-public ModelPart createAttachmentModel() {
-    return modelSet.bakeLayer(MyModel.LAYER_LOCATION);
-}
-
-@Override
-public ResourceLocation getAttachmentTexture() {
-    return ResourceLocation.fromNamespaceAndPath(
-        "protectionengineering",
-        "textures/models/armor/my_attachment.png"
-    );
-}
-
-// For arm/leg attachments, override the left/right variants:
-@Override
-public ModelPart createLeftArmModel() { ... }
-@Override
-public ModelPart createRightArmModel() { ... }
-@Override
-public ResourceLocation getLeftArmTexture() { ... }
-@Override
-public ResourceLocation getRightArmTexture() { ... }
+// PEAttachmentModelSetup.init()
+registerMain(MyItem.class,
+    ms -> new MyAttachmentModel<>(ms.bakeLayer(MyAttachmentModel.LAYER_LOCATION)),
+    "my_texture.png");
 ```
 
-### Layer Registration
+### 肢体模型（手臂、腿部）
 
 ```java
-// In PEModelLayers
-public static final ModelLayerLocation MY_GADGET = new ModelLayerLocation(
-    ResourceLocation.fromNamespaceAndPath(MOD_ID, "my_gadget"), "main"
-);
-
-public static void registerLayerDefinitions(RegisterLayerDefinitionsEvent event) {
-    event.registerLayerDefinition(MY_GADGET, MyModel::createBodyLayer);
-}
+PEAttachmentModelRegistry.registerArm(MyItem.class,
+    new PEAttachmentModelRegistry.LimbModelProvider() {
+        @Override public EntityModel<?> createLeft(EntityModelSet ms) {
+            return new MyLeftModel<>(ms.bakeLayer(MyLeftModel.LAYER_LOCATION));
+        }
+        @Override public EntityModel<?> createRight(EntityModelSet ms) {
+            return new MyRightModel<>(ms.bakeLayer(MyRightModel.LAYER_LOCATION));
+        }
+    },
+    ProtectionEngineering.asResource("textures/models/armor/my_texture.png"));
 ```
+
+右腿由渲染层 X 轴镜像，用 `registerLeg`，只需左腿模型。
+
+### 模型层注册
+
+仍在 `PEModelLayers.registerLayerDefinitions()` 中：
+```java
+event.registerLayerDefinition(MyModel.LAYER_LOCATION, MyModel::createBodyLayer);
+```
+
+### 纹理
+
+`src/main/resources/assets/protectionengineering/textures/models/armor/`，`registerMain` 第三个参数为文件名。
 
 ## Recipe Registration
 
@@ -468,8 +459,8 @@ When adding a new attachment or feature:
 - [ ] **Combat modifiers**: Override `getDamageReduction()`, `getFallDamageReduction()`, `getFallDistanceReduction()`
 - [ ] **Attributes**: Override `addAttributeModifiers()` for attribute bonuses
 - [ ] **Registration**: Add to `PEItems` via Registrate
-- [ ] **3D model**: Create Blockbench model, override model/texture providers
-- [ ] **Model layer**: Register in `PEModelLayers`
+- [ ] **3D model**: Create Blockbench model, add `registerMain`/`registerArm`/`registerLeg` in `PEAttachmentModelSetup`
+- [ ] **Model layer**: Register in `PEModelLayers.registerLayerDefinitions()`
 - [ ] **Translations**: Add English in `PEDataGen.java`, Chinese in `zh_cn.json`
 - [ ] **Recipes**: Add to `PERecipeProvider` or `PEMechanicalCraftingRecipeGen`
 - [ ] **Server config**: Add entries to `PEServerConfig` for tunable parameters

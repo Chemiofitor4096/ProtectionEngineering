@@ -1,29 +1,22 @@
 package com.chemiofitor.protection_engineering.item;
 
-import com.chemiofitor.protection_engineering.ProtectionEngineering;
 import com.chemiofitor.protection_engineering.api.SlotType;
 import com.chemiofitor.protection_engineering.api.SlotTypes;
-import com.chemiofitor.protection_engineering.client.model.JetpackAttachmentModel;
 import com.chemiofitor.protection_engineering.entity.ThrustEntity;
 import com.chemiofitor.protection_engineering.event.PEGameEvents;
 import com.chemiofitor.protection_engineering.registry.PEEntities;
 import com.chemiofitor.protection_engineering.registry.PESounds;
-import net.minecraft.client.model.EntityModel;
-import net.minecraft.client.model.geom.EntityModelSet;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+
 import javax.annotation.Nullable;
 
 /**
  * 喷气背包 —— 背部附件，提供鞘翅滑翔能力，可按热键推力加速。
  */
 public class JetpackItem extends AttachmentItem {
-
-    private static final ResourceLocation TEX =
-            ProtectionEngineering.asResource("textures/models/armor/jetpack.png");
 
     public JetpackItem(Properties properties) {
         super(properties, SlotTypes.BACK);
@@ -56,18 +49,5 @@ public class JetpackItem extends AttachmentItem {
 
         player.level().playSound(null, player, PESounds.THRUST_JETPACK.get(),
                 SoundSource.PLAYERS, 1.0f, 1.0f);
-    }
-
-    // ── 3D 渲染 ──────────────────────────────────────────────
-
-    @Override
-    public EntityModel<?> createAttachmentModel(EntityModelSet modelSet) {
-        return new JetpackAttachmentModel<>(
-                modelSet.bakeLayer(JetpackAttachmentModel.LAYER_LOCATION));
-    }
-
-    @Override
-    public ResourceLocation getAttachmentTexture() {
-        return TEX;
     }
 }

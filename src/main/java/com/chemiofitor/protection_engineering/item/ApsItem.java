@@ -1,13 +1,8 @@
 package com.chemiofitor.protection_engineering.item;
 
-import com.chemiofitor.protection_engineering.ProtectionEngineering;
 import com.chemiofitor.protection_engineering.api.SlotTypes;
-import com.chemiofitor.protection_engineering.client.model.ApsAttachmentModel;
 import com.chemiofitor.protection_engineering.config.PEServerConfig;
 import com.chemiofitor.protection_engineering.registry.PESounds;
-import net.minecraft.client.model.EntityModel;
-import net.minecraft.client.model.geom.EntityModelSet;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -63,17 +58,6 @@ public class ApsItem extends AttachmentItem {
     public String getFeatureKey() {
         return "tooltip.protectionengineering.feature.aps";
     }
-
-    private static final ResourceLocation TEX =
-            ProtectionEngineering.asResource("textures/models/armor/aps.png");
-
-    @Override
-    public EntityModel<?> createAttachmentModel(EntityModelSet modelSet) {
-        return new ApsAttachmentModel<>(modelSet.bakeLayer(ApsAttachmentModel.LAYER_LOCATION));
-    }
-
-    @Override
-    public ResourceLocation getAttachmentTexture() { return TEX; }
 
     // ── Tick：巡航拦截 ───────────────────────────────────────
 

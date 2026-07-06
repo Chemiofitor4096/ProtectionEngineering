@@ -1,11 +1,6 @@
 package com.chemiofitor.protection_engineering.item;
 
-import com.chemiofitor.protection_engineering.ProtectionEngineering;
 import com.chemiofitor.protection_engineering.api.SlotType;
-import com.chemiofitor.protection_engineering.client.model.MomentumJetpackAttachmentModel;
-import net.minecraft.client.model.EntityModel;
-import net.minecraft.client.model.geom.EntityModelSet;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -18,9 +13,6 @@ import javax.annotation.Nullable;
  */
 public class MomentumJetpackItem extends JetpackItem {
 
-    private static final ResourceLocation TEX =
-            ProtectionEngineering.asResource("textures/models/armor/momentum_jetpack.png");
-
     public MomentumJetpackItem(Properties properties) {
         super(properties);
     }
@@ -29,19 +21,6 @@ public class MomentumJetpackItem extends JetpackItem {
     @Nullable
     public String getFeatureKey() {
         return "tooltip.protectionengineering.feature.momentum_jetpack";
-    }
-
-    // ── 3D 渲染 ──────────────────────────────────────────────
-
-    @Override
-    public EntityModel<?> createAttachmentModel(EntityModelSet modelSet) {
-        return new MomentumJetpackAttachmentModel<>(
-                modelSet.bakeLayer(MomentumJetpackAttachmentModel.LAYER_LOCATION));
-    }
-
-    @Override
-    public ResourceLocation getAttachmentTexture() {
-        return TEX;
     }
 
     // ── 速度提升 ──────────────────────────────────────────────

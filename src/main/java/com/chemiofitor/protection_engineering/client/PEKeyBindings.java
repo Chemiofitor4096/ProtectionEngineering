@@ -1,12 +1,11 @@
 package com.chemiofitor.protection_engineering.client;
 
 import com.chemiofitor.protection_engineering.ProtectionEngineering;
+import com.chemiofitor.protection_engineering.ProtectionEngineering;
+import com.chemiofitor.protection_engineering.api.AttachmentUtil;
 import com.chemiofitor.protection_engineering.api.IAttachment;
-import com.chemiofitor.protection_engineering.api.IAttachmentHost;
-import com.chemiofitor.protection_engineering.api.SlotTypes;
-import com.chemiofitor.protection_engineering.item.AttachmentHostArmorItem;
-import com.chemiofitor.protection_engineering.item.HormoneInjectorItem;
 import com.chemiofitor.protection_engineering.item.ApsItem;
+import com.chemiofitor.protection_engineering.item.HormoneInjectorItem;
 import com.chemiofitor.protection_engineering.item.MissilePackItem;
 import com.chemiofitor.protection_engineering.item.MomentumJetpackItem;
 import com.chemiofitor.protection_engineering.item.NightVisionGogglesItem;
@@ -14,12 +13,9 @@ import com.chemiofitor.protection_engineering.item.RocketLauncherItem;
 import com.chemiofitor.protection_engineering.item.SpyglassItem;
 import com.chemiofitor.protection_engineering.network.ToggleAttachmentPayload;
 import com.chemiofitor.protection_engineering.network.ThrustJetpackPayload;
-import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -135,33 +131,15 @@ public class PEKeyBindings {
     }
 
     private static boolean hasMomentumJetpack(Player player) {
-        for (EquipmentSlot slot : EquipmentSlot.values()) {
-            if (slot.getType() != EquipmentSlot.Type.HUMANOID_ARMOR) continue;
-            ItemStack armor = player.getItemBySlot(slot);
-            if (!(armor.getItem() instanceof IAttachmentHost host)) continue;
-            for (var entry : host.getAttachments(armor).slots().entrySet()) {
-                if (entry.getValue().getItem() instanceof MomentumJetpackItem) return true;
-            }
-        }
-        return false;
+        return AttachmentUtil.has(player, MomentumJetpackItem.class);
     }
 
     private static void tryActivateAttachment(Class<? extends IAttachment> type) {
         var player = Minecraft.getInstance().player;
         if (player == null) return;
 
-        for (EquipmentSlot slot : EquipmentSlot.values()) {
-            if (slot.getType() != EquipmentSlot.Type.HUMANOID_ARMOR) continue;
-            ItemStack armor = player.getItemBySlot(slot);
-            if (!(armor.getItem() instanceof AttachmentHostArmorItem host)) continue;
-
-            for (var entry : host.getAttachments(armor).slots().entrySet()) {
-                if (type.isInstance(entry.getValue().getItem())) {
-                    PacketDistributor.sendToServer(new ToggleAttachmentPayload(
-                            slot.ordinal(), entry.getKey().id()));
-                    return;
-                }
-            }
-        }
+        AttachmentUtil.findFirst(player, type).ifPresent(match ->
+            PacketDistributor.sendToServer(new ToggleAttachmentPayload(
+                    match.armorSlot().ordinal(), match.attachSlot().id())));
     }
 }

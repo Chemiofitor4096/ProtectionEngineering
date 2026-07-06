@@ -4,6 +4,7 @@ import com.chemiofitor.protection_engineering.ProtectionEngineering;
 import com.chemiofitor.protection_engineering.api.AttachmentsData;
 import com.chemiofitor.protection_engineering.api.IAttachment;
 import com.chemiofitor.protection_engineering.api.IAttachmentHost;
+import com.chemiofitor.protection_engineering.client.PEAttachmentModelRegistry;
 import com.chemiofitor.protection_engineering.client.model.*;
 import com.chemiofitor.protection_engineering.item.AttachmentHostArmorItem;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -144,22 +145,23 @@ public class PEArmorLayer extends RenderLayer<LivingEntity, HumanoidModel<Living
             ItemStack attachmentStack = entry.getValue();
             if (!(attachmentStack.getItem() instanceof IAttachment attachment)) continue;
 
-            EntityModel<?> leftModel = attachment.createLeftArmModel(models);
-            ResourceLocation leftTex = attachment.getLeftArmTexture();
-            if (leftModel != null && leftTex != null) {
+            ResourceLocation tex = PEAttachmentModelRegistry.getArmTexture(attachment);
+            if (tex == null) continue;
+
+            EntityModel<?> leftModel = PEAttachmentModelRegistry.createLeftArmModel(attachment, models);
+            if (leftModel != null) {
                 pose.pushPose();
                 rotateAtPart(pose, leftArm);
-                leftModel.renderToBuffer(pose, buf.getBuffer(RenderType.entityCutoutNoCull(leftTex)),
+                leftModel.renderToBuffer(pose, buf.getBuffer(RenderType.entityCutoutNoCull(tex)),
                         light, OverlayTexture.NO_OVERLAY, -1);
                 pose.popPose();
             }
 
-            EntityModel<?> rightModel = attachment.createRightArmModel(models);
-            ResourceLocation rightTex = attachment.getRightArmTexture();
-            if (rightModel != null && rightTex != null) {
+            EntityModel<?> rightModel = PEAttachmentModelRegistry.createRightArmModel(attachment, models);
+            if (rightModel != null) {
                 pose.pushPose();
                 rotateAtPart(pose, rightArm);
-                rightModel.renderToBuffer(pose, buf.getBuffer(RenderType.entityCutoutNoCull(rightTex)),
+                rightModel.renderToBuffer(pose, buf.getBuffer(RenderType.entityCutoutNoCull(tex)),
                         light, OverlayTexture.NO_OVERLAY, -1);
                 pose.popPose();
             }
@@ -175,22 +177,26 @@ public class PEArmorLayer extends RenderLayer<LivingEntity, HumanoidModel<Living
             ItemStack attachmentStack = entry.getValue();
             if (!(attachmentStack.getItem() instanceof IAttachment attachment)) continue;
 
-            EntityModel<?> legModel = attachment.createLeftLegModel(models);
-            ResourceLocation legTex = attachment.getLeftLegTexture();
-            if (legModel == null || legTex == null) continue;
+            ResourceLocation legTex = PEAttachmentModelRegistry.getLegTexture(attachment);
+            if (legTex == null) continue;
+
+            EntityModel<?> leftModel = PEAttachmentModelRegistry.createLeftLegModel(attachment, models);
+            if (leftModel == null) continue;
 
             // 左腿
             pose.pushPose();
             rotateAtPart(pose, leftLeg);
-            legModel.renderToBuffer(pose, buf.getBuffer(RenderType.entityCutoutNoCull(legTex)),
+            leftModel.renderToBuffer(pose, buf.getBuffer(RenderType.entityCutoutNoCull(legTex)),
                     light, OverlayTexture.NO_OVERLAY, -1);
             pose.popPose();
 
-            // 右腿 — X 轴镜像
+            // 右腿 — X 轴镜像（使用左腿模型或独立右腿模型）
+            EntityModel<?> rightModel = PEAttachmentModelRegistry.createRightLegModel(attachment, models);
+            if (rightModel == null) rightModel = leftModel;
             pose.pushPose();
             rotateAtPart(pose, rightLeg);
-            pose.scale(-1, 1, 1);
-            legModel.renderToBuffer(pose, buf.getBuffer(RenderType.entityCutoutNoCull(legTex)),
+            if (rightModel == leftModel) pose.scale(-1, 1, 1);
+            rightModel.renderToBuffer(pose, buf.getBuffer(RenderType.entityCutoutNoCull(legTex)),
                     light, OverlayTexture.NO_OVERLAY, -1);
             pose.popPose();
         }
@@ -207,8 +213,8 @@ public class PEArmorLayer extends RenderLayer<LivingEntity, HumanoidModel<Living
             ItemStack attachmentStack = entry.getValue();
             if (!(attachmentStack.getItem() instanceof IAttachment attachment)) continue;
 
-            EntityModel<?> model = attachment.createAttachmentModel(models);
-            ResourceLocation texture = attachment.getAttachmentTexture();
+            EntityModel<?> model = PEAttachmentModelRegistry.createMainModel(attachment, models);
+            ResourceLocation texture = PEAttachmentModelRegistry.getMainTexture(attachment);
             if (model == null || texture == null) continue;
 
             pose.pushPose();

@@ -1,9 +1,8 @@
 package com.chemiofitor.protection_engineering.api;
 
-import net.minecraft.client.model.EntityModel;
-import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.core.Holder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
@@ -58,56 +57,6 @@ public interface IAttachment {
         return true;
     }
 
-    // ── 客户端渲染 ────────────────────────────────────────────
-
-    /**
-     * 创建此附件的 3D 渲染模型。
-     * 返回 null 表示该附件无 3D 模型（仅图标）。
-     *
-     * @param modelSet 用于烘焙模型层的 EntityModelSet
-     */
-    @Nullable
-    default EntityModel<?> createAttachmentModel(EntityModelSet modelSet) {
-        return null;
-    }
-
-    /**
-     * 返回此附件 3D 模型的贴图路径。
-     * 返回 null 表示无 3D 模型。
-     */
-    @Nullable
-    default ResourceLocation getAttachmentTexture() {
-        return null;
-    }
-
-    /** 左臂模型（如额外机械臂），null 表示无 */
-    @Nullable
-    default EntityModel<?> createLeftArmModel(EntityModelSet modelSet) { return null; }
-
-    @Nullable
-    default ResourceLocation getLeftArmTexture() { return null; }
-
-    /** 右臂模型（如额外机械臂），null 表示无 */
-    @Nullable
-    default EntityModel<?> createRightArmModel(EntityModelSet modelSet) { return null; }
-
-    @Nullable
-    default ResourceLocation getRightArmTexture() { return null; }
-
-    /** 左腿模型（如外骨骼），null 表示无 */
-    @Nullable
-    default EntityModel<?> createLeftLegModel(EntityModelSet modelSet) { return null; }
-
-    @Nullable
-    default ResourceLocation getLeftLegTexture() { return null; }
-
-    /** 右腿模型（如外骨骼），null 表示无 */
-    @Nullable
-    default EntityModel<?> createRightLegModel(EntityModelSet modelSet) { return null; }
-
-    @Nullable
-    default ResourceLocation getRightLegTexture() { return null; }
-
     // ── 状态效果免疫 ──────────────────────────────────────────
 
     /**
@@ -139,6 +88,14 @@ public interface IAttachment {
     default void addAttributeModifiers(net.neoforged.neoforge.event.ItemAttributeModifierEvent event) {}
 
     // ── 减伤 ──────────────────────────────────────────────────
+
+    /**
+     * 限定减免的伤害类型。空集 = 全类型（向后兼容旧附件）。
+     * 非空时仅对匹配的 DamageType 生效。
+     */
+    default Set<ResourceKey<DamageType>> getProtectedDamageTypes() {
+        return Set.of();
+    }
 
     /** 伤害减免比例 (0~1)。坚固防护板 0.10，下界合金 0.15 */
     default float getDamageReduction() { return 0f; }

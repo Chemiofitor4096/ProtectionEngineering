@@ -20,6 +20,8 @@ public class PEModelLayers {
 
     @SubscribeEvent
     public static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
+        PEAttachmentModelSetup.init(); // 注册所有附件物品→模型的映射
+
         event.registerLayerDefinition(EngineerHoodModel.LAYER_LOCATION, EngineerHoodModel::createBodyLayer);
         event.registerLayerDefinition(EngineerChestplateModel.LAYER_LOCATION, EngineerChestplateModel::createBodyLayer);
         event.registerLayerDefinition(EngineerChestplateRightArmModel.LAYER_LOCATION, EngineerChestplateRightArmModel::createBodyLayer);
@@ -51,6 +53,7 @@ public class PEModelLayers {
         event.registerLayerDefinition(RocketPackAttachmentModel.LAYER_LOCATION, RocketPackAttachmentModel::createBodyLayer);
         event.registerLayerDefinition(MissilePackAttachmentModel.LAYER_LOCATION, MissilePackAttachmentModel::createBodyLayer);
         event.registerLayerDefinition(SpyglassAttachmentModel.LAYER_LOCATION, SpyglassAttachmentModel::createBodyLayer);
+        event.registerLayerDefinition(PurityMarkAttachmentModel.LAYER_LOCATION, PurityMarkAttachmentModel::createBodyLayer);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
