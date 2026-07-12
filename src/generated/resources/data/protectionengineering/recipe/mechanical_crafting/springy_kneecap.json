@@ -4,7 +4,7 @@
   "category": "misc",
   "key": {
     "M": {
-      "item": "minecraft:white_wool"
+      "item": "minecraft:slime_block"
     },
     "S": {
       "item": "create:sturdy_sheet"
@@ -20,6 +20,6 @@
   ],
   "result": {
     "count": 1,
-    "id": "protectionengineering:cushioned_kneecap"
+    "id": "protectionengineering:springy_kneecap"
   }
 }

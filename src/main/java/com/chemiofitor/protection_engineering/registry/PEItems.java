@@ -191,6 +191,11 @@ public class PEItems {
             .properties(p -> p.stacksTo(1))
             .register();
 
+    public static final ItemEntry<SpringyKneecapItem> SPRINGY_KNEECAP = REGISTRATE
+            .item("springy_kneecap", SpringyKneecapItem::new)
+            .properties(p -> p.stacksTo(1))
+            .register();
+
     public static final ItemEntry<CushionedKneecapItem> CUSHIONED_KNEECAP = REGISTRATE
             .item("cushioned_kneecap", CushionedKneecapItem::new)
             .properties(p -> p.stacksTo(1))
@@ -216,6 +221,11 @@ public class PEItems {
 
     public static final ItemEntry<CushionedSolesItem> CUSHIONED_SOLES = REGISTRATE
             .item("cushioned_soles", CushionedSolesItem::new)
+            .properties(p -> p.stacksTo(1))
+            .register();
+
+    public static final ItemEntry<FrostSolesItem> FROST_SOLES = REGISTRATE
+            .item("frost_soles", FrostSolesItem::new)
             .properties(p -> p.stacksTo(1))
             .register();
 

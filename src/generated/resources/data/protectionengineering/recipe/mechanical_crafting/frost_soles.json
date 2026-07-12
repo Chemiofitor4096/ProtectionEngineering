@@ -3,23 +3,25 @@
   "accept_mirrored": true,
   "category": "misc",
   "key": {
-    "M": {
-      "item": "minecraft:white_wool"
+    "C": {
+      "item": "create:copper_sheet"
+    },
+    "I": {
+      "item": "minecraft:ice"
     },
     "S": {
       "item": "create:sturdy_sheet"
-    },
-    "W": {
-      "tag": "minecraft:wool"
     }
   },
   "pattern": [
+    "     ",
+    "     ",
     " S S ",
-    "WM MW",
-    " S S "
+    "SC CS",
+    "II II"
   ],
   "result": {
     "count": 1,
-    "id": "protectionengineering:cushioned_kneecap"
+    "id": "protectionengineering:frost_soles"
   }
 }

@@ -7,7 +7,9 @@ import com.simibubi.create.AllItems;
 import com.simibubi.create.api.data.recipe.MechanicalCraftingRecipeGen;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Blocks;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -171,13 +173,25 @@ public class PEMechanicalCraftingRecipeGen extends MechanicalCraftingRecipeGen {
         // ── 缓冲护膝 ─────────────────────────────────────────
         create(PEItems.CUSHIONED_KNEECAP::get)
                 .recipe(b -> b
-                        .patternLine(" W W ")
-                        .patternLine(" M M ")
-                        .patternLine(" I I ")
-                        .key('W', Items.WHITE_WOOL)
-                        .key('M', Items.SLIME_BLOCK)
-                        .key('I', AllItems.IRON_SHEET.get())
+                        .patternLine(" S S ")
+                        .patternLine("WM MW")
+                        .patternLine(" S S ")
+                        .key('W', ItemTags.WOOL)
+                        .key('M', Items.WHITE_WOOL)
+                        .key('S', AllItems.STURDY_SHEET.get())
                 );
+
+        // ── 弹跳助力膝 ─────────────────────────────────────────
+        create(PEItems.SPRINGY_KNEECAP::get)
+                .recipe(b -> b
+                        .patternLine(" S S ")
+                        .patternLine("WM MW")
+                        .patternLine(" S S ")
+                        .key('W', ItemTags.WOOL)
+                        .key('M', Items.SLIME_BLOCK)
+                        .key('S', AllItems.STURDY_SHEET.get())
+                );
+
 
         // ── 单筒望远镜 ───────────────────────────────────────
         create(PEItems.SPYGLASS::get)
@@ -301,6 +315,19 @@ public class PEMechanicalCraftingRecipeGen extends MechanicalCraftingRecipeGen {
                         .key('W', Items.CYAN_WOOL)
                         .key('S', AllItems.STURDY_SHEET.get())
                         .key('C', AllItems.CARDBOARD.get())
+                );
+
+        // ── 冰霜鞋底 ─────────────────────────────────────────
+        create(PEItems.FROST_SOLES::get)
+                .recipe(b -> b
+                        .patternLine("     ")
+                        .patternLine("     ")
+                        .patternLine(" S S ")
+                        .patternLine("SC CS")
+                        .patternLine("II II")
+                        .key('S', AllItems.STURDY_SHEET.get())
+                        .key('C', AllItems.COPPER_SHEET.get())
+                        .key('I', Blocks.ICE )
                 );
 
         // ── 防爆内衬 ─────────────────────────────────────────

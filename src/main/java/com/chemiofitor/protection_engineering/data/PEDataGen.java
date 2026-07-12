@@ -78,9 +78,11 @@ public class PEDataGen {
             add.accept("tooltip.protectionengineering.feature.heavy_exoskeleton", "Armor +2 · Step up 1 · Fall Damage -20%");
             add.accept("tooltip.protectionengineering.feature.light_exoskeleton", "Speed +10% · Jump +0.5 · Step up 1");
             add.accept("tooltip.protectionengineering.feature.cushioned_kneecap", "Fall Damage -10%");
+            add.accept("tooltip.protectionengineering.feature.springy_kneecap", "Jump +0.25");
             add.accept("tooltip.protectionengineering.feature.cushioned_soles", "Fall Damage -20% · Height -1");
             add.accept("tooltip.protectionengineering.feature.improved_soles", "No-slip · Immune slime/honey/soul sand · Powder snow walk");
             add.accept("tooltip.protectionengineering.feature.insulated_soles", "Immune to ground heat damage");
+            add.accept("tooltip.protectionengineering.feature.frost_soles", "Frost Walker on water");
             add.accept("tooltip.protectionengineering.feature.silent_soles", "Silent movement · Evades Warden");
             add.accept("tooltip.protectionengineering.feature.blast_lining", "Damage -10%");
             add.accept("tooltip.protectionengineering.feature.aps", "Toggle · Intercept 10s · 30s CD");
