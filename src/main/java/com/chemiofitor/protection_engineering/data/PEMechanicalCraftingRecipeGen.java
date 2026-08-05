@@ -1,10 +1,12 @@
 package com.chemiofitor.protection_engineering.data;
 
 import com.chemiofitor.protection_engineering.ProtectionEngineering;
+import com.chemiofitor.protection_engineering.compat.iron.IronCompatItems;
 import com.chemiofitor.protection_engineering.registry.PEItems;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllItems;
 import com.simibubi.create.api.data.recipe.MechanicalCraftingRecipeGen;
+import io.redspace.ironsspellbooks.registries.ItemRegistry;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.tags.ItemTags;
@@ -352,6 +354,133 @@ public class PEMechanicalCraftingRecipeGen extends MechanicalCraftingRecipeGen {
                         .key('W', Items.MAGMA_BLOCK)
                         .key('S', AllItems.STURDY_SHEET.get())
                         .key('B', AllItems.BRASS_SHEET.get())
+                );
+
+        // ── 炽焰魔法内衬 ─────────────────────────────────────────
+        create(IronCompatItems.FIRE_MAGIC_LINING::get)
+                .recipe(b -> b
+                        .whenModLoaded("irons_spellbooks")
+                        .patternLine("  N  ")
+                        .patternLine(" XSX ")
+                        .patternLine(" BDB ")
+                        .key('S', ItemRegistry.FIRE_RUNE.get())
+                        .key('X', ItemRegistry.MAGIC_CLOTH.get())
+                        .key('D', ItemRegistry.ARCANE_INGOT.get())
+                        .key('N', ItemRegistry.ARCANE_ESSENCE.get())
+                        .key('B', AllItems.BRASS_SHEET.get())
+                );
+
+        // ── 冰霜魔法内衬 ─────────────────────────────────────────
+        create(IronCompatItems.ICE_MAGIC_LINING::get)
+                .recipe(b -> b
+                        .whenModLoaded("irons_spellbooks")
+                        .patternLine("  N  ")
+                        .patternLine(" XSX ")
+                        .patternLine(" BDB ")
+                        .key('S', ItemRegistry.ICE_RUNE.get())
+                        .key('X', ItemRegistry.MAGIC_CLOTH.get())
+                        .key('D', ItemRegistry.ARCANE_INGOT.get())
+                        .key('N', ItemRegistry.ARCANE_ESSENCE.get())
+                        .key('B', AllItems.BRASS_SHEET.get())
+                );
+
+        // ── 雷霆魔法内衬 ─────────────────────────────────────────
+        create(IronCompatItems.LIGHTNING_MAGIC_LINING::get)
+                .recipe(b -> b
+                        .whenModLoaded("irons_spellbooks")
+                        .patternLine("  N  ")
+                        .patternLine(" XSX ")
+                        .patternLine(" BDB ")
+                        .key('S', ItemRegistry.LIGHTNING_RUNE.get())
+                        .key('X', ItemRegistry.MAGIC_CLOTH.get())
+                        .key('D', ItemRegistry.ARCANE_INGOT.get())
+                        .key('N', ItemRegistry.ARCANE_ESSENCE.get())
+                        .key('B', AllItems.BRASS_SHEET.get())
+                );
+
+        // ── 神圣魔法内衬 ─────────────────────────────────────────
+        create(IronCompatItems.HOLY_MAGIC_LINING::get)
+                .recipe(b -> b
+                        .whenModLoaded("irons_spellbooks")
+                        .patternLine("  N  ")
+                        .patternLine(" XSX ")
+                        .patternLine(" BDB ")
+                        .key('S', ItemRegistry.HOLY_RUNE.get())
+                        .key('X', ItemRegistry.MAGIC_CLOTH.get())
+                        .key('D', ItemRegistry.ARCANE_INGOT.get())
+                        .key('N', ItemRegistry.ARCANE_ESSENCE.get())
+                        .key('B', AllItems.BRASS_SHEET.get())
+                );
+
+        // ── 末影魔法内衬 ─────────────────────────────────────────
+        create(IronCompatItems.ENDER_MAGIC_LINING::get)
+                .recipe(b -> b
+                        .whenModLoaded("irons_spellbooks")
+                        .patternLine("  N  ")
+                        .patternLine(" XSX ")
+                        .patternLine(" BDB ")
+                        .key('S', ItemRegistry.ENDER_RUNE.get())
+                        .key('X', ItemRegistry.MAGIC_CLOTH.get())
+                        .key('D', ItemRegistry.ARCANE_INGOT.get())
+                        .key('N', ItemRegistry.ARCANE_ESSENCE.get())
+                        .key('B', AllItems.BRASS_SHEET.get())
+                );
+
+        // ── 猩红魔法内衬 ─────────────────────────────────────────
+        create(IronCompatItems.BLOOD_MAGIC_LINING::get)
+                .recipe(b -> b
+                        .whenModLoaded("irons_spellbooks")
+                        .patternLine("  N  ")
+                        .patternLine(" XSX ")
+                        .patternLine(" BDB ")
+                        .key('S', ItemRegistry.BLOOD_RUNE.get())
+                        .key('X', ItemRegistry.MAGIC_CLOTH.get())
+                        .key('D', ItemRegistry.ARCANE_INGOT.get())
+                        .key('N', ItemRegistry.ARCANE_ESSENCE.get())
+                        .key('B', AllItems.BRASS_SHEET.get())
+                );
+
+        // ── 唤魔魔法内衬 ─────────────────────────────────────────
+        create(IronCompatItems.EVOCATION_MAGIC_LINING::get)
+                .recipe(b -> b
+                        .whenModLoaded("irons_spellbooks")
+                        .patternLine("  N  ")
+                        .patternLine(" XSX ")
+                        .patternLine(" BDB ")
+                        .key('S', ItemRegistry.EVOCATION_RUNE.get())
+                        .key('X', ItemRegistry.MAGIC_CLOTH.get())
+                        .key('D', ItemRegistry.ARCANE_INGOT.get())
+                        .key('N', ItemRegistry.ARCANE_ESSENCE.get())
+                        .key('B', AllItems.BRASS_SHEET.get())
+                );
+
+        // ── 自然魔法内衬 ─────────────────────────────────────────
+        create(IronCompatItems.NATURE_MAGIC_LINING::get)
+                .recipe(b -> b
+                        .whenModLoaded("irons_spellbooks")
+                        .patternLine("  N  ")
+                        .patternLine(" XSX ")
+                        .patternLine(" BDB ")
+                        .key('S', ItemRegistry.NATURE_RUNE.get())
+                        .key('X', ItemRegistry.MAGIC_CLOTH.get())
+                        .key('D', ItemRegistry.ARCANE_INGOT.get())
+                        .key('N', ItemRegistry.ARCANE_ESSENCE.get())
+                        .key('B', AllItems.BRASS_SHEET.get())
+                );
+
+        // ── 邪术魔法内衬 ─────────────────────────────────────────
+        create(IronCompatItems.ELDRITCH_MAGIC_LINING::get)
+                .recipe(b -> b
+                        .whenModLoaded("irons_spellbooks")
+                        .patternLine(" BBB ")
+                        .patternLine("BVSVB")
+                        .patternLine("BSASB")
+                        .patternLine("BVSVB")
+                        .patternLine(" BBB ")
+                        .key('B', Items.ECHO_SHARD)
+                        .key('S', Items.SCULK_SHRIEKER)
+                        .key('A', ItemRegistry.MANA_RUNE.get())
+                        .key('V', ItemRegistry.ARCANE_ESSENCE.get())
                 );
     }
 }

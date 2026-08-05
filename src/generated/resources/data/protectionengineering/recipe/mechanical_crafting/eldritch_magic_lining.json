@@ -1,0 +1,36 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "irons_spellbooks"
+    }
+  ],
+  "type": "create:mechanical_crafting",
+  "accept_mirrored": true,
+  "category": "misc",
+  "key": {
+    "A": {
+      "item": "irons_spellbooks:arcane_rune"
+    },
+    "B": {
+      "item": "minecraft:echo_shard"
+    },
+    "S": {
+      "item": "minecraft:sculk_shrieker"
+    },
+    "V": {
+      "item": "irons_spellbooks:arcane_essence"
+    }
+  },
+  "pattern": [
+    " BBB ",
+    "BVSVB",
+    "BSASB",
+    "BVSVB",
+    " BBB "
+  ],
+  "result": {
+    "count": 1,
+    "id": "protectionengineering:eldritch_magic_lining"
+  }
+}
