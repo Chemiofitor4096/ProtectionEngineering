@@ -3,7 +3,9 @@ package com.chemiofitor.protection_engineering.item;
 import com.chemiofitor.protection_engineering.api.AttachmentsData;
 import com.chemiofitor.protection_engineering.api.IAttachment;
 import com.chemiofitor.protection_engineering.api.IAttachmentHost;
+import com.chemiofitor.protection_engineering.api.IGradedRepair;
 import com.chemiofitor.protection_engineering.api.SlotType;
+import com.chemiofitor.protection_engineering.registry.PERepairMaterials;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
@@ -24,10 +26,23 @@ import static com.chemiofitor.protection_engineering.registry.PEDataComponents.A
 /**
  * 实现了 {@link IAttachmentHost} 的护甲基类。
  */
-public abstract class AttachmentHostArmorItem extends ArmorItem implements IAttachmentHost {
+public abstract class AttachmentHostArmorItem extends ArmorItem implements IAttachmentHost, IGradedRepair {
 
     protected AttachmentHostArmorItem(Holder<ArmorMaterial> material, Type type, Properties properties) {
         super(material, type, properties);
+    }
+
+    // ── 分级修补 ────────────────────────────────────────────────
+
+    @Override
+    public int getRepairUnits(ItemStack toRepair, ItemStack material) {
+        return PERepairMaterials.getUnits(material);
+    }
+
+    /** 仅接受分级材料 */
+    @Override
+    public boolean isValidRepairItem(ItemStack toRepair, ItemStack repair) {
+        return PERepairMaterials.contains(repair);
     }
 
     /** 该模组护甲不显示附魔光效 (#改装台.md) */
@@ -129,5 +144,7 @@ public abstract class AttachmentHostArmorItem extends ArmorItem implements IAtta
             }
             tooltip.add(line);
         }
+
+        appendRepairTooltip(stack, tooltip);
     }
 }

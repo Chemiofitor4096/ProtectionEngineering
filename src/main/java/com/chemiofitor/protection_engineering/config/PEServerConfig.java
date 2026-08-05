@@ -30,6 +30,10 @@ public class PEServerConfig {
     public static final ModConfigSpec.DoubleValue DODGE_STRENGTH;
     public static final ModConfigSpec.IntValue DODGE_COOLDOWN_TICKS;
 
+    // ── 分级修补 ──
+    public static final ModConfigSpec.IntValue REPAIR_UNITS_BRASS_SHEET;
+    public static final ModConfigSpec.IntValue REPAIR_UNITS_STURDY_SHEET;
+
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
 
@@ -79,6 +83,16 @@ public class PEServerConfig {
         DODGE_COOLDOWN_TICKS = builder
                 .comment("应激反馈背包冷却时长（tick）")
                 .defineInRange("cooldownTicks", 200, 20, 3600);
+        builder.pop();
+
+        builder.comment("铁砧分级修补强度：20 = 修满耐久（1 单位 = 5%）。原版铁锭等效 5（25%）")
+                .push("repair");
+        REPAIR_UNITS_BRASS_SHEET = builder
+                .comment("黄铜板修补强度（单位）")
+                .defineInRange("brassSheetUnits", 3, 0, 20);
+        REPAIR_UNITS_STURDY_SHEET = builder
+                .comment("坚固板修补强度（单位）")
+                .defineInRange("sturdySheetUnits", 10, 0, 20);
         builder.pop();
 
         SPEC = builder.build();

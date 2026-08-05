@@ -1,15 +1,14 @@
 package com.chemiofitor.protection_engineering.item;
 
 import com.chemiofitor.protection_engineering.ProtectionEngineering;
+import com.chemiofitor.protection_engineering.api.IAttachment;
 import com.chemiofitor.protection_engineering.api.SlotTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.neoforged.neoforge.event.ItemAttributeModifierEvent;
 
-import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -30,21 +29,13 @@ public class LightExoskeletonItem extends AttachmentItem {
     }
 
     @Override
-    @Nullable
-    public String getFeatureKey() {
-        return "tooltip.protectionengineering.feature.light_exoskeleton";
-    }
-
-    @Override
-    public void addAttributeModifiers(ItemAttributeModifierEvent event) {
-        event.replaceModifier(Attributes.MOVEMENT_SPEED,
-                new AttributeModifier(SPEED_ID, 0.1, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL),
-                EquipmentSlotGroup.LEGS);
-        event.replaceModifier(Attributes.JUMP_STRENGTH,
-                new AttributeModifier(JUMP_ID, 0.12, AttributeModifier.Operation.ADD_VALUE),
-                EquipmentSlotGroup.LEGS);
-        event.replaceModifier(Attributes.STEP_HEIGHT,
-                new AttributeModifier(STEP_ID, 0.4, AttributeModifier.Operation.ADD_VALUE),
-                EquipmentSlotGroup.LEGS);
+    public List<IAttachment.AttributeBonus> getAttributeBonuses() {
+        return List.of(
+                new IAttachment.AttributeBonus(SPEED_ID, Attributes.MOVEMENT_SPEED, 0.1,
+                        AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL),
+                new IAttachment.AttributeBonus(JUMP_ID, Attributes.JUMP_STRENGTH, 0.12,
+                        AttributeModifier.Operation.ADD_VALUE),
+                new IAttachment.AttributeBonus(STEP_ID, Attributes.STEP_HEIGHT, 0.4,
+                        AttributeModifier.Operation.ADD_VALUE));
     }
 }

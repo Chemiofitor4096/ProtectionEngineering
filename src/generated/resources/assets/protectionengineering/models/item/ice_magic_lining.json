@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "protectionengineering:item/ice_magic_lining"
+  }
+}

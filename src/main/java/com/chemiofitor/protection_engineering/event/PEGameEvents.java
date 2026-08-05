@@ -99,7 +99,13 @@ public class PEGameEvents {
         // ── 通用伤害减免 ────────────────────────────────────
         float reduction = (float) AttachmentUtil.reduce(player, att -> {
             var types = att.getProtectedDamageTypes();
-            if (!types.isEmpty() && types.stream().noneMatch(source::is)) return 0f;
+            var tags = att.getProtectedDamageTypeTags();
+            // 两者皆空 = 全类型（向后兼容）；否则任一匹配即生效
+            if (!types.isEmpty() || !tags.isEmpty()) {
+                boolean match = types.stream().anyMatch(source::is)
+                        || tags.stream().anyMatch(source::is);
+                if (!match) return 0f;
+            }
             return att.getDamageReduction();
         });
         if (reduction > 0) {

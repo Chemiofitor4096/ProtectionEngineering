@@ -1,12 +1,18 @@
 package com.chemiofitor.protection_engineering;
 
 import com.chemiofitor.protection_engineering.compat.DetailArmorBarCompat;
+import com.chemiofitor.protection_engineering.compat.iron.IronCompat;
 import com.chemiofitor.protection_engineering.config.PEConfig;
 import com.chemiofitor.protection_engineering.config.PEServerConfig;
 import com.chemiofitor.protection_engineering.data.PEDataGen;
 import com.chemiofitor.protection_engineering.event.PENeoForgeEvents;
 import com.chemiofitor.protection_engineering.item.EngineerGogglesItem;
-import com.chemiofitor.protection_engineering.registry.*;
+import com.chemiofitor.protection_engineering.registry.PEItems;
+import com.chemiofitor.protection_engineering.registry.PEArmorMaterials;
+import com.chemiofitor.protection_engineering.registry.PEDataComponents;
+import com.chemiofitor.protection_engineering.registry.PEEntities;
+import com.chemiofitor.protection_engineering.registry.PESounds;
+import com.chemiofitor.protection_engineering.registry.PEWorkbench;
 import com.mojang.logging.LogUtils;
 import com.tterrag.registrate.Registrate;
 import net.minecraft.network.chat.Component;
@@ -57,7 +63,11 @@ public class ProtectionEngineering {
         modEventBus.addListener(EventPriority.LOWEST, PEDataGen::gatherData);
 
         if (ModList.get().isLoaded("detailab")) {
-            modEventBus.addListener(DetailArmorBarCompat::onClientSetup);
+            DetailArmorBarCompat.register(modEventBus, modContainer);
+        }
+
+        if (ModList.get().isLoaded("irons_spellbooks")) {
+            IronCompat.register(modEventBus, modContainer);
         }
 
         NeoForge.EVENT_BUS.register(new PENeoForgeEvents());

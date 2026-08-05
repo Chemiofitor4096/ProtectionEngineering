@@ -1,4 +1,4 @@
-// 1.21.1	2026-07-12T23:09:07.7469631	protectionengineering's mechanical crafting recipes
+// 1.21.1	2026-07-27T20:03:50.1604652	protectionengineering's mechanical crafting recipes
 1a0713f84a9c64d6d157aec344d22f67642621c5 data/protectionengineering/recipe/mechanical_crafting/advanced_aps.json
 4325e968230a62064b6c8f6d5fdd1b68d5687a46 data/protectionengineering/recipe/mechanical_crafting/air_filter.json
 31eda6026973b05039c88cfb00e55a0cf7816702 data/protectionengineering/recipe/mechanical_crafting/aps.json
@@ -9,6 +9,7 @@
 ed3d3b9629f6a462cc4254abc80d49c46eae8617 data/protectionengineering/recipe/mechanical_crafting/dodge_jetpack.json
 b4e6da8f0924a52322212cf55d7bdaaa19d13347 data/protectionengineering/recipe/mechanical_crafting/engineer_goggles.json
 1f64ef0d8ef1ea93d2010ea7e9b5724286334d31 data/protectionengineering/recipe/mechanical_crafting/extra_mechanical_arm.json
+e899e942103d96782ba307654046f517e220e36e data/protectionengineering/recipe/mechanical_crafting/fire_lining.json
 5875409be7d14633ebb3b797cfd757840e30a6e5 data/protectionengineering/recipe/mechanical_crafting/frost_soles.json
 76c0e214b0f96d20e62cb430495f56ed4977b773 data/protectionengineering/recipe/mechanical_crafting/heavy_exoskeleton.json
 ea95318f4726e705d84d5e6c7e63df46d6243cc1 data/protectionengineering/recipe/mechanical_crafting/hormone_injector.json

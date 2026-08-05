@@ -102,12 +102,17 @@ public final class PEAttachmentModelRegistry {
         return p != null ? p.createLeft(modelSet) : null;
     }
 
+    /**
+     * 右腿模型。返回 {@code null} 表示无专用右腿模型 —
+     * 由渲染层沿用左腿模型并沿 X 轴镜像。
+     * 注意：这里 <b>不能</b> fallback 到 {@code createLeft}，否则渲染层
+     * 无法识别"应镜像"的语义，会把左腿几何原样画到右腿（渲染到同侧）。
+     */
     @Nullable
     public static EntityModel<?> createRightLegModel(IAttachment attachment, EntityModelSet modelSet) {
         var p = LEG_MODELS.get(attachment.getClass());
         if (p == null) return null;
-        var right = p.createRight(modelSet);
-        return right != null ? right : p.createLeft(modelSet);
+        return p.createRight(modelSet);
     }
 
     @Nullable

@@ -2,12 +2,18 @@ package com.chemiofitor.protection_engineering.api;
 
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.event.ItemAttributeModifierEvent;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -82,10 +88,34 @@ public interface IAttachment {
     // ── 属性修改 ──────────────────────────────────────────────
 
     /**
+     * 附件提供的属性修饰符声明。
+     * <p>
+     * 声明同时驱动两处：{@code addAttributeModifiers} 将声明应用到宿主护甲（实际生效），
+     * 附件 tooltip 用原版"当作为部件安装时：+X 属性"风格展示。声明一次，两处复用。
+     * <p>
+     * 生效的装备槽组不在此声明 —— 由附件兼容的 {@link SlotType#equipmentSlotGroup()}
+     * 自动推导（单组 → 该组；跨组 → {@code ANY}），避免手写错槽导致属性不生效。
+     *
+     * @param id        修饰符唯一 ID（模组命名空间）
+     * @param attribute 目标属性
+     * @param amount    数值（ADD_MULTIPLIED_* 为小数，如 0.2 = +20%）
+     * @param operation 操作类型
+     */
+    record AttributeBonus(ResourceLocation id, Holder<Attribute> attribute,
+                          double amount, AttributeModifier.Operation operation) {}
+
+    /**
+     * 此附件提供的属性修饰符列表。tooltip 与事件共用，默认空。
+     */
+    default List<AttributeBonus> getAttributeBonuses() {
+        return List.of();
+    }
+
+    /**
      * 向宿主护甲追加属性修饰符。
      * 当护甲被穿戴并计算属性时，通过 {@code ItemAttributeModifierEvent} 调用。
      */
-    default void addAttributeModifiers(net.neoforged.neoforge.event.ItemAttributeModifierEvent event) {}
+    default void addAttributeModifiers(ItemAttributeModifierEvent event) {}
 
     // ── 减伤 ──────────────────────────────────────────────────
 
@@ -94,6 +124,16 @@ public interface IAttachment {
      * 非空时仅对匹配的 DamageType 生效。
      */
     default Set<ResourceKey<DamageType>> getProtectedDamageTypes() {
+        return Set.of();
+    }
+
+    /**
+     * 限定减免的伤害类型标签。与 {@link #getProtectedDamageTypes()} 取并集。
+     * <p>
+     * 火伤有 7 种原版 DamageType（且模组会追加），逐个枚举容易漏，
+     * 用 {@code DamageTypeTags.IS_FIRE} 之类的标签更稳。
+     */
+    default Set<TagKey<DamageType>> getProtectedDamageTypeTags() {
         return Set.of();
     }
 

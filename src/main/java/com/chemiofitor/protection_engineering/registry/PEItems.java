@@ -1,9 +1,11 @@
 package com.chemiofitor.protection_engineering.registry;
 
+import com.chemiofitor.protection_engineering.client.PEClientExtensions;
 import com.chemiofitor.protection_engineering.item.*;
 import com.simibubi.create.foundation.data.AssetLookup;
 import com.tterrag.registrate.util.entry.ItemEntry;
 import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.Rarity;
 
 import static com.chemiofitor.protection_engineering.ProtectionEngineering.REGISTRATE;
 import static com.chemiofitor.protection_engineering.registry.PEArmorMaterials.DURABILITY_FACTOR;
@@ -25,29 +27,29 @@ public class PEItems {
     public static final ItemEntry<EngineerHoodItem> ENGINEER_HOOD = REGISTRATE
             .item("engineer_hood", p -> new EngineerHoodItem(ENGINEER_ARMOR,
                     p.durability(ArmorItem.Type.HELMET.getDurability(DURABILITY_FACTOR))))
-            .properties(p -> p.stacksTo(1))
-            .clientExtension(() -> () -> com.chemiofitor.protection_engineering.client.PEClientExtensions.INSTANCE)
+            .properties(p -> p.stacksTo(1).rarity(Rarity.UNCOMMON))
+            .clientExtension(() -> () -> PEClientExtensions.INSTANCE)
             .register();
 
     public static final ItemEntry<EngineerChestplateItem> ENGINEER_CHESTPLATE = REGISTRATE
             .item("engineer_chestplate", p -> new EngineerChestplateItem(ENGINEER_ARMOR,
                     p.durability(ArmorItem.Type.CHESTPLATE.getDurability(DURABILITY_FACTOR))))
-            .properties(p -> p.stacksTo(1))
-            .clientExtension(() -> () -> com.chemiofitor.protection_engineering.client.PEClientExtensions.INSTANCE)
+            .properties(p -> p.stacksTo(1).rarity(Rarity.UNCOMMON))
+            .clientExtension(() -> () -> PEClientExtensions.INSTANCE)
             .register();
 
     public static final ItemEntry<EngineerLeggingsItem> ENGINEER_LEGGINGS = REGISTRATE
             .item("engineer_leggings", p -> new EngineerLeggingsItem(ENGINEER_ARMOR,
                     p.durability(ArmorItem.Type.LEGGINGS.getDurability(DURABILITY_FACTOR))))
-            .properties(p -> p.stacksTo(1))
-            .clientExtension(() -> () -> com.chemiofitor.protection_engineering.client.PEClientExtensions.INSTANCE)
+            .properties(p -> p.stacksTo(1).rarity(Rarity.UNCOMMON))
+            .clientExtension(() -> () -> PEClientExtensions.INSTANCE)
             .register();
 
     public static final ItemEntry<EngineerBootsItem> ENGINEER_BOOTS = REGISTRATE
             .item("engineer_boots", p -> new EngineerBootsItem(ENGINEER_ARMOR,
                     p.durability(ArmorItem.Type.BOOTS.getDurability(DURABILITY_FACTOR))))
-            .properties(p -> p.stacksTo(1))
-            .clientExtension(() -> () -> com.chemiofitor.protection_engineering.client.PEClientExtensions.INSTANCE)
+            .properties(p -> p.stacksTo(1).rarity(Rarity.UNCOMMON))
+            .clientExtension(() -> () -> PEClientExtensions.INSTANCE)
             .register();
 
     // ══════════════════════════════════════════════════════════════
@@ -208,6 +210,11 @@ public class PEItems {
     public static final ItemEntry<BlastLiningItem> BLAST_LINING = REGISTRATE
             .item("blast_lining", BlastLiningItem::new)
             .properties(p -> p.stacksTo(1))
+            .register();
+
+    public static final ItemEntry<FireLiningItem> FIRE_LINING = REGISTRATE
+            .item("fire_lining", FireLiningItem::new)
+            .properties(p -> p.stacksTo(1).fireResistant())
             .register();
 
     // ══════════════════════════════════════════════════════════════

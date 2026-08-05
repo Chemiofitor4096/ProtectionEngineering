@@ -8,13 +8,14 @@ Minecraft NeoForge 1.21.1 模组。工程师护甲系统 — 护甲可安装附�
 src/main/java/com/chemiofitor/protection_engineering/
 ├── ProtectionEngineering.java       # 主类 (MODID, Registrate, 构造器组装)
 ├── api/                             # 接口层
-│   ├── IAttachment.java             # 附件接口 (ControlPattern + state 常量 + 生命周期钩子)
+│   ├── IAttachment.java             # 附件接口 (ControlPattern + state 常量 + 生命周期钩子 + AttributeBonus 属性声明)
 │   ├── IAttachmentHost.java         # 宿主接口 (护甲实现)
 │   ├── AttachmentsData.java         # 附件数据组件 record
-│   ├── SlotType.java                # 槽位类型 record (含注册表)
-│   └── SlotTypes.java               # 内置槽位常量
+│   ├── SlotType.java                # 槽位类型 record (含注册表 + 装备槽组映射)
+│   ├── SlotTypes.java               # 内置槽位常量 (含装备槽组)
+│   └── IGradedRepair.java           # 分级修补接口 (材料→强度)
 ├── item/                            # 物品类 (共 24 个)
-│   ├── AttachmentItem.java          # 附件抽象基类 ★ 统一状态机
+│   ├── AttachmentItem.java          # 附件抽象基类 ★ 统一状态机 + 属性声明统一应用
 │   ├── SimpleAttachmentItem.java    # 纯被动附件
 │   ├── AttachmentHostArmorItem.java # 护甲基类
 │   ├── EngineerHoodItem.java        # 兜帽 (EYES+MOUTH)
@@ -43,7 +44,9 @@ src/main/java/com/chemiofitor/protection_engineering/
 │   ├── MechaKnuckleItem.java        # 机械拳套 (近战+20%)
 │   ├── CushionedKneecapItem.java    # 缓冲护膝 (摔落-10%)
 │   ├── CushionedSolesItem.java      # 缓冲鞋底 (摔落-20%, 高度-1)
-│   └── ImprovedSolesItem.java       # 改良鞋底 (防滑/免疫粘液/细雪行走)
+│   ├── ImprovedSolesItem.java       # 改良鞋底 (防滑/免疫粘液/细雪行走)
+│   ├── BlastLiningItem.java         # 防爆内衬 (IS_EXPLOSION 标签, LINING)
+│   └── FireLiningItem.java          # 防火内衬 (IS_FIRE 标签, LINING)
 ├── entity/                          # 自定义实体
 │   ├── MissileEntity.java           # 制导导弹 (导向+粒子+音效)
 │   ├── RocketProjectile.java        # 火箭射弹 (直线+爆炸)
@@ -51,15 +54,25 @@ src/main/java/com/chemiofitor/protection_engineering/
 ├── registry/
 │   ├── PEDataComponents.java        # 数据组件 (ATTACHMENT_STATE, COOLDOWN, ATTACHMENTS)
 │   ├── PEArmorMaterials.java
+│   ├── PERepairMaterials.java       # 分级修补材料表 (黄铜板/坚固板)
 │   ├── PEItems.java                 # 物品注册 (Registrate)
 │   ├── PEEntities.java              # 实体类型注册
 │   ├── PESounds.java                # 音效事件注册
 │   └── PEWorkbench.java             # 改装台注册
+├── compat/
+│   ├── DetailArmorBarCompat.java    # 细节护甲条 HUD 兼容
+│   ├── PlayerAnimCompat.java        # PlayerAnimator 弯曲动画兼容（护甲层同步 body bend）
+│   └── iron/                        # Iron's Spells 'n Spellbooks 兼容（守卫加载）
+│       ├── IronCompat.java          # 加载守卫
+│       ├── IronCompatItems.java     # 9 个学派内衬注册
+│       └── SchoolLiningItem.java    # 学派内衬 (魔法减伤 10% + 最大法力 +50)
 ├── config/
 │   ├── PEConfig.java                # 客户端配置 (HUD 位置)
 │   └── PEServerConfig.java          # 服务端配置 (APS/导弹/闪避/激素/火箭参数)
 ├── event/
-│   ├── PEGameEvents.java            # 伤害/摔落/效果免疫/附魔禁用
+│   ├── PEGameEvents.java            # 伤害/摔落/效果免疫/静音鞋底 (LivingIncomingDamage 等)
+│   ├── PEAnvilEvents.java           # 铁砧分级修补
+│   ├── PENeoForgeEvents.java        # 属性修饰符 (ItemAttributeModifierEvent + 护甲值合并) + 装配钩子
 │   └── PENetworkEvents.java         # 网络包处理 (附件开关+喷气推进)
 ├── network/
 │   ├── ToggleAttachmentPayload.java # 附件开关包
@@ -75,7 +88,7 @@ src/main/java/com/chemiofitor/protection_engineering/
 │   ├── renderer/                    # 实体渲染器
 │   └── model/                       # Blockbench 导出模型
 ├── mixin/
-│   ├── LivingEntityMixin.java       # 减伤(上限100%) + 改良鞋底防滑
+│   ├── LivingEntityMixin.java       # 改良鞋底防滑 (getBlockSpeedFactor)
 │   └── ItemStackMixin.java          # 改良鞋底细雪行走
 ├── block/                           # 改装台方块
 ├── menu/                            # 改装台 GUI
@@ -162,6 +175,27 @@ public class XItem extends AttachmentItem {
 
 **不要**覆写 `onEquip` / `onActivatePress` / `onTick` 做状态管理 — 基类 `AttachmentItem` 已统一处理。必须覆写 `onTick` 时先调 `super.onTick(...)`。
 
+## 属性声明机制 (`AttributeBonus`)
+
+带属性的附件覆写 `getAttributeBonuses()` 声明修饰符，`AttachmentItem` 统一两处应用：
+
+```java
+@Override
+public List<IAttachment.AttributeBonus> getAttributeBonuses() {
+    return List.of(new IAttachment.AttributeBonus(
+            ProtectionEngineering.asResource("xxx_bonus"),
+            Attributes.ARMOR, 4.0,
+            AttributeModifier.Operation.ADD_VALUE));   // 装备槽组自动推导，无需手写
+}
+```
+
+- **生效**：`addAttributeModifiers`（`ItemAttributeModifierEvent`）遍历声明 `replaceModifier`
+- **展示**：附件 tooltip 底部"当作为部件安装时：+X 属性"（原版格式，数值与属性名作为占位参数传入 `attribute.modifier.plus.*`）
+- **装备槽组**：按宿主护甲的实际部件动态选择（通用槽附件装到胸甲→CHEST、护腿→LEGS 等，精确跟随安装位置）；非护甲宿主回退槽位映射
+- **修饰符 ID**：应用时追加宿主部件后缀（`xxx_chest` / `xxx_legs`…），同一附件装到不同护甲部件时 ID 唯一 → 可跨护甲堆叠（含同种附件）；若附件自身需区分不同来源，基础 ID 用注册名派生（如学派内衬）
+
+已接入：坚固/下界合金板（护甲）、外骨骼（护甲/跨越）、机械臂（触及）、机械拳套（近战）、弹跳膝（跳跃）、学校内衬（最大法力）。
+
 ## 槽位类型 (`SlotTypes`)
 
 | 护甲 | 槽位 (各1个) |
@@ -171,6 +205,23 @@ public class XItem extends AttachmentItem {
 | 护腿 | `LEG`, `KNEE` |
 | 靴子 | `FOOT` |
 | 武器(预留) | `BLADE`, `HILT`, `GUARD` |
+
+每个槽位映射一个 `EquipmentSlotGroup`（附件属性修饰符的生效范围，见 `SlotType.equipmentSlotGroup()`）：
+
+| 槽位 | 装备槽组 |
+|------|---------|
+| `EYES` / `MOUTH` | `HEAD` |
+| `SHOULDER` / `CHESTPLATE` / `BACK` / `ARM` | `CHEST` |
+| `LEG` / `KNEE` | `LEGS` |
+| `FOOT` | `FEET` |
+| `LINING` / `*_DECORATION` | `ANY` |
+| `BLADE` / `HILT` / `GUARD` | `HAND` |
+
+附件声明属性时**不再手写装备槽组** —— `AttachmentItem` 动态决定：
+- **护甲宿主**：按 `ArmorItem.getEquipmentSlot()` 跟随实际部件（通用槽附件装胸甲→`CHEST`、护腿→`LEGS`…），同一附件装到不同护甲时属性跟随迁移
+- **非护甲宿主**（武器附件预留）：回退到上表的静态映射（单组 → 该组；跨组 → `ANY`）
+
+映射存 `SlotType` 旁路表（不参与 record equals/hashCode，避免 `byId` 反序列化实例失配）。
 
 ## 配置系统 (`PEServerConfig`)
 
@@ -189,6 +240,43 @@ public class XItem extends AttachmentItem {
 | hormone | `cooldownTicks` | 1200 | 20-7200 |
 | dodge | `dodgeStrength` | 1.0 | 0.2-10 |
 | | `cooldownTicks` | 200 | 20-3600 |
+| repair | `brassSheetUnits` | 3 | 0-20 |
+| | `sturdySheetUnits` | 10 | 0-20 |
+
+## 分级修补系统
+
+铁砧按材料等级恢复不同耐久（原版固定 25%，无法分级）。
+标度：**20 单位 = 满耐久**（1 单位 = 5%），原版铁锭等效 5 单位。
+
+| 组件 | 作用 |
+|------|------|
+| `api/IGradedRepair.java` | 物品接口，`getRepairUnits(toRepair, material)` 返回强度；`appendRepairTooltip` 共用 tooltip |
+| `registry/PERepairMaterials.java` | 材料→强度表（延迟解析 + 配置驱动），`asIngredient()` 供 ArmorMaterial |
+| `event/PEAnvilEvents.java` | `AnvilUpdateEvent` 接管铁砧结果计算 |
+
+已接入：4 件工程师护甲（`AttachmentHostArmorItem`）、工程师盾牌、工程师链锯剑。
+三者**只**接受分级材料 —— 盾牌不吃木板，链锯剑不吃钻石
+（`EngineerSawSwordItem.TIER.getRepairIngredient()` 也同步改为分级材料）。
+
+新增材料：`PERepairMaterials.register(() -> AllItems.XXX, units)`。
+让新物品支持分级修补：实现 `IGradedRepair` + 覆写 `isValidRepairItem` + 在 `appendHoverText`
+调 `appendRepairTooltip(stack, tooltip)`。未登记的材料组合不写 output，回退原版逻辑。
+
+前置工作惩罚（`REPAIR_COST` 递增）由 `increasesRepairCost` 控制，默认跟随
+`Item#isEnchantable`：链锯剑递增（防无限附魔叠加），护甲/盾牌不递增
+（不可附魔，递增只会让装备修几次后彻底无法修复）。
+
+Tooltip key：`tooltip.protectionengineering.repair_materials`，表头 + 每材料一行
+（缩进两空格，与附件清单一致）：
+
+```
+修补：
+  黄铜板 15%
+  坚固板 50%
+```
+
+比例由配置实时换算。服务端配置未就绪（主菜单）或该物品不接受任何已登记材料时，
+连表头一起不显示。
 
 ## 热键
 
@@ -207,12 +295,19 @@ public class XItem extends AttachmentItem {
 ## 减伤系统
 
 无上限叠加，最终 clamp 到 100%（防负伤害）。
+乘性叠加：`LivingIncomingDamageEvent` 在 `hurt` 最早阶段触发，优先于原版护甲 / 抗性提升 / 附魔保护结算
+（模组减伤 10% + 抗性提升 I 级 20% = 总减免 28%，非加性）。
 
 | 位置 | 事件 | 类型 |
 |------|------|------|
-| `LivingEntityMixin` | `hurt` 通用减伤 | `getDamageReduction()` |
+| `PEGameEvents.onLivingIncomingDamage` | `LivingIncomingDamageEvent` 通用减伤 | `getDamageReduction()`（受 protected types/tags 过滤） |
 | `PEGameEvents.onLivingFall` | 摔落距离减免 | `getFallDistanceReduction()` |
 | `PEGameEvents.onLivingFall` | 摔落伤害倍率 | `getFallDamageReduction()` |
+
+伤害类型过滤（`IAttachment`）：
+- `getProtectedDamageTypes()`：枚举具体 `ResourceKey<DamageType>`
+- `getProtectedDamageTypeTags()`：`TagKey<DamageType>` 标签 —— 推荐，覆盖同源全部类型并兼容模组追加
+- 防爆/防火内衬用原版 `DamageTypeTags`（`IS_EXPLOSION` / `IS_FIRE`），与原版对应保护附魔判断同源
 
 ## 配方系统
 
@@ -241,17 +336,19 @@ Create 物品引用：`AllItems.STURDY_SHEET`, `AllItems.BRASS_SHEET`, `AllItems
 
 | Mixin | 目标 | 用途 |
 |-------|------|------|
-| `LivingEntityMixin` | `LivingEntity` | `hurt` 减伤(上限100%) + `getBlockSpeedFactor` 防滑 |
+| `LivingEntityMixin` | `LivingEntity` | `getBlockSpeedFactor` 改良鞋底防滑（通用减伤在 `PEGameEvents`，不在 mixin） |
 | `ItemStackMixin` | `ItemStack` | `canWalkOnPowderedSnow` 细雪行走 |
 
-## 事件系统 (`PEGameEvents`)
+## 事件系统
 
-| 事件 | 用途 |
-|------|------|
-| `LivingIncomingDamageEvent` | 应激反馈背包 (近战) / APS 拦截 (投射物) |
-| `LivingFallEvent` | 摔落距离减免 + 伤害倍率减免 |
-| `MobEffectEvent.Applicable` / `Added` | 状态效果免疫 |
-| `ItemAttributeModifierEvent` | 附件属性修饰符 |
+| 处理器 | 事件 | 用途 |
+|--------|------|------|
+| `PEGameEvents` | `LivingIncomingDamageEvent` | 应激反馈背包 (近战) / APS 拦截 (投射物) / 隔热鞋底 / 通用减伤 |
+| `PEGameEvents` | `LivingFallEvent` | 摔落距离减免 + 伤害倍率减免 |
+| `PEGameEvents` | `MobEffectEvent.Applicable` / `Added` | 状态效果免疫 |
+| `PEGameEvents` | `VanillaGameEvent` | 静音鞋底屏蔽脚步声 |
+| `PENeoForgeEvents` | `ItemAttributeModifierEvent` | 附件属性修饰符（`getAttributeBonuses` 声明应用 + 护甲值/韧性合并） |
+| `PENeoForgeEvents` | `LivingEquipmentChangeEvent` | 附件装配/卸下钩子（`onEquip` / `onUnequip`） |
 
 ## 文档
 

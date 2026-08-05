@@ -60,31 +60,41 @@ public class PEDataGen {
             add.accept("tooltip.protectionengineering.installed_attachments", "Attachments:");
             add.accept("tooltip.protectionengineering.immunities", "Immunities:");
             add.accept("tooltip.protectionengineering.feature", "Feature:");
+            add.accept("tooltip.protectionengineering.worn", "When installed as a part");
             add.accept("tooltip.protectionengineering.prev_page", "Previous Page");
             add.accept("tooltip.protectionengineering.next_page", "Next Page");
+            add.accept("tooltip.protectionengineering.repair_materials", "Repair:");
 
             // ── Feature Tooltips ───────────────────────────────────
             add.accept("tooltip.protectionengineering.feature.night_vision", "Night vision (toggle)");
             add.accept("tooltip.protectionengineering.feature.engineer_goggles", "Engineering data overlay");
             add.accept("tooltip.protectionengineering.feature.hormone_injector", "Regen & Resistance 10s · Nausea 5s · 60s CD");
             add.accept("tooltip.protectionengineering.feature.diving_device", "Water Breathing II");
-            add.accept("tooltip.protectionengineering.feature.extra_mechanical_arm", "Reach +2");
-            add.accept("tooltip.protectionengineering.feature.sturdy_plate", "Armor +2 · Damage -10%");
-            add.accept("tooltip.protectionengineering.feature.netherite_plate", "Armor +4 · Damage -15%");
-            add.accept("tooltip.protectionengineering.feature.mecha_knuckle", "Melee +20%");
+            // 纯属性附件无 Feature（属性由"穿戴时：+X"区块展示）；此处仅保留非属性效果
+            add.accept("tooltip.protectionengineering.feature.sturdy_plate", "Damage -10%");
+            add.accept("tooltip.protectionengineering.feature.netherite_plate", "Damage -15%");
             add.accept("tooltip.protectionengineering.feature.jetpack", "Elytra flight · J thrust");
             add.accept("tooltip.protectionengineering.feature.momentum_jetpack", "Elytra · Speed +20% · J thrust");
             add.accept("tooltip.protectionengineering.feature.dodge_jetpack", "Melee immune & dash · 10s CD");
-            add.accept("tooltip.protectionengineering.feature.heavy_exoskeleton", "Armor +2 · Step up 1 · Fall Damage -20%");
-            add.accept("tooltip.protectionengineering.feature.light_exoskeleton", "Speed +10% · Jump +0.5 · Step up 1");
+            add.accept("tooltip.protectionengineering.feature.heavy_exoskeleton", "Fall Damage -20%");
             add.accept("tooltip.protectionengineering.feature.cushioned_kneecap", "Fall Damage -10%");
-            add.accept("tooltip.protectionengineering.feature.springy_kneecap", "Jump +0.25");
             add.accept("tooltip.protectionengineering.feature.cushioned_soles", "Fall Damage -20% · Height -1");
             add.accept("tooltip.protectionengineering.feature.improved_soles", "No-slip · Immune slime/honey/soul sand · Powder snow walk");
             add.accept("tooltip.protectionengineering.feature.insulated_soles", "Immune to ground heat damage");
             add.accept("tooltip.protectionengineering.feature.frost_soles", "Frost Walker on water");
             add.accept("tooltip.protectionengineering.feature.silent_soles", "Silent movement · Evades Warden");
-            add.accept("tooltip.protectionengineering.feature.blast_lining", "Damage -10%");
+            add.accept("tooltip.protectionengineering.feature.blast_lining", "Explosion Damage -10%");
+            add.accept("tooltip.protectionengineering.feature.fire_lining", "Fire Damage -10%");
+            // Iron's Spells 兼容内衬（仅 ISS 加载时注册物品，key 提前声明无害）
+            add.accept("tooltip.protectionengineering.feature.fire_magic_lining", "Fire Magic Damage -10%");
+            add.accept("tooltip.protectionengineering.feature.ice_magic_lining", "Ice Magic Damage -10%");
+            add.accept("tooltip.protectionengineering.feature.lightning_magic_lining", "Lightning Magic Damage -10%");
+            add.accept("tooltip.protectionengineering.feature.holy_magic_lining", "Holy Magic Damage -10%");
+            add.accept("tooltip.protectionengineering.feature.ender_magic_lining", "Ender Magic Damage -10%");
+            add.accept("tooltip.protectionengineering.feature.blood_magic_lining", "Blood Magic Damage -10%");
+            add.accept("tooltip.protectionengineering.feature.evocation_magic_lining", "Evocation Magic Damage -10%");
+            add.accept("tooltip.protectionengineering.feature.eldritch_magic_lining", "Eldritch Magic Damage -10%");
+            add.accept("tooltip.protectionengineering.feature.nature_magic_lining", "Nature Magic Damage -10%");
             add.accept("tooltip.protectionengineering.feature.aps", "Toggle · Intercept 10s · 30s CD");
             add.accept("tooltip.protectionengineering.feature.advanced_aps", "Toggle · Intercept 15s · 30s CD");
             add.accept("tooltip.protectionengineering.feature.rocket_launcher", "Consumes fireworks · 12-shot scatter · 10s CD");

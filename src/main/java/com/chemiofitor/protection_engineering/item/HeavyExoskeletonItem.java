@@ -1,15 +1,15 @@
 package com.chemiofitor.protection_engineering.item;
 
 import com.chemiofitor.protection_engineering.ProtectionEngineering;
+import com.chemiofitor.protection_engineering.api.IAttachment;
 import com.chemiofitor.protection_engineering.api.SlotTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.neoforged.neoforge.event.ItemAttributeModifierEvent;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -38,12 +38,11 @@ public class HeavyExoskeletonItem extends AttachmentItem {
     public float getFallDamageReduction() { return 0.20f; }
 
     @Override
-    public void addAttributeModifiers(ItemAttributeModifierEvent event) {
-        event.replaceModifier(Attributes.ARMOR,
-                new AttributeModifier(ARMOR_ID, 2.0, AttributeModifier.Operation.ADD_VALUE),
-                EquipmentSlotGroup.LEGS);
-        event.replaceModifier(Attributes.STEP_HEIGHT,
-                new AttributeModifier(STEP_ID, 0.4, AttributeModifier.Operation.ADD_VALUE),
-                EquipmentSlotGroup.LEGS);
+    public List<IAttachment.AttributeBonus> getAttributeBonuses() {
+        return List.of(
+                new IAttachment.AttributeBonus(ARMOR_ID, Attributes.ARMOR, 2.0,
+                        AttributeModifier.Operation.ADD_VALUE),
+                new IAttachment.AttributeBonus(STEP_ID, Attributes.STEP_HEIGHT, 0.4,
+                        AttributeModifier.Operation.ADD_VALUE));
     }
 }

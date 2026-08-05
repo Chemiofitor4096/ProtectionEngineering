@@ -23,11 +23,7 @@ sourceSets.main.resources {
 
     // Exclude common development only resources from finalized outputs
     exclude("**/*.bbmodel") // BlockBench project files
-    exclude("src/generated/**/.cache") // datagen cache files
-}
-
-repositories {
-    // Add here additional repositories if required by some of the dependencies below.
+    exclude("**/.cache") // datagen cache files
 }
 
 base {
@@ -124,6 +120,7 @@ repositories {
     maven {
         url "https://api.modrinth.com/maven"
     }
+    maven { url "https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/" } // Geckolib
 }
 
 dependencies {
@@ -138,7 +135,19 @@ dependencies {
     compileOnly("mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}")
     runtimeOnly("mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}")
 
-    implementation("maven.modrinth:detail-armor-bar-reconstructed:${detail_armor_bar_version}")
+    compileOnly("maven.modrinth:detail-armor-bar-reconstructed:${detail_armor_bar_version}")
+    runtimeOnly("maven.modrinth:detail-armor-bar-reconstructed:${detail_armor_bar_version}")
+
+    // Iron's Spells 'n Spellbooks — 可选兼容（compat/iron 包里守卫加载）。
+    // compileOnly + runtimeOnly：不传播给下游消费者，dev 运行时可用。
+    // ISS 的 4 个硬依赖用 runtimeOnly 补上（dev 运行时用，不传播给消费者）。
+    compileOnly("maven.modrinth:irons-spells-n-spellbooks:${iron_spells_version}")
+    runtimeOnly("maven.modrinth:irons-spells-n-spellbooks:${iron_spells_version}")
+    runtimeOnly("maven.modrinth:curios:9.5.1+1.21.1")
+    runtimeOnly("software.bernie.geckolib:geckolib-neoforge-1.21.1:4.9.2") // 官方 maven（Modrinth 会解析到 Fabric 版）
+    compileOnly("maven.modrinth:playeranimator:2.0.4+1.21.1-forge")
+    runtimeOnly("maven.modrinth:playeranimator:2.0.4+1.21.1-forge")
+    runtimeOnly("maven.modrinth:irons-lib:1.21.1-2.1.0")
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.

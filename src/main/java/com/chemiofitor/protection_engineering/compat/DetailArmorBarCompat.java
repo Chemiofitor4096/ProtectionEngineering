@@ -7,6 +7,8 @@ import com.redlimerl.detailab.api.render.ArmorBarRenderManager;
 import com.redlimerl.detailab.api.render.BarRenderManager;
 import com.redlimerl.detailab.api.render.TextureOffset;
 import net.minecraft.resources.ResourceLocation;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 
 import java.awt.*;
@@ -17,7 +19,11 @@ public class DetailArmorBarCompat {
             ProtectionEngineering.MODID, "textures/gui/engineer_armor_bar.png");
     // 纹理 36×9: 半格(0,0) 满格(9,0) 半轮廓(18,0) 全轮廓(27,0)
 
-    public static void onClientSetup(FMLClientSetupEvent event) {
+    public static void register(IEventBus modEventBus, ModContainer modContainer) {
+        modEventBus.addListener(DetailArmorBarCompat::onClientSetup);
+    }
+
+    private static void onClientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(() -> DetailArmorBarAPI.customArmorBarBuilder()
                 .armor(PEItems.ENGINEER_HOOD.get(),
                        PEItems.ENGINEER_CHESTPLATE.get(),

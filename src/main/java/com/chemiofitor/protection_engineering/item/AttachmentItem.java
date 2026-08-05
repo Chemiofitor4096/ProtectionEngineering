@@ -7,13 +7,19 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.neoforged.neoforge.event.ItemAttributeModifierEvent;
 
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Set;
 
@@ -254,6 +260,54 @@ public abstract class AttachmentItem extends Item implements IAttachment {
     /** 离开某状态时调用（子类覆写） */
     protected void onStateExit(ItemStack stack, int oldState, LivingEntity entity) {}
 
+    // ── 属性：声明统一应用 ────────────────────────────────────
+    // 子类只需覆写 getAttributeBonuses() 声明属性，
+    // 此处统一应用到宿主护甲（实际生效）。声明一次，tooltip 复用。
+
+    @Override
+    public void addAttributeModifiers(ItemAttributeModifierEvent event) {
+        EquipmentSlotGroup group = resolveSlotGroup(event);
+        // 修饰符 ID 追加宿主装备部件后缀（chest/legs/feet/head…）：
+        // 同一附件装到不同护甲部件时 ID 唯一，可跨护甲堆叠（实体属性按 ID 去重）。
+        String hostSuffix = group.getSerializedName();
+        for (IAttachment.AttributeBonus bonus : getAttributeBonuses()) {
+            ResourceLocation id = ResourceLocation.fromNamespaceAndPath(
+                    bonus.id().getNamespace(), bonus.id().getPath() + "_" + hostSuffix);
+            event.replaceModifier(bonus.attribute(),
+                    new AttributeModifier(id, bonus.amount(), bonus.operation()),
+                    group);
+        }
+    }
+
+    /**
+     * 属性生效的装备槽组：优先按宿主护甲的实际部件决定 —— 通用槽附件（LINING/装饰）
+     * 装到胸甲→CHEST、护腿→LEGS、靴子→FEET、头盔→HEAD，精确跟随安装位置；
+     * 非护甲宿主（武器附件等预留）回退到兼容槽位的静态推导。
+     */
+    private EquipmentSlotGroup resolveSlotGroup(ItemAttributeModifierEvent event) {
+        if (event.getItemStack().getItem() instanceof ArmorItem armor) {
+            return switch (armor.getEquipmentSlot()) {
+                case HEAD -> EquipmentSlotGroup.HEAD;
+                case CHEST -> EquipmentSlotGroup.CHEST;
+                case LEGS -> EquipmentSlotGroup.LEGS;
+                case FEET -> EquipmentSlotGroup.FEET;
+                default -> EquipmentSlotGroup.ANY;
+            };
+        }
+        return resolveSlotGroupFromSlots();
+    }
+
+    /** 按兼容槽位静态推导（非护甲宿主兜底）：同组 → 该组；跨组 / 未映射 → ANY */
+    private EquipmentSlotGroup resolveSlotGroupFromSlots() {
+        EquipmentSlotGroup result = null;
+        for (SlotType slot : compatibleSlots) {
+            EquipmentSlotGroup group = slot.equipmentSlotGroup();
+            if (result == null) result = group;
+            else if (result != group) return EquipmentSlotGroup.ANY;
+        }
+        return result != null ? result : EquipmentSlotGroup.ANY;
+    }
+
     // ── Tooltip ────────────────────────────────────────────────
 
     @Override
@@ -291,5 +345,38 @@ public abstract class AttachmentItem extends Item implements IAttachment {
                     .append(Component.translatable(featureKey))
                     .withStyle(ChatFormatting.BLUE));
         }
+
+        // 穿戴属性（位于 tooltip 最下方；"当作为部件安装时：+X 属性"）
+        List<IAttachment.AttributeBonus> bonuses = getAttributeBonuses();
+        if (!bonuses.isEmpty()) {
+            tooltip.add(Component.translatable("tooltip.protectionengineering.worn")
+                    .withStyle(ChatFormatting.GOLD));
+            for (IAttachment.AttributeBonus bonus : bonuses) {
+                tooltip.add(Component.literal(" ").append(formatAttributeBonus(bonus)));
+            }
+        }
+    }
+
+    // ── 属性 tooltip 格式化（对齐原版 item.modifiers / attribute.modifier 风格） ──
+
+    /** 渲染单条属性："+4 护甲" / "+20% 攻击伤害"，复用原版属性名与 +/- 翻译 key */
+    private static Component formatAttributeBonus(IAttachment.AttributeBonus bonus) {
+        AttributeModifier.Operation operation = bonus.operation();
+        boolean positive = bonus.amount() >= 0;
+        int opIndex = operation == AttributeModifier.Operation.ADD_VALUE ? 0 : 1;
+        double display = operation == AttributeModifier.Operation.ADD_VALUE
+                ? bonus.amount() : bonus.amount() * 100;
+        String key = positive ? "attribute.modifier.plus." + opIndex
+                              : "attribute.modifier.takes." + opIndex;
+        // 原版格式是 "+%s %s"（plus.1 为 "+%s%% %s"）：数值与属性名都必须作为占位参数传入
+        return Component.translatable(key,
+                formatDecimal(Math.abs(display)),
+                Component.translatable(bonus.attribute().value().getDescriptionId()))
+                .withStyle(ChatFormatting.BLUE);
+    }
+
+    /** 去尾零数值：4.0 → "4"，0.4 → "0.4"，0.06 → "0.06" */
+    private static String formatDecimal(double value) {
+        return new DecimalFormat("#.##").format(value);
     }
 }

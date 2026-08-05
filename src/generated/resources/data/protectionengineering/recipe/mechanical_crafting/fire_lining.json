@@ -1,0 +1,28 @@
+{
+  "type": "create:mechanical_crafting",
+  "accept_mirrored": true,
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "create:brass_sheet"
+    },
+    "N": {
+      "item": "minecraft:netherite_scrap"
+    },
+    "S": {
+      "item": "create:sturdy_sheet"
+    },
+    "W": {
+      "item": "minecraft:magma_block"
+    }
+  },
+  "pattern": [
+    "  N  ",
+    " WWW ",
+    " BSB "
+  ],
+  "result": {
+    "count": 1,
+    "id": "protectionengineering:fire_lining"
+  }
+}

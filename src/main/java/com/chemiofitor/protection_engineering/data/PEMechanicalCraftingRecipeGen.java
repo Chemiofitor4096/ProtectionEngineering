@@ -341,5 +341,17 @@ public class PEMechanicalCraftingRecipeGen extends MechanicalCraftingRecipeGen {
                         .key('S', AllItems.STURDY_SHEET.get())
                         .key('B', AllItems.BRASS_SHEET.get())
                 );
+
+        // ── 防火内衬 ─────────────────────────────────────────
+        create(PEItems.FIRE_LINING::get)
+                .recipe(b -> b
+                        .patternLine("  N  ")
+                        .patternLine(" WWW ")
+                        .patternLine(" BSB ")
+                        .key('N', Items.NETHERITE_SCRAP)
+                        .key('W', Items.MAGMA_BLOCK)
+                        .key('S', AllItems.STURDY_SHEET.get())
+                        .key('B', AllItems.BRASS_SHEET.get())
+                );
     }
 }

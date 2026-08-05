@@ -1,7 +1,10 @@
 package com.chemiofitor.protection_engineering.item;
 
+import com.chemiofitor.protection_engineering.api.IGradedRepair;
+import com.chemiofitor.protection_engineering.registry.PERepairMaterials;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -16,13 +19,17 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.neoforged.neoforge.common.ItemAbilities;
 import net.neoforged.neoforge.common.ItemAbility;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
  * 工程师链锯剑 — 等同钻石剑伤害/攻速，下界合金耐久。
  * 攻击冷却未满也能横扫，可砍树（斧头工具），兼容剑+斧附魔。
+ * <p>
+ * 修补：仅分级材料（黄铜板/坚固板），见 {@link PERepairMaterials}。
+ * 因可附魔，保留原版的前置工作惩罚递增。
  */
-public class EngineerSawSwordItem extends SwordItem {
+public class EngineerSawSwordItem extends SwordItem implements IGradedRepair {
 
     /** 与钻石剑相同的属性，耐久用下界合金 */
     public static final Tier TIER = new Tier() {
@@ -33,8 +40,9 @@ public class EngineerSawSwordItem extends SwordItem {
         @Override public net.minecraft.tags.TagKey<net.minecraft.world.level.block.Block> getIncorrectBlocksForDrops() {
             return net.minecraft.tags.BlockTags.INCORRECT_FOR_DIAMOND_TOOL;
         }
+        /** 分级材料（黄铜板/坚固板），不用钻石 */
         @Override public net.minecraft.world.item.crafting.Ingredient getRepairIngredient() {
-            return net.minecraft.world.item.crafting.Ingredient.of(Items.DIAMOND);
+            return PERepairMaterials.asIngredient();
         }
     };
 
@@ -113,4 +121,23 @@ public class EngineerSawSwordItem extends SwordItem {
     @Override
     public boolean isEnchantable(ItemStack stack) { return true; }
 
+    // ── 分级修补 ────────────────────────────────────────────────
+
+    @Override
+    public int getRepairUnits(ItemStack toRepair, ItemStack material) {
+        return PERepairMaterials.getUnits(material);
+    }
+
+    /** 仅接受分级材料 — 不再沿用钻石修补 */
+    @Override
+    public boolean isValidRepairItem(ItemStack toRepair, ItemStack repair) {
+        return PERepairMaterials.contains(repair);
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, TooltipContext context,
+                                List<Component> tooltip, TooltipFlag flag) {
+        super.appendHoverText(stack, context, tooltip, flag);
+        appendRepairTooltip(stack, tooltip);
+    }
 }

@@ -5,6 +5,7 @@ import net.minecraft.ResourceLocationException;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EquipmentSlotGroup;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -24,6 +25,8 @@ import java.util.Map;
  *   <li>record 自动提供 equals/hashCode，可作为 Map key</li>
  *   <li>CODEC 以 ResourceLocation 为持久化形式，反序列化时查注册表</li>
  *   <li>未知 id 反序列化时创建临时实例（category=UTILITY），不会丢数据</li>
+ *   <li>装备槽组（{@link #equipmentSlotGroup()}）存旁路映射表而非 record component，
+ *       避免参与 equals/hashCode —— 否则 byId 反序列化的临时实例会因 group 不同而失配</li>
  * </ul>
  */
 public record SlotType(ResourceLocation id, SlotCategory category) {
@@ -37,19 +40,34 @@ public record SlotType(ResourceLocation id, SlotCategory category) {
 
     private static final Map<ResourceLocation, SlotType> REGISTRY = new HashMap<>();
 
-    /** 注册一个新槽位类型，返回注册后的实例 */
+    /** 槽位 → 装备槽组（属性修饰符生效范围）的旁路映射，不参与 record 相等性 */
+    private static final Map<ResourceLocation, EquipmentSlotGroup> GROUPS = new HashMap<>();
+
+    /** 注册一个新槽位类型（默认 ANY），返回注册后的实例 */
     public static synchronized SlotType register(ResourceLocation id, SlotCategory category) {
+        return register(id, category, EquipmentSlotGroup.ANY);
+    }
+
+    /** 注册一个新槽位类型并指定装备槽组，返回注册后的实例 */
+    public static synchronized SlotType register(ResourceLocation id, SlotCategory category,
+                                                 EquipmentSlotGroup group) {
         if (REGISTRY.containsKey(id)) {
             throw new IllegalArgumentException("SlotType already registered: " + id);
         }
         var type = new SlotType(id, category);
         REGISTRY.put(id, type);
+        GROUPS.put(id, group);
         return type;
     }
 
     /** 通过 ResourceLocation 查找已注册的槽位，未注册的返回临时实例(UTILITY) */
     public static SlotType byId(ResourceLocation id) {
         return REGISTRY.computeIfAbsent(id, k -> new SlotType(k, SlotCategory.UTILITY));
+    }
+
+    /** 该槽位对应的装备槽组（附件属性修饰符的生效范围），未映射时默认 ANY */
+    public EquipmentSlotGroup equipmentSlotGroup() {
+        return GROUPS.getOrDefault(id, EquipmentSlotGroup.ANY);
     }
 
     /** 通过字符串 id 查找，解析失败返回 null */
