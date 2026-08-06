@@ -1,5 +1,6 @@
 package com.chemiofitor.protection_engineering.item;
 
+import com.chemiofitor.protection_engineering.api.AttachmentUtil;
 import com.chemiofitor.protection_engineering.api.SlotTypes;
 import com.chemiofitor.protection_engineering.registry.PEItems;
 import com.simibubi.create.content.equipment.goggles.GogglesItem;
@@ -40,9 +41,7 @@ public class EngineerGogglesItem extends AttachmentItem {
     }
 
     private static boolean hasGogglesEquipped(Player player) {
-        ItemStack helmet = player.getItemBySlot(EquipmentSlot.HEAD);
-        if (!(helmet.getItem() instanceof AttachmentHostArmorItem host)) return false;
-        ItemStack eyeSlot = host.getAttachments(helmet).get(SlotTypes.EYES);
-        return eyeSlot.getItem() == PEItems.ENGINEER_GOGGLES.get();
+        return AttachmentUtil.get(player, EquipmentSlot.HEAD, SlotTypes.EYES).getItem()
+                == PEItems.ENGINEER_GOGGLES.get();
     }
 }

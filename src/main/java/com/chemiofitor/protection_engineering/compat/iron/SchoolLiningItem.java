@@ -1,6 +1,5 @@
 package com.chemiofitor.protection_engineering.compat.iron;
 
-import com.chemiofitor.protection_engineering.ProtectionEngineering;
 import com.chemiofitor.protection_engineering.api.IAttachment;
 import com.chemiofitor.protection_engineering.api.SlotTypes;
 import com.chemiofitor.protection_engineering.item.AttachmentItem;
@@ -38,9 +37,8 @@ public class SchoolLiningItem extends AttachmentItem {
         // 法力上限 +50。基础修饰符 ID 按物品注册名派生（区分学派）；
         // 基类会再追加宿主部件后缀（chest/legs…），故跨护甲、跨学派均可堆叠。
         // （不参与护甲值合并：mergeArmorModifiers 只处理 ARMOR/ARMOR_TOUGHNESS）
-        return List.of(new IAttachment.AttributeBonus(
-                ProtectionEngineering.asResource("school_lining_mana_"
-                        + BuiltInRegistries.ITEM.getKey(this).getPath()),
+        return List.of(IAttachment.bonus(
+                "school_lining_mana_" + BuiltInRegistries.ITEM.getKey(this).getPath(),
                 AttributeRegistry.MAX_MANA, 50.0,
                 AttributeModifier.Operation.ADD_VALUE));
     }

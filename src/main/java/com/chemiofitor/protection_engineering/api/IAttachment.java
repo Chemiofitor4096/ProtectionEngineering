@@ -1,5 +1,6 @@
 package com.chemiofitor.protection_engineering.api;
 
+import com.chemiofitor.protection_engineering.ProtectionEngineering;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -103,6 +104,12 @@ public interface IAttachment {
      */
     record AttributeBonus(ResourceLocation id, Holder<Attribute> attribute,
                           double amount, AttributeModifier.Operation operation) {}
+
+    /** 便捷工厂：以模组命名空间生成修饰符 ID */
+    static AttributeBonus bonus(String path, Holder<Attribute> attribute, double amount,
+                                AttributeModifier.Operation operation) {
+        return new AttributeBonus(ProtectionEngineering.asResource(path), attribute, amount, operation);
+    }
 
     /**
      * 此附件提供的属性修饰符列表。tooltip 与事件共用，默认空。

@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "protectionengineering:block/armor_emitter"
+    }
+  }
+}

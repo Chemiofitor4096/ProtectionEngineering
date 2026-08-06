@@ -1,6 +1,6 @@
 package com.chemiofitor.protection_engineering.entity;
 
-import com.chemiofitor.protection_engineering.api.IAttachmentHost;
+import com.chemiofitor.protection_engineering.api.AttachmentUtil;
 import com.chemiofitor.protection_engineering.config.PEServerConfig;
 import com.chemiofitor.protection_engineering.item.ApsItem;
 import com.chemiofitor.protection_engineering.registry.PESounds;
@@ -13,7 +13,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -47,7 +46,6 @@ public class MissileEntity extends Projectile {
     private int life;
     @Nullable private UUID targetEntityUUID;
     @Nullable private Vec3 targetPos;
-    @Nullable private UUID shooterUUID;
     private int engineSoundTimer;
     private int warningSoundTimer;
 
@@ -68,14 +66,6 @@ public class MissileEntity extends Projectile {
 
     public void setShooterEntity(@Nullable LivingEntity shooter) {
         this.setOwner(shooter);
-        if (shooter != null) {
-            this.shooterUUID = shooter.getUUID();
-        }
-    }
-
-    @Nullable
-    public UUID getTargetEntityUUID() {
-        return targetEntityUUID;
     }
 
     // ── Tick ──────────────────────────────────────────────────
@@ -282,20 +272,8 @@ public class MissileEntity extends Projectile {
 
     /** 检查玩家是否激活了主动防御系统 */
     private boolean hasApsActive(Player player) {
-        for (EquipmentSlot slot : EquipmentSlot.values()) {
-            if (slot.getType() != EquipmentSlot.Type.HUMANOID_ARMOR) continue;
-            ItemStack armor = player.getItemBySlot(slot);
-            if (!(armor.getItem() instanceof IAttachmentHost host)) continue;
-            for (var entry : host.getAttachments(armor).slots().entrySet()) {
-                ItemStack attached = entry.getValue();
-                if (attached.getItem() instanceof ApsItem aps) {
-                    if (aps.isInActiveWindow(attached)) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
+        return AttachmentUtil.any(player, s ->
+                s.getItem() instanceof ApsItem aps && aps.isInActiveWindow(s));
     }
 
     // ── 粒子 ──────────────────────────────────────────────────
@@ -318,17 +296,6 @@ public class MissileEntity extends Projectile {
                     (level.random.nextDouble() - 0.5) * 0.4,
                     (level.random.nextDouble() - 0.5) * 0.4,
                     (level.random.nextDouble() - 0.5) * 0.4);
-    }
-
-    // ── 朝向 ──────────────────────────────────────────────────
-
-    private void updateRotationFromVelocity() {
-        Vec3 vel = this.getDeltaMovement();
-        if (vel.lengthSqr() > 0.001) {
-            double hDist = vel.horizontalDistance();
-            this.setYRot((float) (Math.toDegrees(Math.atan2(-vel.x, vel.z))));
-            this.setXRot((float) (Math.toDegrees(Math.atan2(-vel.y, hDist))));
-        }
     }
 
     // ── 碰撞过滤 ──────────────────────────────────────────────
@@ -369,9 +336,6 @@ public class MissileEntity extends Projectile {
                     tag.getDouble("TargetY"),
                     tag.getDouble("TargetZ"));
         }
-        if (tag.hasUUID("ShooterUUID")) {
-            this.shooterUUID = tag.getUUID("ShooterUUID");
-        }
     }
 
     @Override
@@ -387,9 +351,6 @@ public class MissileEntity extends Projectile {
             tag.putDouble("TargetX", targetPos.x);
             tag.putDouble("TargetY", targetPos.y);
             tag.putDouble("TargetZ", targetPos.z);
-        }
-        if (shooterUUID != null) {
-            tag.putUUID("ShooterUUID", shooterUUID);
         }
     }
 

@@ -332,6 +332,19 @@ public class PEMechanicalCraftingRecipeGen extends MechanicalCraftingRecipeGen {
                         .key('I', Blocks.ICE )
                 );
 
+        // ── 潜水配重鞋底 ─────────────────────────────────────────
+        create(PEItems.DIVING_SOLES::get)
+                .recipe(b -> b
+                        .patternLine("     ")
+                        .patternLine("     ")
+                        .patternLine(" S S ")
+                        .patternLine("SC CS")
+                        .patternLine("II II")
+                        .key('S', AllItems.STURDY_SHEET.get())
+                        .key('C', AllItems.COPPER_SHEET.get())
+                        .key('I', AllItems.ANDESITE_ALLOY.get())
+                );
+
         // ── 防爆内衬 ─────────────────────────────────────────
         create(PEItems.BLAST_LINING::get)
                 .recipe(b -> b

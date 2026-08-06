@@ -42,6 +42,4 @@ public class PEEntities {
                             .clientTrackingRange(10)
                             .updateInterval(1)
                             .build(ProtectionEngineering.asResource("missile").toString()));
-
-    public static void init() {}
 }

@@ -28,10 +28,6 @@ public class ApsItem extends AttachmentItem {
         super(properties, SlotTypes.SHOULDER);
     }
 
-    ApsItem(Properties properties, boolean advanced) {
-        super(properties, SlotTypes.SHOULDER);
-    }
-
     @Override
     public ControlPattern getControlPattern() { return ControlPattern.ACTIVE_COOLDOWN; }
 
@@ -40,15 +36,26 @@ public class ApsItem extends AttachmentItem {
         if (newState == STATE_ACTIVE) {
             entity.level().playSound(null, entity, PESounds.APS_ACTIVATE.get(),
                     SoundSource.PLAYERS, 0.8f, 1.0f);
+            sendMessage(entity, "message.protectionengineering.aps_activated");
+        } else if (newState == STATE_READY) {
+            sendMessage(entity, "message.protectionengineering.aps_ready");
+        }
+    }
+
+    @Override
+    protected void onStateExit(ItemStack stack, int oldState, LivingEntity entity) {
+        if (oldState == STATE_ACTIVE) {
+            sendMessage(entity, "message.protectionengineering.aps_cooldown", cooldownSeconds());
         }
     }
 
     @Override
     public long getActiveDuration() {
-        return this instanceof AdvancedApsItem
-                ? (long) (PEServerConfig.APS_ACTIVE_DURATION.get() * 1.5)
-                : PEServerConfig.APS_ACTIVE_DURATION.get();
+        return (long) (PEServerConfig.APS_ACTIVE_DURATION.get() * durationMultiplier());
     }
+
+    /** 激活时长倍率：高级 APS 1.5x，普通 1.0x */
+    protected double durationMultiplier() { return 1.0; }
 
     @Override
     public long getCooldownDuration() { return PEServerConfig.APS_COOLDOWN_TICKS.get(); }

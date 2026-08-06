@@ -15,8 +15,6 @@ import net.minecraft.world.level.block.state.BlockState;
  */
 public class WorkbenchBlockEntity extends BlockEntity {
 
-    public static final int SLOT_ATTACH = 4;
-
     public WorkbenchBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
     }

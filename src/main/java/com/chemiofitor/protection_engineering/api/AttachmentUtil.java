@@ -6,6 +6,7 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
 
@@ -16,21 +17,36 @@ import java.util.function.ToDoubleFunction;
 public final class AttachmentUtil {
     private AttachmentUtil() {}
 
-    // ── 按类查找 ──────────────────────────────────────────────
+    // ── 核心遍历（其他方法复用）───────────────────────────────
 
-    /** 在所有护甲上查找第一个指定类型的附件。 */
-    public static <T extends IAttachment> Optional<Match<T>> findFirst(Player player, Class<T> type) {
+    /** 遍历玩家所有已安装的附件（含盔甲槽位 / 附件槽位上下文） */
+    private static void forAll(Player player, Consumer<Match<?>> consumer) {
         for (EquipmentSlot slot : EquipmentSlot.values()) {
             if (slot.getType() != EquipmentSlot.Type.HUMANOID_ARMOR) continue;
             ItemStack armor = player.getItemBySlot(slot);
             if (!(armor.getItem() instanceof IAttachmentHost host)) continue;
             for (var entry : host.getAttachments(armor).slots().entrySet()) {
-                if (type.isInstance(entry.getValue().getItem())) {
-                    return Optional.of(new Match<>(slot, entry.getKey(), entry.getValue(), type.cast(entry.getValue().getItem())));
+                ItemStack stack = entry.getValue();
+                if (stack.getItem() instanceof IAttachment att) {
+                    consumer.accept(new Match<>(slot, entry.getKey(), stack, att));
                 }
             }
         }
-        return Optional.empty();
+    }
+
+    // ── 按类查找 ──────────────────────────────────────────────
+
+    /** 在所有护甲上查找第一个指定类型的附件。 */
+    public static <T extends IAttachment> Optional<Match<T>> findFirst(Player player, Class<T> type) {
+        final Optional<Match<T>>[] result = new Optional[]{Optional.empty()};
+        forAll(player, match -> {
+            if (result[0].isPresent()) return;
+            if (type.isInstance(match.attachment())) {
+                result[0] = Optional.of(new Match<>(match.armorSlot(), match.attachSlot(),
+                        match.stack(), type.cast(match.attachment())));
+            }
+        });
+        return result[0];
     }
 
     /** 检查玩家是否安装了指定类型的附件。 */
@@ -40,15 +56,11 @@ public final class AttachmentUtil {
 
     /** 检查任一护甲槽位上是否有满足条件的附件（遍历全部护甲）。 */
     public static boolean any(Player player, Predicate<ItemStack> pred) {
-        for (EquipmentSlot slot : EquipmentSlot.values()) {
-            if (slot.getType() != EquipmentSlot.Type.HUMANOID_ARMOR) continue;
-            ItemStack armor = player.getItemBySlot(slot);
-            if (!(armor.getItem() instanceof IAttachmentHost host)) continue;
-            for (var entry : host.getAttachments(armor).slots().entrySet()) {
-                if (pred.test(entry.getValue())) return true;
-            }
-        }
-        return false;
+        final boolean[] found = {false};
+        forAll(player, match -> {
+            if (!found[0] && pred.test(match.stack())) found[0] = true;
+        });
+        return found[0];
     }
 
     /** 检查指定护甲槽位上是否有满足条件的附件。 */
@@ -74,16 +86,7 @@ public final class AttachmentUtil {
 
     /** 遍历玩家所有已安装的附件。 */
     public static void forEach(Player player, BiConsumer<Match<?>, IAttachment> consumer) {
-        for (EquipmentSlot slot : EquipmentSlot.values()) {
-            if (slot.getType() != EquipmentSlot.Type.HUMANOID_ARMOR) continue;
-            ItemStack armor = player.getItemBySlot(slot);
-            if (!(armor.getItem() instanceof IAttachmentHost host)) continue;
-            for (var entry : host.getAttachments(armor).slots().entrySet()) {
-                if (entry.getValue().getItem() instanceof IAttachment att) {
-                    consumer.accept(new Match<>(slot, entry.getKey(), entry.getValue(), att), att);
-                }
-            }
-        }
+        forAll(player, match -> consumer.accept(match, match.attachment()));
     }
 
     /** 遍历指定护甲槽位的所有附件。 */
@@ -97,18 +100,9 @@ public final class AttachmentUtil {
 
     /** 归约 — 对所有附件累加浮点值（如减伤、摔落减免）。 */
     public static double reduce(Player player, ToDoubleFunction<IAttachment> mapper) {
-        double total = 0;
-        for (EquipmentSlot slot : EquipmentSlot.values()) {
-            if (slot.getType() != EquipmentSlot.Type.HUMANOID_ARMOR) continue;
-            ItemStack armor = player.getItemBySlot(slot);
-            if (!(armor.getItem() instanceof IAttachmentHost host)) continue;
-            for (var entry : host.getAttachments(armor).slots().entrySet()) {
-                if (entry.getValue().getItem() instanceof IAttachment att) {
-                    total += mapper.applyAsDouble(att);
-                }
-            }
-        }
-        return total;
+        final double[] total = {0};
+        forAll(player, match -> total[0] += mapper.applyAsDouble(match.attachment()));
+        return total[0];
     }
 
     // ── 结果类型 ──────────────────────────────────────────────

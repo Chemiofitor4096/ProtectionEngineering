@@ -4,6 +4,7 @@ import com.chemiofitor.protection_engineering.api.SlotTypes;
 import com.chemiofitor.protection_engineering.config.PEServerConfig;
 import com.chemiofitor.protection_engineering.registry.PESounds;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -64,6 +65,8 @@ public class DodgeJetpackItem extends AttachmentItem {
                 SoundSource.PLAYERS, 1.0f, 1.0f);
         level.playSound(null, player, PESounds.DODGE_JET.get(),
                 SoundSource.PLAYERS, 1.0f, 1.0f);
+        player.displayClientMessage(
+                Component.translatable("message.protectionengineering.dodge_activated"), true);
     }
 
     private static @NotNull Vec3 getDodgeDirection(Player player, @Nullable Entity attacker) {
@@ -92,7 +95,7 @@ public class DodgeJetpackItem extends AttachmentItem {
 
     // ── 危险源扫描 ────────────────────────────────────────────
 
-    static boolean isNearDanger(Player player) {
+    public static boolean isNearDanger(Player player) {
         Level level = player.level();
         BlockPos playerPos = player.blockPosition();
 

@@ -1,9 +1,7 @@
 package com.chemiofitor.protection_engineering.item;
 
-import com.chemiofitor.protection_engineering.ProtectionEngineering;
 import com.chemiofitor.protection_engineering.api.IAttachment;
 import com.chemiofitor.protection_engineering.api.SlotTypes;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 
@@ -14,9 +12,6 @@ import java.util.List;
  * 下界合金防护板 —— 胸甲板附件，盔甲值 +4，减伤 15%。
  */
 public class NetheritePlateItem extends AttachmentItem {
-
-    private static final ResourceLocation ARMOR_ID =
-            ProtectionEngineering.asResource("netherite_plate_armor");
 
     public NetheritePlateItem(Properties properties) {
         super(properties, SlotTypes.CHESTPLATE);
@@ -33,7 +28,7 @@ public class NetheritePlateItem extends AttachmentItem {
 
     @Override
     public List<IAttachment.AttributeBonus> getAttributeBonuses() {
-        return List.of(new IAttachment.AttributeBonus(ARMOR_ID, Attributes.ARMOR, 4.0,
+        return List.of(IAttachment.bonus("netherite_plate_armor", Attributes.ARMOR, 4.0,
                 AttributeModifier.Operation.ADD_VALUE));
     }
 }

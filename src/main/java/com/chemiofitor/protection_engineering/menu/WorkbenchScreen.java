@@ -15,8 +15,6 @@ public class WorkbenchScreen extends AbstractContainerScreen<WorkbenchMenu> {
     private static final ResourceLocation TEXTURE =
             ProtectionEngineering.asResource("textures/gui/workbench.png");
 
-    private static final int[][] ATTACH_POS = {{88, 29}, {88, 47}, {106, 29}, {106, 47}};
-
     // 翻页按钮位置 (贴图自带，始终显示)
     private static final int BTN_PREV_X = 126, BTN_NEXT_X = 134, BTN_Y = 40;
     private static final int BTN_W = 6, BTN_H = 12;
@@ -34,11 +32,11 @@ public class WorkbenchScreen extends AbstractContainerScreen<WorkbenchMenu> {
 
         // 空附件槽位渲染专用 UI
         List<SlotType> activeSlots = menu.getActiveSlots();
-        for (int i = 0; i < activeSlots.size() && i < ATTACH_POS.length; i++) {
+        for (int i = 0; i < activeSlots.size() && i < WorkbenchMenu.ATTACH_POS.length; i++) {
             if (menu.slots.get(1 + i).hasItem()) continue;
             SlotType slot = activeSlots.get(i);
-            int x = leftPos + ATTACH_POS[i][0];
-            int y = topPos + ATTACH_POS[i][1];
+            int x = leftPos + WorkbenchMenu.ATTACH_POS[i][0];
+            int y = topPos + WorkbenchMenu.ATTACH_POS[i][1];
             g.blit(slotTexture(slot), x, y, 0, 0, 16, 16, 16, 16);
         }
 
@@ -54,9 +52,9 @@ public class WorkbenchScreen extends AbstractContainerScreen<WorkbenchMenu> {
 
         // 附件槽位悬停 tooltip
         List<SlotType> activeSlots = menu.getActiveSlots();
-        for (int i = 0; i < activeSlots.size() && i < ATTACH_POS.length; i++) {
-            int x = leftPos + ATTACH_POS[i][0];
-            int y = topPos + ATTACH_POS[i][1];
+        for (int i = 0; i < activeSlots.size() && i < WorkbenchMenu.ATTACH_POS.length; i++) {
+            int x = leftPos + WorkbenchMenu.ATTACH_POS[i][0];
+            int y = topPos + WorkbenchMenu.ATTACH_POS[i][1];
             if (inRect(mouseX, mouseY, x, y, 16, 16)) {
                 if (!menu.slots.get(1 + i).hasItem()) {
                     g.renderTooltip(font, Component.translatable(activeSlots.get(i).getTranslationKey()), mouseX, mouseY);

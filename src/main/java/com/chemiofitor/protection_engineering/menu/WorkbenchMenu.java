@@ -26,7 +26,8 @@ public class WorkbenchMenu extends AbstractContainerMenu {
     public static final int SLOT_ATTACH = 4;
     public static final int SLOT_COUNT = 1 + SLOT_ATTACH;
 
-    private static final int[][] ATTACH_POS = {{88, 29}, {88, 47}, {106, 29}, {106, 47}};
+    /** 附件槽位在 GUI 中的位置（供 Screen 复用） */
+    public static final int[][] ATTACH_POS = {{88, 29}, {88, 47}, {106, 29}, {106, 47}};
 
     private final SimpleContainer container = new SimpleContainer(SLOT_COUNT);
     @Nullable

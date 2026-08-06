@@ -1,9 +1,10 @@
 package com.chemiofitor.protection_engineering.client;
 
 import com.chemiofitor.protection_engineering.ProtectionEngineering;
+import com.chemiofitor.protection_engineering.api.AttachmentUtil;
 import com.chemiofitor.protection_engineering.api.IAttachment;
-import com.chemiofitor.protection_engineering.api.IAttachmentHost;
 import com.chemiofitor.protection_engineering.config.PEServerConfig;
+import com.chemiofitor.protection_engineering.item.HormoneInjectorItem;
 import com.chemiofitor.protection_engineering.item.SpyglassItem;
 import com.chemiofitor.protection_engineering.registry.PEDataComponents;
 import com.chemiofitor.protection_engineering.registry.PEItems;
@@ -14,7 +15,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -102,19 +102,12 @@ public class PEHormoneOverlay {
     }
 
     private static boolean isSpyglassActive(LocalPlayer player) {
-        for (EquipmentSlot slot : EquipmentSlot.values()) {
-            if (slot.getType() != EquipmentSlot.Type.HUMANOID_ARMOR) continue;
-            ItemStack armor = player.getItemBySlot(slot);
-            if (!(armor.getItem() instanceof IAttachmentHost host)) continue;
-            for (var entry : host.getAttachments(armor).slots().entrySet()) {
-                if (entry.getValue().getItem() instanceof SpyglassItem sg
-                        && sg.getState(entry.getValue()) == IAttachment.STATE_READY) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return AttachmentUtil.any(player, s ->
+                s.getItem() instanceof SpyglassItem sg && sg.getState(s) == IAttachment.STATE_READY);
     }
+
+    /** 效果结束前的淡出时长（tick） */
+    private static final int FADE_TICKS = 40;
 
     /** 计算叠加层透明度：激活后前 8 秒恒定 35%，后 2 秒淡出 */
     private static float getOverlayAlpha(LocalPlayer player) {
@@ -124,10 +117,11 @@ public class PEHormoneOverlay {
 
         long activatedAt = cooldownEnd - PEServerConfig.HORMONE_COOLDOWN_TICKS.get();
         long elapsed = now - activatedAt;
-        if (elapsed < 0 || elapsed >= 200) return 0; // EFFECT_DURATION = 200
+        if (elapsed < 0 || elapsed >= HormoneInjectorItem.EFFECT_DURATION) return 0;
 
-        if (elapsed < 160) return 0.35f;
-        return 0.35f * (1f - (elapsed - 160) / 40f);
+        long steady = HormoneInjectorItem.EFFECT_DURATION - FADE_TICKS;
+        if (elapsed < steady) return 0.35f;
+        return 0.35f * (1f - (elapsed - steady) / (float) FADE_TICKS);
     }
 
     // ── FOV 缩放 (FORGE bus) ─────────────────────────────────
@@ -168,17 +162,8 @@ public class PEHormoneOverlay {
     // ── 工具 ────────────────────────────────────────────────
 
     private static long getHormoneCooldownEnd(LocalPlayer player) {
-        for (EquipmentSlot slot : EquipmentSlot.values()) {
-            if (slot.getType() != EquipmentSlot.Type.HUMANOID_ARMOR) continue;
-            ItemStack armor = player.getItemBySlot(slot);
-            if (!(armor.getItem() instanceof IAttachmentHost host)) continue;
-            for (var entry : host.getAttachments(armor).slots().entrySet()) {
-                ItemStack attached = entry.getValue();
-                if (attached.getItem() == PEItems.HORMONE_INJECTOR.get()) {
-                    return attached.getOrDefault(PEDataComponents.ATTACHMENT_COOLDOWN.get(), 0L);
-                }
-            }
-        }
-        return 0L;
+        return AttachmentUtil.findFirst(player, HormoneInjectorItem.class)
+                .map(m -> m.stack().getOrDefault(PEDataComponents.ATTACHMENT_COOLDOWN.get(), 0L))
+                .orElse(0L);
     }
 }

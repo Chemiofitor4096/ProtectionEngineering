@@ -1,0 +1,27 @@
+{
+  "type": "create:mechanical_crafting",
+  "accept_mirrored": true,
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "create:copper_sheet"
+    },
+    "I": {
+      "item": "create:andesite_alloy"
+    },
+    "S": {
+      "item": "create:sturdy_sheet"
+    }
+  },
+  "pattern": [
+    "     ",
+    "     ",
+    " S S ",
+    "SC CS",
+    "II II"
+  ],
+  "result": {
+    "count": 1,
+    "id": "protectionengineering:diving_soles"
+  }
+}

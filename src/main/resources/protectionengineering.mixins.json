@@ -5,7 +5,8 @@
   "mixins": [
     "LivingEntityMixin",
     "PlayerShieldMixin",
-    "ShieldAngleMixin"
+    "ShieldAngleMixin",
+    "DivingBootsMixin"
   ],
   "injectors": {
     "defaultRequire": 1

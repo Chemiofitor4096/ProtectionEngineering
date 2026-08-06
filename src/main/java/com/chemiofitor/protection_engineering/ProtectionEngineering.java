@@ -7,12 +7,7 @@ import com.chemiofitor.protection_engineering.config.PEServerConfig;
 import com.chemiofitor.protection_engineering.data.PEDataGen;
 import com.chemiofitor.protection_engineering.event.PENeoForgeEvents;
 import com.chemiofitor.protection_engineering.item.EngineerGogglesItem;
-import com.chemiofitor.protection_engineering.registry.PEItems;
-import com.chemiofitor.protection_engineering.registry.PEArmorMaterials;
-import com.chemiofitor.protection_engineering.registry.PEDataComponents;
-import com.chemiofitor.protection_engineering.registry.PEEntities;
-import com.chemiofitor.protection_engineering.registry.PESounds;
-import com.chemiofitor.protection_engineering.registry.PEWorkbench;
+import com.chemiofitor.protection_engineering.registry.*;
 import com.mojang.logging.LogUtils;
 import com.tterrag.registrate.Registrate;
 import net.minecraft.network.chat.Component;
@@ -47,6 +42,7 @@ public class ProtectionEngineering {
         PEArmorMaterials.REGISTRY.register(modEventBus);
         PESounds.REGISTRY.register(modEventBus);
         PEEntities.REGISTRY.register(modEventBus);
+        PEArmInteractionPointTypes.REGISTRY.register(modEventBus);
 
         // 必须在 PEItems.init() 之前调用，确保物品注册时 defaultCreativeModeTab 已设置
         REGISTRATE.defaultCreativeTab("engineering_tab",
@@ -54,8 +50,8 @@ public class ProtectionEngineering {
         ).register();
 
         PEItems.init();
-        PEEntities.init();
         PEWorkbench.init();
+        PEArmorEmitter.init();
 
         EngineerGogglesItem.registerGogglesPredicate();
 

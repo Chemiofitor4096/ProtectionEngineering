@@ -24,6 +24,8 @@ description='''
 Provide installable attachments for the engineer's armor system, and each attachment is installed in a specific slot of armor to provide passive immunity, attribute bonus or active skills.
 '''
 
+# The [[mixins]] block allows you to declare your mixin config to FML so that it gets loaded.
+[[mixins]]
 config="${mod_id}.mixins.json"
 
 # The [[accessTransformers]] block allows you to declare where your AT file is.

@@ -12,6 +12,9 @@ public class AdvancedApsItem extends ApsItem {
     }
 
     @Override
+    protected double durationMultiplier() { return 1.5; }
+
+    @Override
     @Nullable
     public String getFeatureKey() {
         return "tooltip.protectionengineering.feature.advanced_aps";

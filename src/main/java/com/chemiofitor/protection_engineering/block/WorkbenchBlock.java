@@ -78,14 +78,6 @@ public class WorkbenchBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected void onRemove(BlockState state, Level level, BlockPos pos,
-                            BlockState newState, boolean moved) {
-        if (!state.is(newState.getBlock())) {
-            super.onRemove(state, level, pos, newState, moved);
-        }
-    }
-
-    @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return Shapes.or(
                 Shapes.box(0.0D / 16, 0.0D / 16, 0.0D / 16, 16.0D / 16, 9.0D / 16, 16.0D / 16),

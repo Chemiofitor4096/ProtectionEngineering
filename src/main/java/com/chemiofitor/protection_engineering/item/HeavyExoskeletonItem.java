@@ -1,9 +1,7 @@
 package com.chemiofitor.protection_engineering.item;
 
-import com.chemiofitor.protection_engineering.ProtectionEngineering;
 import com.chemiofitor.protection_engineering.api.IAttachment;
 import com.chemiofitor.protection_engineering.api.SlotTypes;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -17,11 +15,6 @@ import java.util.Set;
  * 护甲值 +2，可以走上 1 格高的方块，降低 20% 摔落伤害，免疫缓慢效果。
  */
 public class HeavyExoskeletonItem extends AttachmentItem {
-
-    private static final ResourceLocation ARMOR_ID =
-            ProtectionEngineering.asResource("heavy_exo_armor");
-    private static final ResourceLocation STEP_ID =
-            ProtectionEngineering.asResource("heavy_exo_step");
 
     public HeavyExoskeletonItem(Properties properties) {
         super(properties, Set.of(MobEffects.MOVEMENT_SLOWDOWN), SlotTypes.LEG);
@@ -40,9 +33,9 @@ public class HeavyExoskeletonItem extends AttachmentItem {
     @Override
     public List<IAttachment.AttributeBonus> getAttributeBonuses() {
         return List.of(
-                new IAttachment.AttributeBonus(ARMOR_ID, Attributes.ARMOR, 2.0,
+                IAttachment.bonus("heavy_exo_armor", Attributes.ARMOR, 2.0,
                         AttributeModifier.Operation.ADD_VALUE),
-                new IAttachment.AttributeBonus(STEP_ID, Attributes.STEP_HEIGHT, 0.4,
+                IAttachment.bonus("heavy_exo_step", Attributes.STEP_HEIGHT, 0.4,
                         AttributeModifier.Operation.ADD_VALUE));
     }
 }

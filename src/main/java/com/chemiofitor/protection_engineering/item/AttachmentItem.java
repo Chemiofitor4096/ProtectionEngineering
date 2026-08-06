@@ -111,8 +111,7 @@ public abstract class AttachmentItem extends Item implements IAttachment {
 
     @Override
     public boolean isFoil(ItemStack stack) {
-        int s = getState(stack);
-        return s == STATE_READY || s == STATE_ACTIVE;
+        return isActive(stack);
     }
 
     /** 是否处于激活窗口中（仅 ACTIVE_COOLDOWN 模式有意义） */
@@ -259,6 +258,20 @@ public abstract class AttachmentItem extends Item implements IAttachment {
 
     /** 离开某状态时调用（子类覆写） */
     protected void onStateExit(ItemStack stack, int oldState, LivingEntity entity) {}
+
+    // ── 消息 ──────────────────────────────────────────────────
+
+    /** 给玩家发送即时消息（仅服务端；非玩家实体静默跳过） */
+    protected void sendMessage(LivingEntity entity, String key, Object... args) {
+        if (entity instanceof Player player && !player.level().isClientSide()) {
+            player.displayClientMessage(Component.translatable(key, args), true);
+        }
+    }
+
+    /** 冷却剩余秒数（tick → 秒，向上取整） */
+    protected long cooldownSeconds() {
+        return (getCooldownDuration() + 19) / 20;
+    }
 
     // ── 属性：声明统一应用 ────────────────────────────────────
     // 子类只需覆写 getAttributeBonuses() 声明属性，

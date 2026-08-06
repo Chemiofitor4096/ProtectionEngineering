@@ -17,7 +17,8 @@ import javax.annotation.Nullable;
  */
 public class HormoneInjectorItem extends AttachmentItem {
 
-    private static final int EFFECT_DURATION = 200;
+    /** 效果总时长（tick）— 供 HUD 叠加层参考 */
+    public static final int EFFECT_DURATION = 200;
     private static final int NAUSEA_DURATION = 100;
 
     public HormoneInjectorItem(Properties properties) {
@@ -49,5 +50,14 @@ public class HormoneInjectorItem extends AttachmentItem {
 
         entity.level().playSound(null, entity, PESounds.HORMONE_INJECT.get(),
                 SoundSource.PLAYERS, 0.8f, 1.0f);
+        // action bar 一次只显示一条：激活确认即可，冷却倒计时由 HUD（PECooldownOverlay）展示
+        sendMessage(entity, "message.protectionengineering.hormone_used");
+    }
+
+    @Override
+    protected void onStateEnter(ItemStack stack, int newState, LivingEntity entity) {
+        if (newState == STATE_READY) {
+            sendMessage(entity, "message.protectionengineering.hormone_ready");
+        }
     }
 }

@@ -1,8 +1,8 @@
 package com.chemiofitor.protection_engineering.client;
 
 import com.chemiofitor.protection_engineering.ProtectionEngineering;
+import com.chemiofitor.protection_engineering.api.AttachmentUtil;
 import com.chemiofitor.protection_engineering.api.IAttachment;
-import com.chemiofitor.protection_engineering.api.IAttachmentHost;
 import com.chemiofitor.protection_engineering.config.PEConfig;
 import com.chemiofitor.protection_engineering.item.AttachmentItem;
 import net.minecraft.client.DeltaTracker;
@@ -12,7 +12,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -70,84 +69,78 @@ public class PECooldownOverlay {
         long now = player.level().getGameTime();
         boolean creative = player.getAbilities().instabuild;
 
-        for (EquipmentSlot slot : EquipmentSlot.values()) {
-            if (slot.getType() != EquipmentSlot.Type.HUMANOID_ARMOR) continue;
-            ItemStack armor = player.getItemBySlot(slot);
-            if (!(armor.getItem() instanceof IAttachmentHost host)) continue;
+        AttachmentUtil.forEach(player, (match, attachment) -> {
+            if (!(attachment instanceof AttachmentItem att)) return;
+            ItemStack attached = match.stack();
 
-            for (var entry : host.getAttachments(armor).slots().entrySet()) {
-                ItemStack attached = entry.getValue();
-                if (!(attached.getItem() instanceof AttachmentItem att)) continue;
+            IAttachment.ControlPattern pattern = att.getControlPattern();
+            if (pattern == IAttachment.ControlPattern.PASSIVE
+                    || pattern == IAttachment.ControlPattern.ALWAYS_ON) return;
 
-                IAttachment.ControlPattern pattern = att.getControlPattern();
-                if (pattern == IAttachment.ControlPattern.PASSIVE
-                        || pattern == IAttachment.ControlPattern.ALWAYS_ON) continue;
+            int state = att.getState(attached);
+            String name = attached.getHoverName().getString().replaceAll("§.", "");
+            String text;
+            int color;
+            long sortKey;
 
-                int state = att.getState(attached);
-                String name = attached.getHoverName().getString().replaceAll("§.", "");
-                String text;
-                int color;
-                long sortKey;
-
-                switch (state) {
-                    case IAttachment.STATE_READY -> {
-                            if (creative) {
-                                text = name + " §d●";
-                                color = PURPLE;
-                            } else {
-                                text = name + " §a●";
-                                color = 0xFF55FF55;
-                            }
-                            sortKey = 0;
+            switch (state) {
+                case IAttachment.STATE_READY -> {
+                    if (creative) {
+                        text = name + " §d●";
+                        color = PURPLE;
+                    } else {
+                        text = name + " §a●";
+                        color = 0xFF55FF55;
                     }
-                    case IAttachment.STATE_ACTIVE -> {
-                        long timer = att.getTimer(attached);
-                        if (timer > 0) {
-                            long remaining = timer - now;
-                            if (remaining <= 0) continue;
-                            text = name + (creative ? " §d⚡" : " §b⚡") + formatTime(remaining);
-                            color = creative ? PURPLE : 0xFF55FFFF;
-                            sortKey = remaining;
-                        } else {
-                            text = name + " §d⚡";
-                            color = PURPLE;
-                            sortKey = 0;
-                        }
-                    }
-                    case IAttachment.STATE_COOLING -> {
-                        long cdTimer = att.getTimer(attached);
-                        if (cdTimer > 0) {
-                            long remaining = cdTimer - now;
-                            if (remaining <= 0) continue;
-                            text = name + (creative ? " §d⌛" : " §7⌛") + formatTime(remaining);
-                            long cdDur = att.getCooldownDuration();
-                            if (creative) {
-                                color = PURPLE;
-                            } else {
-                                float pct = cdDur > 0 ? (float) remaining / (float) cdDur : 0;
-                                if (pct > 0.5f) color = 0xFFAAAAAA;
-                                else if (pct > 0.25f) color = 0xFFFFAA00;
-                                else color = 0xFFFF5555;
-                            }
-                            sortKey = remaining;
-                        } else {
-                            continue;
-                        }
-                    }
-                    default -> { // DISABLED
-                        if (pattern == IAttachment.ControlPattern.FREE_TOGGLE) {
-                            text = name + (creative ? " §d○" : " §8○");
-                            color = creative ? PURPLE : 0xFF888888;
-                            sortKey = Long.MAX_VALUE;
-                        } else {
-                            continue;
-                        }
+                    sortKey = 0;
+                }
+                case IAttachment.STATE_ACTIVE -> {
+                    long timer = att.getTimer(attached);
+                    if (timer > 0) {
+                        long remaining = timer - now;
+                        if (remaining <= 0) return;
+                        text = name + (creative ? " §d⚡" : " §b⚡") + formatTime(remaining);
+                        color = creative ? PURPLE : 0xFF55FFFF;
+                        sortKey = remaining;
+                    } else {
+                        text = name + " §d⚡";
+                        color = PURPLE;
+                        sortKey = 0;
                     }
                 }
-
-                entries.add(new StatusEntry(text, color, sortKey));
+                case IAttachment.STATE_COOLING -> {
+                    long cdTimer = att.getTimer(attached);
+                    if (cdTimer > 0) {
+                        long remaining = cdTimer - now;
+                        if (remaining <= 0) return;
+                        text = name + (creative ? " §d⌛" : " §7⌛") + formatTime(remaining);
+                        long cdDur = att.getCooldownDuration();
+                        if (creative) {
+                            color = PURPLE;
+                        } else {
+                            float pct = cdDur > 0 ? (float) remaining / (float) cdDur : 0;
+                            if (pct > 0.5f) color = 0xFFAAAAAA;
+                            else if (pct > 0.25f) color = 0xFFFFAA00;
+                            else color = 0xFFFF5555;
+                        }
+                        sortKey = remaining;
+                    } else {
+                        return;
+                    }
+                }
+                default -> { // DISABLED
+                    if (pattern == IAttachment.ControlPattern.FREE_TOGGLE) {
+                        text = name + (creative ? " §d○" : " §8○");
+                        color = creative ? PURPLE : 0xFF888888;
+                        sortKey = Long.MAX_VALUE;
+                    } else {
+                        return;
+                    }
+                }
             }
-        }
+
+            entries.add(new StatusEntry(text, color, sortKey));
+        });
 
         entries.sort(Comparator.comparingLong(e -> e.sortKey));
         return entries;

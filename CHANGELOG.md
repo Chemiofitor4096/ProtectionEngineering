@@ -1,5 +1,40 @@
 # Protection Engineering 更新日志
 
+## [1.6.0]
+
+### 新增
+
+- **护甲发射器 (`armor_emitter`)** — 压力板式功能方块，接受机械臂递送的护甲/附件并自动穿戴。碰撞箱 (0, -0.5, 0)~(16, 1.5, 16)，半透明渲染（`minecraft:translucent`）。Shift + 右键切换三种模式：脱装备（保留附件）/ 拆附件 / 全部移除（从头部到脚部依次脱下），机械臂 TAKE 按模式提取。
+- **潜水配重鞋底 (`DivingSolesItem`)** — FOOT 槽附件，被 Create 识别为潜水靴：水下主动下沉（配重）+ 水平移动加速。
+- **改良鞋底功能增强** — 防滑、免疫粘液/蜂蜜/灵魂沙减速、细雪行走。
+
+### 优化
+
+- **`AttachmentUtil` 全项目统一** — `PECooldownOverlay`、`PEHormoneOverlay`（两处）、`MissileEntity`、`PEGameEvents` APS 拦截块、`EngineerGogglesItem` 全部改用工具方法；`AttachmentUtil` 内部抽 `forAll` 消除 5 个方法各自的重复双层遍历。
+- **`IAttachment.bonus()` 工厂** — 新增静态工厂方法，8 个附件类消灭 `X_ID` 字段 + 声明样板，每类从 ~15 行缩到 1-3 行。
+- **`LiningItem` 参数化** — 防爆内衬（`BlastLiningItem`）与防火内衬（`FireLiningItem`）合并为 `LiningItem`，注册时传入标签（`IS_EXPLOSION`/`IS_FIRE`）和 feature key。
+- **HormoneInjector 时长常量共享** — `EFFECT_DURATION` 从 `PEHormoneOverlay` 硬编码 200 改为引用 `HormoneInjectorItem.EFFECT_DURATION`。
+- **改装甲台 `ATTACH_POS` 共享** — 从 `WorkbenchScreen` 和 `WorkbenchMenu` 各一份改为 `WorkbenchMenu` 单一定义。
+- **`isFoil` → `isActive`** — 重复方法体合并。
+- **`ApsItem` 脆弱的 `instanceof AdvancedApsItem`** → 子类覆写 `durationMultiplier()`。
+- **消息系统落实** — 15 条孤儿 message key 全部接入实际逻辑（激素/闪避/APS/火箭/导弹的激活、冷却、就绪消息），`AttachmentItem` 新增 `sendMessage` / `cooldownSeconds` 统一辅助方法。action bar 挤占问题已修复（激活只发确认，冷却倒计时由 HUD 展示）。
+
+### 修复
+
+- **Mixin 配置从未加载** — `neoforge.mods.toml` 的 `config` 字段写错位置（在 `[[mods]]` 块而非 `[[mixins]]` 块），导致项目所有 mixin（`LivingEntityMixin`防滑、`PlayerShieldMixin`等）在 NeoForge 1.21 上从未生效。改为标准 `[[mixins]]` 块。
+- **人形生物（僵尸/骷髅等）穿工程师套装不渲染** — `PEModelLayers.addLayers` 只在玩家和盔甲架上注册 `PEArmorLayer`，现遍历 `BuiltInRegistries.ENTITY_TYPE` 为所有 `HumanoidModel` 渲染器注入层。
+- **`build.gradle`** — 空 `repositories` 块整合、sourceSet 缓存排除路径修正、可选兼容依赖统一 `compileOnly` + `runtimeOnly` 模式。
+
+### 死代码清理
+
+- 删除 `SimpleAttachmentItem`（无引用）
+- 删除 `ApsItem` 未用 `advanced` 构造器
+- 删除 `MissileEntity` 的 `shooterUUID` / `getTargetEntityUUID()` / `updateRotationFromVelocity()`（死字段/方法）
+- 删除 `WorkbenchBlockEntity.SLOT_ATTACH`（未用）
+- 删除 `WorkbenchBlock` 空覆写 `onRemove`
+- 删除 `PEKeyBindings` 重复 import
+- 删除 `PEDataGen` 孤儿 `slot...decoration` key
+
 ## [1.5.0]
 
 ### 新增

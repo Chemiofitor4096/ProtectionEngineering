@@ -3,9 +3,12 @@ package com.chemiofitor.protection_engineering.client;
 import com.chemiofitor.protection_engineering.ProtectionEngineering;
 import com.chemiofitor.protection_engineering.client.layer.PEArmorLayer;
 import com.chemiofitor.protection_engineering.client.model.*;
+import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.entity.ArmorStandRenderer;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.EntityType;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -59,14 +62,21 @@ public class PEModelLayers {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @SubscribeEvent
     public static void addLayers(EntityRenderersEvent.AddLayers event) {
+        // 玩家（所有皮肤变体）
         event.getSkins().forEach(skin -> {
             if (event.getSkin(skin) instanceof PlayerRenderer pr) {
                 pr.addLayer((RenderLayer) new PEArmorLayer(pr, event.getEntityModels()));
             }
         });
 
-        if (event.getRenderer(EntityType.ARMOR_STAND) instanceof ArmorStandRenderer asr) {
-            asr.addLayer((RenderLayer) new PEArmorLayer(asr, event.getEntityModels()));
+        // 盔甲架 + 所有使用 HumanoidModel 的类人生物（僵尸、骷髅、凋灵骷髅等）
+        for (EntityType<?> type : BuiltInRegistries.ENTITY_TYPE) {
+            if (type == EntityType.PLAYER) continue; // 玩家已处理
+            if (event.getRenderer(type) instanceof LivingEntityRenderer<?, ?> renderer) {
+                if (renderer instanceof ArmorStandRenderer || renderer.getModel() instanceof HumanoidModel) {
+                    renderer.addLayer((RenderLayer) new PEArmorLayer(renderer, event.getEntityModels()));
+                }
+            }
         }
     }
 }

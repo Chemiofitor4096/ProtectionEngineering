@@ -1,7 +1,6 @@
 package com.chemiofitor.protection_engineering.client;
 
 import com.chemiofitor.protection_engineering.ProtectionEngineering;
-import com.chemiofitor.protection_engineering.ProtectionEngineering;
 import com.chemiofitor.protection_engineering.api.AttachmentUtil;
 import com.chemiofitor.protection_engineering.api.IAttachment;
 import com.chemiofitor.protection_engineering.item.ApsItem;

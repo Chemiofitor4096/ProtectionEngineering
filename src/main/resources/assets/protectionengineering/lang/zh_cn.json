@@ -1,5 +1,13 @@
 {
   "block.protectionengineering.workbench": "盔甲改装台",
+  "block.protectionengineering.armor_emitter": "护甲发射器",
+  "block.protectionengineering.armor_emitter.tooltip.summary": "自动穿戴动力臂递送的护甲与附件",
+  "block.protectionengineering.armor_emitter.tooltip.condition1": "当有可穿戴装备的生物站在上方时，",
+  "block.protectionengineering.armor_emitter.tooltip.behaviour1": "护甲会装备到对应槽位，本模组附件会安装到兼容槽位",
+  "message.protectionengineering.armor_emitter.mode": "护甲发射器模式：%s",
+  "mode.protectionengineering.armor_emitter.equip": "脱下装备（保留附件）",
+  "mode.protectionengineering.armor_emitter.attach": "拆除附件",
+  "mode.protectionengineering.armor_emitter.both": "全部移除",
 
   "itemGroup.protectionengineering": "工程防护",
 
@@ -40,6 +48,7 @@
   "item.protectionengineering.springy_kneecap": "弹跳助力膝",
 
   "item.protectionengineering.improved_soles": "改良鞋底",
+  "item.protectionengineering.diving_soles": "潜水配重鞋底",
   "item.protectionengineering.cushioned_soles": "缓冲鞋底",
   "item.protectionengineering.frost_soles": "冰霜鞋底",
   "item.protectionengineering.insulated_soles": "隔热鞋底",
@@ -97,6 +106,7 @@
   "tooltip.protectionengineering.feature.cushioned_kneecap": "摔落伤害 -10%",
   "tooltip.protectionengineering.feature.cushioned_soles": "摔落伤害 -20% · 摔落高度 -1",
   "tooltip.protectionengineering.feature.improved_soles": "防滑 · 免疫粘液/蜂蜜/灵魂沙 · 细雪行走",
+  "tooltip.protectionengineering.feature.diving_soles": "潜水配重：水下下沉 · 水平加速",
   "tooltip.protectionengineering.feature.insulated_soles": "免疫脚下热源伤害",
   "tooltip.protectionengineering.feature.frost_soles": "水上行走时将水面冻结为霜冰",
   "tooltip.protectionengineering.feature.silent_soles": "静音移动 · 躲避坚守者探测",
@@ -133,19 +143,16 @@
   "key.protectionengineering.toggle_spyglass": "切换望远镜",
 
   "message.protectionengineering.hormone_used": "§a治疗针已激活",
-  "message.protectionengineering.hormone_cooldown": "§c冷却中… %s 秒",
   "message.protectionengineering.hormone_ready": "§a治疗针已就绪",
   "message.protectionengineering.dodge_activated": "§b应激反馈已激活！伤害免疫",
   "message.protectionengineering.dodge_cooldown": "§c应激反馈冷却中… %s 秒",
   "message.protectionengineering.dodge_danger": "§c周围存在危险源，应激反馈未触发",
 
   "message.protectionengineering.aps_activated": "§a主动防御系统已开启",
-  "message.protectionengineering.aps_cooldown_start": "§e主动防御系统进入冷却",
   "message.protectionengineering.aps_cooldown": "§c冷却中… %s 秒",
   "message.protectionengineering.aps_ready": "§a主动防御系统已就绪",
 
   "message.protectionengineering.rocket_launcher_activated": "§a火箭发射！",
-  "message.protectionengineering.rocket_launcher_cooldown": "§c火箭发射器冷却中… %s 秒",
   "message.protectionengineering.rocket_launcher_ready": "§a火箭发射器已就绪",
 
   "tooltip.protectionengineering.missile_item": "供便携式导弹背包发射",
@@ -154,7 +161,6 @@
   "message.protectionengineering.missile_empty": "§c物品栏中没有制导导弹！",
   "message.protectionengineering.missile_no_target": "§c未锁定到有效目标！",
   "message.protectionengineering.missile_activated": "§a导弹已发射！",
-  "message.protectionengineering.missile_cooldown": "§c导弹系统冷却中… %s 秒",
   "message.protectionengineering.missile_ready": "§a导弹系统已就绪",
 
   "subtitles.protectionengineering.dodge_warning": "应激反馈背包：警报",

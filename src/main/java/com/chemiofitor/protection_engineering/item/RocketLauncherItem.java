@@ -90,6 +90,14 @@ public class RocketLauncherItem extends AttachmentItem {
 
         level.playSound(null, player, PESounds.ROCKET_LAUNCH.get(),
                 SoundSource.PLAYERS, 1.0f, 1.0f);
+        sendMessage(player, "message.protectionengineering.rocket_launcher_activated");
+    }
+
+    @Override
+    protected void onStateEnter(ItemStack stack, int newState, LivingEntity entity) {
+        if (newState == STATE_READY) {
+            sendMessage(entity, "message.protectionengineering.rocket_launcher_ready");
+        }
     }
 
     private int countFireworks(Player player) {

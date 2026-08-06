@@ -50,7 +50,6 @@ public class PEDataGen {
             add.accept("slot.protectionengineering.chestplate_decoration", "Chestplate Decoration");
             add.accept("slot.protectionengineering.leggings_decoration", "Leggings Decoration");
             add.accept("slot.protectionengineering.boots_decoration", "Boots Decoration");
-            add.accept("slot.protectionengineering.decoration", "Decoration");
             add.accept("slot.protectionengineering.blade", "Blade");
             add.accept("slot.protectionengineering.hilt", "Hilt");
             add.accept("slot.protectionengineering.guard", "Guard");
@@ -62,6 +61,18 @@ public class PEDataGen {
             add.accept("tooltip.protectionengineering.feature", "Feature:");
             add.accept("tooltip.protectionengineering.worn", "When installed as a part");
             add.accept("tooltip.protectionengineering.prev_page", "Previous Page");
+
+            // ── Armor Emitter tooltip（机械动力风格）──────────────────
+            add.accept("block.protectionengineering.armor_emitter.tooltip.summary",
+                    "Automatically equips armor & attachments delivered by a Deployer");
+            add.accept("block.protectionengineering.armor_emitter.tooltip.condition1",
+                    "When an entity that can wear equipment stands on top,");
+            add.accept("block.protectionengineering.armor_emitter.tooltip.behaviour1",
+                    "armor equips to the matching slot, PE attachments install to compatible slots");
+            add.accept("message.protectionengineering.armor_emitter.mode", "Armor Emitter mode: %s");
+            add.accept("mode.protectionengineering.armor_emitter.equip", "Remove equipment (keep attachments)");
+            add.accept("mode.protectionengineering.armor_emitter.attach", "Remove attachments");
+            add.accept("mode.protectionengineering.armor_emitter.both", "Remove all");
             add.accept("tooltip.protectionengineering.next_page", "Next Page");
             add.accept("tooltip.protectionengineering.repair_materials", "Repair:");
 
@@ -80,6 +91,7 @@ public class PEDataGen {
             add.accept("tooltip.protectionengineering.feature.cushioned_kneecap", "Fall Damage -10%");
             add.accept("tooltip.protectionengineering.feature.cushioned_soles", "Fall Damage -20% · Height -1");
             add.accept("tooltip.protectionengineering.feature.improved_soles", "No-slip · Immune slime/honey/soul sand · Powder snow walk");
+            add.accept("tooltip.protectionengineering.feature.diving_soles", "Diving weights: sink & speed up underwater");
             add.accept("tooltip.protectionengineering.feature.insulated_soles", "Immune to ground heat damage");
             add.accept("tooltip.protectionengineering.feature.frost_soles", "Frost Walker on water");
             add.accept("tooltip.protectionengineering.feature.silent_soles", "Silent movement · Evades Warden");
@@ -125,7 +137,6 @@ public class PEDataGen {
 
             // ── Messages: Hormone ──────────────────────────────────
             add.accept("message.protectionengineering.hormone_used", "§aHormone injector activated");
-            add.accept("message.protectionengineering.hormone_cooldown", "§cCooling down… %s s");
             add.accept("message.protectionengineering.hormone_ready", "§aHormone injector ready");
 
             // ── Messages: Dodge ────────────────────────────────────
@@ -135,13 +146,11 @@ public class PEDataGen {
 
             // ── Messages: APS ──────────────────────────────────────
             add.accept("message.protectionengineering.aps_activated", "§aAPS activated");
-            add.accept("message.protectionengineering.aps_cooldown_start", "§eAPS entering cooldown");
             add.accept("message.protectionengineering.aps_cooldown", "§cCooling down… %s s");
             add.accept("message.protectionengineering.aps_ready", "§aAPS ready");
 
             // ── Messages: Rocket Launcher ──────────────────────────
             add.accept("message.protectionengineering.rocket_launcher_activated", "§aRocket launched!");
-            add.accept("message.protectionengineering.rocket_launcher_cooldown", "§cRocket launcher cooling… %s s");
             add.accept("message.protectionengineering.rocket_launcher_ready", "§aRocket launcher ready");
 
             // ── Messages: Missile ──────────────────────────────────
@@ -149,7 +158,6 @@ public class PEDataGen {
             add.accept("message.protectionengineering.missile_empty", "§cNo guided missile in inventory!");
             add.accept("message.protectionengineering.missile_no_target", "§cNo valid target locked!");
             add.accept("message.protectionengineering.missile_activated", "§aMissile launched!");
-            add.accept("message.protectionengineering.missile_cooldown", "§cMissile system cooling… %s s");
             add.accept("message.protectionengineering.missile_ready", "§aMissile system ready");
 
             // ── Misc Tooltips ──────────────────────────────────────

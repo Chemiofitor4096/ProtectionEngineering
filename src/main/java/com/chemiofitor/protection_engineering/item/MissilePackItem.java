@@ -128,6 +128,14 @@ public class MissilePackItem extends AttachmentItem {
 
         level.playSound(null, player, PESounds.MISSILE_LAUNCH.get(),
                 SoundSource.PLAYERS, 1.0f, 1.0f);
+        sendMessage(player, "message.protectionengineering.missile_activated");
+    }
+
+    @Override
+    protected void onStateEnter(ItemStack stack, int newState, LivingEntity entity) {
+        if (newState == STATE_READY) {
+            sendMessage(entity, "message.protectionengineering.missile_ready");
+        }
     }
 
     // ── 消耗导弹 ──────────────────────────────────────────────

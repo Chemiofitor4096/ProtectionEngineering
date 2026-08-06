@@ -4,8 +4,11 @@ import com.chemiofitor.protection_engineering.client.PEClientExtensions;
 import com.chemiofitor.protection_engineering.item.*;
 import com.simibubi.create.foundation.data.AssetLookup;
 import com.tterrag.registrate.util.entry.ItemEntry;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Rarity;
+
+import java.util.Set;
 
 import static com.chemiofitor.protection_engineering.ProtectionEngineering.REGISTRATE;
 import static com.chemiofitor.protection_engineering.registry.PEArmorMaterials.DURABILITY_FACTOR;
@@ -207,13 +210,15 @@ public class PEItems {
     //  通用附件 (1) — LINING
     // ══════════════════════════════════════════════════════════════
 
-    public static final ItemEntry<BlastLiningItem> BLAST_LINING = REGISTRATE
-            .item("blast_lining", BlastLiningItem::new)
+    public static final ItemEntry<LiningItem> BLAST_LINING = REGISTRATE
+            .item("blast_lining", p -> new LiningItem(p, Set.of(DamageTypeTags.IS_EXPLOSION),
+                    "tooltip.protectionengineering.feature.blast_lining"))
             .properties(p -> p.stacksTo(1))
             .register();
 
-    public static final ItemEntry<FireLiningItem> FIRE_LINING = REGISTRATE
-            .item("fire_lining", FireLiningItem::new)
+    public static final ItemEntry<LiningItem> FIRE_LINING = REGISTRATE
+            .item("fire_lining", p -> new LiningItem(p, Set.of(DamageTypeTags.IS_FIRE),
+                    "tooltip.protectionengineering.feature.fire_lining"))
             .properties(p -> p.stacksTo(1).fireResistant())
             .register();
 
@@ -243,6 +248,11 @@ public class PEItems {
 
     public static final ItemEntry<SilentSolesItem> SILENT_SOLES = REGISTRATE
             .item("silent_soles", SilentSolesItem::new)
+            .properties(p -> p.stacksTo(1))
+            .register();
+
+    public static final ItemEntry<DivingSolesItem> DIVING_SOLES = REGISTRATE
+            .item("diving_soles", DivingSolesItem::new)
             .properties(p -> p.stacksTo(1))
             .register();
 

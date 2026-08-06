@@ -1,15 +1,18 @@
-// 1.21.1	2026-08-05T16:02:53.7674472	Registrate Provider for protectionengineering [Registries, Data Maps, Recipes, Advancements, Loot Tables, Tags (blocks), Tags (enchantments), Tags (items), Tags (fluids), Tags (entity_types), generic_server_provider, Blockstates, Item models, Lang (en_us/en_ud), generic_client_provider]
+// 1.21.1	2026-08-06T15:02:30.0425007	Registrate Provider for protectionengineering [Registries, Data Maps, Recipes, Advancements, Loot Tables, Tags (blocks), Tags (enchantments), Tags (items), Tags (fluids), Tags (entity_types), generic_server_provider, Blockstates, Item models, Lang (en_us/en_ud), generic_client_provider]
+128efc46a9df62458debcfbbd485b650d6404b61 assets/protectionengineering/blockstates/armor_emitter.json
 9548b733d8408aab37f04a6ccfcda663b4d8e229 assets/protectionengineering/blockstates/workbench.json
-2f86bc3db8bd003f69c82407e2bfe15291d6d72d assets/protectionengineering/lang/en_ud.json
-17babb624777d61e466b2a95d30f78d5cc81755d assets/protectionengineering/lang/en_us.json
+40a44f13d7c1edc915c7615ec2135bc03330c0a4 assets/protectionengineering/lang/en_ud.json
+390154defa2af898005e2df909061576b55b17da assets/protectionengineering/lang/en_us.json
 de432a9aaddd8bf94d4ff0714405d45b68482019 assets/protectionengineering/models/item/advanced_aps.json
 fd6421744d19fc737d2db860c16f73d268b23727 assets/protectionengineering/models/item/air_filter.json
 d83a0d8a91c9426b9002ffad467f65ec884026bb assets/protectionengineering/models/item/aps.json
+745a7fb8f292b64ae2c3189508824d5af685f8e5 assets/protectionengineering/models/item/armor_emitter.json
 eefa93e73e4292998cc345e1c1e18e5f7eaa3dbc assets/protectionengineering/models/item/blast_lining.json
 297deffd4d39d7e71ef67f227eb60c91175f3bd5 assets/protectionengineering/models/item/blood_magic_lining.json
 cddd2c2f78b45d389174d4e8ae660c51b07b7ea8 assets/protectionengineering/models/item/cushioned_kneecap.json
 239d9830cdccd63507f974190bdbb15385d7b35a assets/protectionengineering/models/item/cushioned_soles.json
 b0c5e032f49e35a0c8684782d33305a55518345a assets/protectionengineering/models/item/diving_device.json
+ca6702b41135e093db33b9777875c910319a23eb assets/protectionengineering/models/item/diving_soles.json
 2db41bc5e311dff0bd017376138680346dee3d17 assets/protectionengineering/models/item/dodge_jetpack.json
 02bb2f177bcabcc77a7c57947d541a693b5a8f0f assets/protectionengineering/models/item/eldritch_magic_lining.json
 24dc28dcdb0bfd4c134dcc077e64bcc7098955c0 assets/protectionengineering/models/item/ender_magic_lining.json
@@ -46,4 +49,5 @@ af6628e86678c209a6ea7e307d7c9ff8aeb0b48d assets/protectionengineering/models/ite
 585c71e4897b058ed334aef67be481b272f870e9 assets/protectionengineering/models/item/spyglass.json
 a77d04174c7f8d1fbf0947adcf2a19c42fa3d9c3 assets/protectionengineering/models/item/sturdy_plate.json
 c44852c88a1dbe2a21e75f32839d5239677e0114 assets/protectionengineering/models/item/workbench.json
+75ac6e173161603de13537bf72d9518f8ec706c9 data/protectionengineering/loot_table/blocks/armor_emitter.json
 3c07b37db8260d18850e40b46354054ffd880efc data/protectionengineering/loot_table/blocks/workbench.json

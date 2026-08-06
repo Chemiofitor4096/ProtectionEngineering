@@ -12,6 +12,7 @@ import com.chemiofitor.protection_engineering.item.InsulatedSolesItem;
 import com.chemiofitor.protection_engineering.item.SilentSolesItem;
 import com.chemiofitor.protection_engineering.registry.PEDataComponents;
 import net.minecraft.core.Holder;
+import net.minecraft.network.chat.Component;
 import net.minecraft.tags.GameEventTags;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffect;
@@ -70,12 +71,18 @@ public class PEGameEvents {
                             backSlot.set(PEDataComponents.ATTACHMENT_STATE.get(), STATE_COOLING);
                             backSlot.set(PEDataComponents.ATTACHMENT_COOLDOWN.get(),
                                     now + PEServerConfig.DODGE_COOLDOWN_TICKS.get());
+                            player.displayClientMessage(
+                                    Component.translatable("message.protectionengineering.dodge_cooldown",
+                                            PEServerConfig.DODGE_COOLDOWN_TICKS.get() / 20), true);
                         }
                         host.setAttachments(chestplate,
                                 host.getAttachments(chestplate).with(SlotTypes.BACK, backSlot));
                         player.setItemSlot(EquipmentSlot.CHEST, chestplate);
                         event.setCanceled(true);
                         return;
+                    } else if (DodgeJetpackItem.isNearDanger(player)) {
+                        player.displayClientMessage(
+                                Component.translatable("message.protectionengineering.dodge_danger"), true);
                     }
                 }
             }
@@ -83,16 +90,11 @@ public class PEGameEvents {
 
         // ── 投射物 → APS 拦截 ───────────────────────────
         if (attacker instanceof Projectile projectile) {
-            if (chestplate.getItem() instanceof IAttachmentHost host) {
-                for (var entry : host.getAttachments(chestplate).slots().entrySet()) {
-                    ItemStack attached = entry.getValue();
-                    if (attached.getItem() instanceof ApsItem) {
-                        if (ApsItem.interceptDirectHit(player, attached, projectile)) {
-                            event.setCanceled(true);
-                            return;
-                        }
-                    }
-                }
+            ItemStack apsStack = AttachmentUtil.get(player, EquipmentSlot.CHEST, SlotTypes.SHOULDER);
+            if (apsStack.getItem() instanceof ApsItem
+                    && ApsItem.interceptDirectHit(player, apsStack, projectile)) {
+                event.setCanceled(true);
+                return;
             }
         }
 
