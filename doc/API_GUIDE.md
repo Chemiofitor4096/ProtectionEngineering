@@ -5,22 +5,22 @@
 | Package | Purpose |
 |---|---|
 | `com.chemiofitor.protection_engineering` | Main mod class and client setup |
-| `com.chemiofitor.protection_engineering.api` | Public API: attachment/host interfaces, slot types, data component |
-| `com.chemiofitor.protection_engineering.block` | Workbench block and block entity |
-| `com.chemiofitor.protection_engineering.client` | Keybindings, HUD overlays, model layers, entity renderers |
+| `com.chemiofitor.protection_engineering.api` | Public API: attachment/host interfaces, slot types, data component, attachment utils, graded repair |
+| `com.chemiofitor.protection_engineering.block` | Workbench block/BE + Armor Emitter block |
+| `com.chemiofitor.protection_engineering.client` | Keybindings, HUD overlays, model layers, entity renderers, model setup |
 | `com.chemiofitor.protection_engineering.client.layer` | `PEArmorLayer` -- 3D armor + attachment rendering on player |
 | `com.chemiofitor.protection_engineering.client.model` | 33 Blockbench-exported model classes |
 | `com.chemiofitor.protection_engineering.client.renderer` | Missile and rocket entity renderers |
-| `com.chemiofitor.protection_engineering.compat` | Detail Armor Bar Reconstructed compatibility |
+| `com.chemiofitor.protection_engineering.compat` | Detail Armor Bar, PlayerAnimator, Iron's Spells compats (guarded) |
 | `com.chemiofitor.protection_engineering.config` | Client and server configuration specs |
 | `com.chemiofitor.protection_engineering.data` | Data generation entry point and recipe providers |
 | `com.chemiofitor.protection_engineering.entity` | Custom entity classes (missile, rocket, thrust) |
 | `com.chemiofitor.protection_engineering.event` | Game event handlers and network event registration |
-| `com.chemiofitor.protection_engineering.item` | All item classes (32 total) |
+| `com.chemiofitor.protection_engineering.item` | All item classes (38 total: 4 armor + 30 attachments + missile/saw-sword/shield) |
 | `com.chemiofitor.protection_engineering.menu` | Workbench GUI container and screen |
-| `com.chemiofitor.protection_engineering.mixin` | Damage cap, shield behavior, slip/snow walking |
+| `com.chemiofitor.protection_engineering.mixin` | Slip cancel, shield angle, shield cooldown, diving boots |
 | `com.chemiofitor.protection_engineering.network` | Custom network payloads (toggle, thrust) |
-| `com.chemiofitor.protection_engineering.registry` | All deferred registers (data components, items, entities, sounds, armor materials) |
+| `com.chemiofitor.protection_engineering.registry` | All deferred registers (data components, items, entities, sounds, armor materials, blocks) |
 
 ## Core Concepts
 
@@ -34,7 +34,7 @@
 
 ## Slot Types
 
-All slots are defined in `SlotTypes` and identified by `ResourceLocation`:
+All slots are defined in `SlotTypes` and identified by `ResourceLocation`. Each armor piece supports its dedicated slots plus a generic `LINING` and a per-piece decoration slot:
 
 | Constant | ID | Armor Piece |
 |---|---|---|
@@ -47,6 +47,12 @@ All slots are defined in `SlotTypes` and identified by `ResourceLocation`:
 | `LEG` | `protectionengineering:leg` | Leggings |
 | `KNEE` | `protectionengineering:knee` | Leggings |
 | `FOOT` | `protectionengineering:foot` | Boots |
+| `LINING` | `protectionengineering:lining` | All armor (generic) |
+| `HELMET_DECORATION` | `protectionengineering:helmet_decoration` | Hood (generic) |
+| `CHESTPLATE_DECORATION` | `protectionengineering:chestplate_decoration` | Chestplate (generic) |
+| `LEGGINGS_DECORATION` | `protectionengineering:leggings_decoration` | Leggings (generic) |
+| `BOOTS_DECORATION` | `protectionengineering:boots_decoration` | Boots (generic) |
+| `BLADE` / `HILT` / `GUARD` | `protectionengineering:blade` / `hilt` / `guard` | Weapons (reserved) |
 
 ### Custom Slots
 
@@ -59,49 +65,64 @@ public static final SlotType MY_SLOT = SlotType.register(
 );
 ```
 
+> Every slot maps to an `EquipmentSlotGroup` (used for attribute modifier application). The group is stored in a side-table so it does not participate in `record` equality. For host armor the group is **derived from the actual armor piece** at apply time (see below).
+
 ---
 
 ## Creating Attachments
 
+All attachments extend `AttachmentItem` (never `Item` directly). The base class owns the state machine — do **not** override `onEquip`/`onActivatePress`/`onTick` for state transitions.
+
 ### Passive Attachment (Immunity Only)
 
-Use `SimpleAttachmentItem` directly:
+Declare compatible slots + immunity set in the constructor:
 
 ```java
+// Constructor: (Properties, Set<Holder<MobEffect>> immunities, SlotType... slots)
+public class MyFilterItem extends AttachmentItem {
+    public MyFilterItem(Properties p) {
+        super(p, Set.of(MobEffects.POISON, MobEffects.CONFUSION), SlotTypes.MOUTH);
+    }
+}
+
 // In your registration class
-public static final ItemEntry<SimpleAttachmentItem> MY_GADGET = REGISTRATE
-    .item("my_gadget", p -> new SimpleAttachmentItem(p,
-        Set.of(MobEffects.POISON),       // immunities
-        SlotTypes.MOUTH))                // compatible slot
+public static final ItemEntry<MyFilterItem> MY_FILTER = REGISTRATE
+    .item("my_filter", MyFilterItem::new)
     .properties(p -> p.stacksTo(1))
     .register();
 ```
 
 ### Passive With Attribute Modifiers
 
+Declare bonuses via `getAttributeBonuses()`; the base class applies them to the host through `ItemAttributeModifierEvent` and renders the "When installed as a part" tooltip. Equipment slot groups are auto-derived — never hand-write them:
+
 ```java
 public class MyPlateItem extends AttachmentItem {
-    private static final UUID ARMOR_MODIFIER = UUID.fromString("...");
-
     public MyPlateItem(Properties p) { super(p, SlotTypes.CHESTPLATE); }
 
     @Override
     public ControlPattern getControlPattern() { return ControlPattern.PASSIVE; }
 
     @Override
-    public void addAttributeModifiers(ItemStack stack, ItemStack armor,
-                                       SlotType slot, LivingEntity entity,
-                                       AttributeMap attributes) {
-        attributes.addTransientAttributeModifier(
-            Attributes.ARMOR,
-            new AttributeModifier(ARMOR_MODIFIER, "My plate bonus", 2.0,
-                AttributeModifier.Operation.ADD_VALUE)
-        );
+    public List<IAttachment.AttributeBonus> getAttributeBonuses() {
+        return List.of(IAttachment.bonus("my_plate_armor",  // id auto-prefixed with mod namespace
+                Attributes.ARMOR, 2.0,
+                AttributeModifier.Operation.ADD_VALUE));
     }
 
     @Override
     public float getDamageReduction() { return 0.10f; }
 }
+```
+
+For a tag-scoped lining (generic `LINING` slot), reuse `LiningItem` with the tag and a feature key:
+
+```java
+public static final ItemEntry<LiningItem> MY_LINING = REGISTRATE
+    .item("my_lining", p -> new LiningItem(p, Set.of(DamageTypeTags.IS_FIRE),
+            "tooltip.protectionengineering.feature.my_lining"))
+    .properties(p -> p.stacksTo(1).fireResistant())
+    .register();
 ```
 
 ### Toggleable Attachment (FREE_TOGGLE)
@@ -242,6 +263,21 @@ void onStateEnter(ItemStack, int newState, LivingEntity) // Entering state
 void onStateExit(ItemStack, int oldState, LivingEntity)  // Exiting state
 ```
 
+> `onEquip` default: FREE_TOGGLE / ACTIVE_COOLDOWN / ONE_SHOT_COOLDOWN / ALWAYS_ON attachments start READY (PASSIVE has no state; `SpyglassItem` overrides to start DISABLED). If you override `onTick`, call `super.onTick(...)` first — the base class drives all timer-driven transitions.
+
+### AttachmentUtil
+
+`AttachmentUtil` (in `api`) removes the "iterate armor -> find host -> iterate attachments" boilerplate shared by `PEGameEvents`, `PEKeyBindings` and the HUD overlays:
+
+```java
+AttachmentUtil.findFirst(player, MyAttachment.class)      // Optional<Match<T>>
+AttachmentUtil.has(player, MyAttachment.class)            // boolean
+AttachmentUtil.any(player, stackPredicate)                // boolean
+AttachmentUtil.get(player, EquipmentSlot.HEAD, SlotTypes.EYES) // ItemStack
+AttachmentUtil.forEach(player, (match, attachment) -> ...)
+AttachmentUtil.reduce(player, IAttachment::getDamageReduction) // double sum
+```
+
 ## Damage Reduction and Immunity System
 
 ### Override Points
@@ -264,7 +300,7 @@ public Set<Holder<MobEffect>> getImmunities() {
 
 ### Stacking Rules
 
-All damage reductions and distance reductions from all attachments stack additively with no upper limit. The final damage is clamped to 100% reduction (preventing negative damage). Processing is done in `PEGameEvents` and `LivingEntityMixin`.
+All damage reductions and distance reductions from all attachments stack additively with no upper limit. The final damage is clamped to 100% reduction (preventing negative damage). Processing is done in `PEGameEvents.onLivingIncomingDamage` (general reduction + protected types/tags filter) and `PEGameEvents.onLivingFall` (fall distance + fall damage multiplier). Damage-type filtering is done via `getProtectedDamageTypes()` (explicit `ResourceKey<DamageType>`) and `getProtectedDamageTypeTags()` (`TagKey<DamageType>`, preferred); empty set = applies to all types.
 
 ## HUD Overlay System
 
@@ -334,6 +370,8 @@ while (MY_KEY.consumeClick()) {
 | hormone | cooldownTicks | 1200 | 20-7200 | Hormone injector cooldown |
 | dodge | dodgeStrength | 1.0 | 0.2-10 | Dodge jetpack push strength |
 | dodge | cooldownTicks | 200 | 20-3600 | Dodge jetpack cooldown |
+| repair | brassSheetUnits | 3 | 0-20 | Graded repair units (20 = full durability) for Brass Sheet |
+| repair | sturdySheetUnits | 10 | 0-20 | Graded repair units for Sturdy Sheet |
 
 ## 3D Model Integration
 
@@ -436,7 +474,7 @@ public record ToggleAttachmentPayload(int armorIndex, ResourceLocation slotTypeI
 // In PENetworkEvents
 @SubscribeEvent
 public static void registerPayloads(RegisterPayloadHandlersEvent event) {
-    event.registrar("1.0")
+    event.registrar("1")   // protocol version tag
         .playToServer(
             ToggleAttachmentPayload.TYPE,
             ToggleAttachmentPayload.STREAM_CODEC,
@@ -451,19 +489,20 @@ public static void registerPayloads(RegisterPayloadHandlersEvent event) {
 
 When adding a new attachment or feature:
 
-- [ ] **Item class**: Extend `AttachmentItem` (or `SimpleAttachmentItem` for passives)
-- [ ] **Control pattern**: Implement `getControlPattern()` and any duration methods
-- [ ] **Lifecycle hooks**: Override `onActivateOnce`, `onStateEnter`, `onStateExit`
-- [ ] **Per-tick logic**: Override `onTick()` with `super.onTick()` call
+- [ ] **Item class**: Extend `AttachmentItem` (passive or active; no `SimpleAttachmentItem` — it was removed)
+- [ ] **Control pattern**: Implement `getControlPattern()` and any duration methods (`getActiveDuration` / `getCooldownDuration`)
+- [ ] **Lifecycle hooks**: Override `onActivateOnce`, `onStateEnter`, `onStateExit` (not `onEquip`/`onActivatePress`/`onTick` for transitions)
+- [ ] **Per-tick logic**: Override `onTick()` with `super.onTick()` call first
 - [ ] **Immunities**: Pass `Set.of(...)` in constructor for effect immunities
-- [ ] **Combat modifiers**: Override `getDamageReduction()`, `getFallDamageReduction()`, `getFallDistanceReduction()`
-- [ ] **Attributes**: Override `addAttributeModifiers()` for attribute bonuses
+- [ ] **Combat modifiers**: Override `getDamageReduction()`, `getFallDamageReduction()`, `getFallDistanceReduction()`; scope with `getProtectedDamageTypes()` / `getProtectedDamageTypeTags()`
+- [ ] **Attributes**: Override `getAttributeBonuses()` (use `IAttachment.bonus()`) — never hand-write equipment slot groups
 - [ ] **Registration**: Add to `PEItems` via Registrate
 - [ ] **3D model**: Create Blockbench model, add `registerMain`/`registerArm`/`registerLeg` in `PEAttachmentModelSetup`
 - [ ] **Model layer**: Register in `PEModelLayers.registerLayerDefinitions()`
-- [ ] **Translations**: Add English in `PEDataGen.java`, Chinese in `zh_cn.json`
-- [ ] **Recipes**: Add to `PERecipeProvider` or `PEMechanicalCraftingRecipeGen`
+- [ ] **Translations**: Add English key + run `runData`, hand-write Chinese in `zh_cn.json`
+- [ ] **Recipes**: Add to `PERecipeProvider` or `PEMechanicalCraftingRecipeGen`, then run `runData`
 - [ ] **Server config**: Add entries to `PEServerConfig` for tunable parameters
 - [ ] **Game events**: Add handler in `PEGameEvents` if custom damage/interaction needed
-- [ ] **Sound**: Add sound event in `PESounds` and OGG file if custom audio needed
+- [ ] **Sound**: Add sound event in `PESounds` + `sounds.json` + OGG file if custom audio needed
 - [ ] **Keybind**: Register key mapping in `PEKeyBindings` if active ability
+- [ ] **Graded repair**: For repairable items implement `IGradedRepair` + override `isValidRepairItem` + call `appendRepairTooltip`

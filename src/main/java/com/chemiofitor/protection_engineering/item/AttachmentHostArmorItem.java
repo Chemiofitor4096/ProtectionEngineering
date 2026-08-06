@@ -45,7 +45,7 @@ public abstract class AttachmentHostArmorItem extends ArmorItem implements IAtta
         return PERepairMaterials.contains(repair);
     }
 
-    /** 该模组护甲不显示附魔光效 (#改装台.md) */
+    /** 该模组护甲不显示附魔光效 */
     @Override
     public boolean isFoil(ItemStack stack) {
         return false;
