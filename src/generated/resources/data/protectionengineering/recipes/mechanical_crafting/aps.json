@@ -1,0 +1,22 @@
+{
+  "type": "create:mechanical_crafting",
+  "acceptMirrored": true,
+  "key": {
+    "B": {
+      "item": "create:brass_sheet"
+    },
+    "C": {
+      "item": "create:redstone_contact"
+    },
+    "T": {
+      "item": "minecraft:tnt"
+    }
+  },
+  "pattern": [
+    "BB BB",
+    "BTCTB"
+  ],
+  "result": {
+    "item": "protectionengineering:aps"
+  }
+}

@@ -7,8 +7,8 @@ import com.chemiofitor.protection_engineering.entity.ThrustEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.RegistryObject;
 
 /**
  * 实体类型注册 — 推力实体、火箭射弹、制导导弹。
@@ -18,7 +18,7 @@ public class PEEntities {
     public static final DeferredRegister<EntityType<?>> REGISTRY =
             DeferredRegister.create(Registries.ENTITY_TYPE, ProtectionEngineering.MODID);
 
-    public static final DeferredHolder<EntityType<?>, EntityType<ThrustEntity>> THRUST =
+    public static final RegistryObject<EntityType<ThrustEntity>> THRUST =
             REGISTRY.register("thrust",
                     () -> EntityType.Builder.<ThrustEntity>of(ThrustEntity::new, MobCategory.MISC)
                             .sized(0.0F, 0.0F)
@@ -27,7 +27,7 @@ public class PEEntities {
                             .noSummon()
                             .build(ProtectionEngineering.asResource("thrust").toString()));
 
-    public static final DeferredHolder<EntityType<?>, EntityType<RocketProjectile>> ROCKET_PROJECTILE =
+    public static final RegistryObject<EntityType<RocketProjectile>> ROCKET_PROJECTILE =
             REGISTRY.register("rocket_projectile",
                     () -> EntityType.Builder.<RocketProjectile>of(RocketProjectile::new, MobCategory.MISC)
                             .sized(0.25F, 0.25F)
@@ -35,7 +35,7 @@ public class PEEntities {
                             .updateInterval(10)
                             .build(ProtectionEngineering.asResource("rocket_projectile").toString()));
 
-    public static final DeferredHolder<EntityType<?>, EntityType<MissileEntity>> MISSILE =
+    public static final RegistryObject<EntityType<MissileEntity>> MISSILE =
             REGISTRY.register("missile",
                     () -> EntityType.Builder.<MissileEntity>of(MissileEntity::new, MobCategory.MISC)
                             .sized(0.5F, 0.5F)

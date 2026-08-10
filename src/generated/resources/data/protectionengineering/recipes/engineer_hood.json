@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "H": {
+      "item": "minecraft:diamond_helmet"
+    },
+    "P": {
+      "item": "create:precision_mechanism"
+    },
+    "S": {
+      "item": "create:sturdy_sheet"
+    },
+    "W": {
+      "item": "minecraft:red_wool"
+    }
+  },
+  "pattern": [
+    "SPS",
+    "WHW"
+  ],
+  "result": {
+    "item": "protectionengineering:engineer_hood"
+  },
+  "show_notification": true
+}

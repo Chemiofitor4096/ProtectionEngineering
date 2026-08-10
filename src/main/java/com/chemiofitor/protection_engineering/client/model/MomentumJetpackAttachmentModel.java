@@ -13,7 +13,7 @@ import net.minecraft.world.entity.Entity;
 public class MomentumJetpackAttachmentModel<T extends Entity> extends EntityModel<T> {
 
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(
-            ResourceLocation.fromNamespaceAndPath("protectionengineering", "momentum_jetpack"), "main");
+            new ResourceLocation("protectionengineering", "momentum_jetpack"), "main");
     private final ModelPart MachineBackpack;
 
     public MomentumJetpackAttachmentModel(ModelPart root) {
@@ -107,7 +107,7 @@ public class MomentumJetpackAttachmentModel<T extends Entity> extends EntityMode
 
     @Override
     public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer,
-                               int packedLight, int packedOverlay, int color) {
-        MachineBackpack.render(poseStack, vertexConsumer, packedLight, packedOverlay, -1);
+                               int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+        MachineBackpack.render(poseStack, vertexConsumer, packedLight, packedOverlay);
     }
 }

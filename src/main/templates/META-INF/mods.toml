@@ -1,0 +1,38 @@
+modLoader="javafml"
+loaderVersion="${loader_version_range}"
+license="${mod_license}"
+
+[[mods]]
+modId="${mod_id}"
+version="${mod_version}"
+displayName="${mod_name}"
+authors="Rhodes_Koei,Chemiofitor"
+description='''
+Provide installable attachments for the engineer's armor system, and each attachment is installed in a specific slot of armor to provide passive immunity, attribute bonus or active skills.
+'''
+
+# mixin 配置不在 mods.toml 声明（Forge 1.20.1 不读取 [[mixins]]）：
+# 生产环境由 jar manifest 的 MixinConfigs 属性加载，
+# dev 环境由 ModDevGradle 自动向 run 注入 --mixin.config。
+
+[[dependencies.${mod_id}]]
+
+    modId="forge"
+    # 1.20.1 (本环境) 的 FML 依赖解析只认 mandatory 布尔字段，不认 type
+    mandatory=true
+    versionRange="${forge_version_range}"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="${minecraft_version_range}"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.${mod_id}]]
+    modId="create"
+    mandatory=true
+    versionRange="${create_version_range}"
+    ordering="NONE"
+    side="BOTH"

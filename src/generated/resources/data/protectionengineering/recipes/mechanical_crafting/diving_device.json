@@ -1,0 +1,24 @@
+{
+  "type": "create:mechanical_crafting",
+  "acceptMirrored": true,
+  "key": {
+    "C": {
+      "item": "create:copper_sheet"
+    },
+    "G": {
+      "item": "minecraft:glass_pane"
+    },
+    "S": {
+      "item": "create:sturdy_sheet"
+    }
+  },
+  "pattern": [
+    " S   ",
+    " SGGG",
+    " SCS ",
+    " SCS "
+  ],
+  "result": {
+    "item": "protectionengineering:diving_device"
+  }
+}

@@ -29,6 +29,6 @@ public class SturdyPlateItem extends AttachmentItem {
     @Override
     public List<IAttachment.AttributeBonus> getAttributeBonuses() {
         return List.of(IAttachment.bonus("sturdy_plate_armor", Attributes.ARMOR, 2.0,
-                AttributeModifier.Operation.ADD_VALUE));
+                AttributeModifier.Operation.ADDITION));
     }
 }

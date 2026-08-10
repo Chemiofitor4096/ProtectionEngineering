@@ -42,8 +42,8 @@ public class RocketProjectile extends Projectile {
     }
 
     @Override
-    protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        builder.define(DATA_RENDER_ITEM, new ItemStack(Items.FIREWORK_ROCKET));
+    protected void defineSynchedData() {
+        this.entityData.define(DATA_RENDER_ITEM, new ItemStack(Items.FIREWORK_ROCKET));
     }
 
     @Override
@@ -124,7 +124,4 @@ public class RocketProjectile extends Projectile {
 
     @Override
     public boolean isAttackable() { return false; }
-
-    @Override
-    protected double getDefaultGravity() { return 0; }
 }

@@ -29,6 +29,6 @@ public class NetheritePlateItem extends AttachmentItem {
     @Override
     public List<IAttachment.AttributeBonus> getAttributeBonuses() {
         return List.of(IAttachment.bonus("netherite_plate_armor", Attributes.ARMOR, 4.0,
-                AttributeModifier.Operation.ADD_VALUE));
+                AttributeModifier.Operation.ADDITION));
     }
 }

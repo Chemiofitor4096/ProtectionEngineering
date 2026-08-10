@@ -103,7 +103,7 @@ public class WorkbenchScreen extends AbstractContainerScreen<WorkbenchMenu> {
     }
 
     private static ResourceLocation slotTexture(SlotType slot) {
-        return ResourceLocation.fromNamespaceAndPath(slot.id().getNamespace(),
+        return new ResourceLocation(slot.id().getNamespace(),
                 "textures/gui/slot/slot_" + slot.id().getPath() + ".png");
     }
 }

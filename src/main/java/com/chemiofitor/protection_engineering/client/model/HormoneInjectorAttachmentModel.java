@@ -13,7 +13,7 @@ import net.minecraft.world.entity.Entity;
 public class HormoneInjectorAttachmentModel<T extends Entity> extends EntityModel<T> {
 
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(
-            ResourceLocation.fromNamespaceAndPath("protectionengineering", "hormone_injector"), "main");
+            new ResourceLocation("protectionengineering", "hormone_injector"), "main");
     private final ModelPart AttachGlass;
 
     public HormoneInjectorAttachmentModel(ModelPart root) {
@@ -53,7 +53,7 @@ public class HormoneInjectorAttachmentModel<T extends Entity> extends EntityMode
 
     @Override
     public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer,
-                               int packedLight, int packedOverlay, int color) {
-        AttachGlass.render(poseStack, vertexConsumer, packedLight, packedOverlay, -1);
+                               int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+        AttachGlass.render(poseStack, vertexConsumer, packedLight, packedOverlay);
     }
 }

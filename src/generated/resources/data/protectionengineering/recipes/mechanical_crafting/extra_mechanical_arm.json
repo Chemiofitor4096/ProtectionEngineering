@@ -1,0 +1,23 @@
+{
+  "type": "create:mechanical_crafting",
+  "acceptMirrored": true,
+  "key": {
+    "A": {
+      "item": "create:mechanical_arm"
+    },
+    "P": {
+      "item": "create:precision_mechanism"
+    },
+    "S": {
+      "item": "create:sturdy_sheet"
+    }
+  },
+  "pattern": [
+    " S S ",
+    "ASPSA",
+    " S S "
+  ],
+  "result": {
+    "item": "protectionengineering:extra_mechanical_arm"
+  }
+}

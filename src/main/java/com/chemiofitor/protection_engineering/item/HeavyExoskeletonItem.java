@@ -5,6 +5,7 @@ import com.chemiofitor.protection_engineering.api.SlotTypes;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraftforge.common.ForgeMod;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -34,8 +35,9 @@ public class HeavyExoskeletonItem extends AttachmentItem {
     public List<IAttachment.AttributeBonus> getAttributeBonuses() {
         return List.of(
                 IAttachment.bonus("heavy_exo_armor", Attributes.ARMOR, 2.0,
-                        AttributeModifier.Operation.ADD_VALUE),
-                IAttachment.bonus("heavy_exo_step", Attributes.STEP_HEIGHT, 0.4,
-                        AttributeModifier.Operation.ADD_VALUE));
+                        AttributeModifier.Operation.ADDITION),
+                // 1.20.1 无 Attributes.STEP_HEIGHT（1.20.5+ 引入），等价物为 ForgeMod.STEP_HEIGHT_ADDITION
+                IAttachment.bonus("heavy_exo_step", ForgeMod.STEP_HEIGHT_ADDITION.get(), 0.4,
+                        AttributeModifier.Operation.ADDITION));
     }
 }

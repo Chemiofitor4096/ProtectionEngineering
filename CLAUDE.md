@@ -1,6 +1,6 @@
 # Protection Engineering - 开发指南
 
-Minecraft NeoForge 1.21.1 模组。工程师护甲系统 — 护甲可安装附件，附件提供被动免疫/主动技能。
+Minecraft Forge 1.20.1 模组（ModDevGradle LegacyForge 构建）。工程师护甲系统 — 护甲可安装附件，附件提供被动免疫/主动技能。
 
 ## 项目结构
 
@@ -10,7 +10,7 @@ src/main/java/com/chemiofitor/protection_engineering/
 ├── api/                             # 接口层
 │   ├── IAttachment.java             # 附件接口 (ControlPattern + state 常量 + 生命周期钩子 + AttributeBonus 属性声明 + bonus() 工厂)
 │   ├── IAttachmentHost.java         # 宿主接口 (护甲实现)
-│   ├── AttachmentsData.java         # 附件数据组件 (codec/stream codec/值比较)
+│   ├── AttachmentsData.java         # 附件数据 (NBT 序列化, equals 用 ItemStack.matches 值比较)
 │   ├── AttachmentUtil.java          # 附件遍历/查找/归约工具 (PEGameEvents/PEKeyBindings/HUD 共用)
 │   ├── SlotType.java                # 槽位类型 record (含注册表 + 装备槽组旁路映射)
 │   ├── SlotTypes.java               # 内置槽位常量 (9 专属 + LINING + 4 装饰 + 3 武器预留)
@@ -41,9 +41,9 @@ src/main/java/com/chemiofitor/protection_engineering/
 │   ├── MissileItem.java             # 制导导弹 (消耗品, 堆叠16)
 │   ├── ExtraMechanicalArmItem.java  # 额外机械臂 (ARM, 触及+2)
 │   ├── MechaKnuckleItem.java        # 机械拳套 (ARM, 近战+20%)
-│   ├── LightExoskeletonItem.java    # 轻型外骨骼 (LEG, 速度+10%, 跳跃+0.5, 跨1格)
+│   ├── LightExoskeletonItem.java    # 轻型外骨骼 (LEG, 速度+10%, 跳跃+0.12, 跨1格)
 │   ├── HeavyExoskeletonItem.java    # 重型外骨骼 (LEG, 护甲+2, 跨1格, 摔落-20%)
-│   ├── SpringyKneecapItem.java      # 弹跳助力膝 (KNEE, 跳跃+0.5)
+│   ├── SpringyKneecapItem.java      # 弹跳助力膝 (KNEE, 跳跃+0.06)
 │   ├── CushionedKneecapItem.java    # 缓冲护膝 (KNEE, 摔落-10%)
 │   ├── LiningItem.java              # 通用内衬 (LINING, 参数化标签 — 防爆 IS_EXPLOSION / 防火 IS_FIRE)
 │   ├── ImprovedSolesItem.java       # 改良鞋底 (FOOT, 防滑/免疫粘液/细雪行走)
@@ -59,7 +59,7 @@ src/main/java/com/chemiofitor/protection_engineering/
 │   ├── RocketProjectile.java        # 火箭射弹 (直线+爆炸)
 │   └── ThrustEntity.java            # 推力实体 (不可见, 挂载助推)
 ├── registry/
-│   ├── PEDataComponents.java        # 数据组件 (ATTACHMENTS, STATE, COOLDOWN; ACTIVE 已废弃)
+│   ├── PEDataComponents.java        # NBT tag 键常量 (attachments/attachment_state/attachment_cooldown; attachment_active 已废弃)
 │   ├── PEArmorMaterials.java        # 工程师护甲材质 (下界合金级 3/8/6/3, 耐久因子 56)
 │   ├── PERepairMaterials.java       # 分级修补材料表 (黄铜板 3 / 坚固板 10 单位)
 │   ├── PEItems.java                 # 物品注册 (Registrate, 37 个)
@@ -81,11 +81,12 @@ src/main/java/com/chemiofitor/protection_engineering/
 ├── event/
 │   ├── PEGameEvents.java            # 伤害/摔落/效果免疫/静音鞋底/APS/应激背包 (LivingIncomingDamage 等)
 │   ├── PEAnvilEvents.java           # 铁砧分级修补
-│   ├── PENeoForgeEvents.java        # 属性修饰符 (ItemAttributeModifierEvent + 护甲值合并) + 装备变更钩子
+│   ├── PEForgeEvents.java            # 属性修饰符 (ItemAttributeModifierEvent + 护甲值合并) + 装备变更钩子
 │   └── PENetworkEvents.java         # 网络包处理 (附件开关+喷气推进)
 ├── network/
-│   ├── ToggleAttachmentPayload.java # 附件开关包 (armorIndex + slotTypeId)
-│   └── ThrustJetpackPayload.java    # 喷气推进包 (无字段)
+│   ├── PEChannel.java                # SimpleChannel 通道 (registerMessage 幂等注册)
+│   ├── ToggleAttachmentMessage.java  # 附件开关包 (armorIndex + slotTypeId)
+│   └── ThrustJetpackMessage.java     # 喷气推进包 (无字段)
 ├── client/
 │   ├── PEKeyBindings.java           # 热键 (N/H/J/K/R/G/Z)
 │   ├── PEClientExtensions.java      # 隐藏原版贴片护甲模型
@@ -111,14 +112,16 @@ src/main/java/com/chemiofitor/protection_engineering/
     └── PEMechanicalCraftingRecipeGen.java  # 动力合成配方 (28 基础 + 9 ISS 条件配方)
 ```
 
-## 数据组件 (`PEDataComponents`)
+## 数据存储 (`PEDataComponents`)
 
-| 组件 | 类型 | 用途 |
-|------|------|------|
-| `ATTACHMENTS` | `AttachmentsData` | 护甲上的附件列表 |
-| `ATTACHMENT_STATE` | `Integer` | **统一状态** 0=DISABLED, 1=READY, 2=ACTIVE, 3=COOLING |
-| `ATTACHMENT_COOLDOWN` | `Long` | 当前阶段结束 tick (0=无计时器) |
-| `ATTACHMENT_ACTIVE` | `Boolean` | ⚠️ 已废弃，仅用于旧存档迁移 |
+1.20.1 无 Data Component 系统，全部改用 ItemStack NBT tag 键（常量集中在 `PEDataComponents`）：
+
+| NBT 键 | 类型 | 用途 |
+|--------|------|------|
+| `attachments` | `AttachmentsData` | 护甲上的附件列表（宿主 tag 内） |
+| `attachment_state` | `Integer` | **统一状态** 0=DISABLED, 1=READY, 2=ACTIVE, 3=COOLING |
+| `attachment_cooldown` | `Long` | 当前阶段结束 tick (0=无计时器) |
+| `attachment_active` | `Boolean` | ⚠️ 已废弃，仅用于旧存档迁移，永不写入 |
 
 ## 统一状态机
 
@@ -209,6 +212,17 @@ public List<IAttachment.AttributeBonus> getAttributeBonuses() {
 
 已接入：坚固/下界合金板（护甲）、外骨骼（护甲/跨越）、机械臂（触及）、机械拳套（近战）、弹跳膝（跳跃）、学校内衬（最大法力）。
 
+## 跳跃强度属性 (`PEAttributes`)
+
+1.20.1 **没有** vanilla 玩家跳跃属性：`Attributes.JUMP_STRENGTH` 实为马的 `horse.jump_strength`（默认 0.7，玩家无此属性实例），且 `LivingEntity#getJumpPower` 硬编码 `0.42F * getBlockJumpFactor() + getJumpBoostPower()`，不消费任何属性。为复刻 1.21.1 语义（玩家跳跃初速 0.42，ADDITION 直接叠加）：
+
+- `registry/PEAttributes.java` 注册自有 `protectionengineering:jump_strength`：`RangedAttribute` 默认 **0.42**（与原版基准一致，-1024~1024），`setSyncable(true)` 让客户端跳跃预测使用同步后的值
+- 构造器注册 `PEAttributes.REGISTRY`，`EntityAttributeModificationEvent` 仅挂到 `EntityType.PLAYER`（马等生物保持原逻辑）
+- `LivingEntityMixin` 用 `@ModifyConstant(getJumpPower, 0.42F)` 把常量替换为属性值 —— 用 ModifyConstant 而非 HEAD 重写：`Entity#getBlockJumpFactor` 在 1.20.1 是 **protected**，mixin 类跨包无法调用，改常量可留在目标方法内执行原版公式
+- 附件声明与普通属性一致（`IAttachment.bonus("light_exo_jump", PEAttributes.JUMP_STRENGTH.get(), 0.12, ADDITION)`），LightExo +0.12 / SpringyKneecap +0.06，与 1.21.1 数值一致
+
+> ⚠️ 该属性对未挂载实体的 `getAttribute` 返回 null，mixin 必须判空回退原值，否则马等生物跳跃会出错。
+
 ## 槽位类型 (`SlotTypes`)
 
 | 护甲 | 槽位 (各1个) | 每件小计 |
@@ -243,7 +257,7 @@ public List<IAttachment.AttributeBonus> getAttributeBonuses() {
 - 方块 `workbench`（强度 2.0，需正确工具，金属音效）+ BE（仅创建菜单，不存物品）
 - GUI：1 个护甲槽 + 4 个附件槽，按 `supportedSlots()` **翻页**展示（胸甲 6 槽分两页）
 - 槽位兼容判定：`IAttachmentHost.canInstall(slot, attachment)` → 宿主支持 + `attachment.compatibleSlots().contains(slot)`
-- 安装/拆卸在关闭菜单时写入护甲数据组件；播放 `attach_1` / `attach_2` 音效
+- 安装/拆卸在关闭菜单时写入护甲 NBT tag；播放 `attach_1` / `attach_2` 音效
 
 ## 护甲发射器 (`PEArmorEmitter`)
 
@@ -367,12 +381,14 @@ Create 物品引用：`AllItems.STURDY_SHEET`, `AllItems.BRASS_SHEET`, `AllItems
 
 | Mixin | 目标 | 用途 |
 |-------|------|------|
-| `LivingEntityMixin` | `LivingEntity` | `getBlockSpeedFactor` 改良鞋底防滑（通用减伤在 `PEGameEvents`，不在 mixin） |
+| `LivingEntityMixin` | `LivingEntity` | `getBlockSpeedFactor` 改良鞋底防滑；`getJumpPower` 常量 0.42 → `PEAttributes.JUMP_STRENGTH` 属性值（通用减伤在 `PEGameEvents`，不在 mixin） |
 | `ShieldAngleMixin` | `LivingEntity` | `isDamageSourceBlocked` 工程师盾牌防护范围 180°→216° |
 | `PlayerShieldMixin` | `Player` | `disableShield` 工程师盾牌斧破防禁用 100→50 tick |
 | `DivingBootsMixin` | Create `DivingBootsItem` | `getWornItem` 潜水配重鞋底被识别为潜水靴 |
 
-> ⚠️ 新增 mixin 必须同时登记两处（否则静默不加载）：`src/main/resources/protectionengineering.mixins.json` 的 `mixins` 列表 + `src/main/templates/META-INF/neoforge.mods.toml` 的 `[[mixins]]` 块。
+> ⚠️ 新增 mixin 只需登记 `src/main/resources/protectionengineering.mixins.json` 的 `mixins` 列表。
+> 生产加载靠 build.gradle 里 jar manifest 的 `MixinConfigs` 属性（Forge 1.20.1 不读 mods.toml 的 `[[mixins]]`）；
+> dev 环境由 ModDevGradle 自动向 run 注入 `--mixin.config`，无需手动注册。
 
 ## 事件系统
 
@@ -382,10 +398,10 @@ Create 物品引用：`AllItems.STURDY_SHEET`, `AllItems.BRASS_SHEET`, `AllItems
 | `PEGameEvents` | `LivingFallEvent` | 摔落距离减免 + 伤害倍率减免 |
 | `PEGameEvents` | `MobEffectEvent.Applicable` / `Added` | 状态效果免疫 |
 | `PEGameEvents` | `VanillaGameEvent` | 静音鞋底屏蔽 sculk 振动 |
-| `PENeoForgeEvents` | `ItemAttributeModifierEvent` | 附件属性修饰符（`getAttributeBonuses` 声明应用 + 护甲值/韧性合并） |
-| `PENeoForgeEvents` | `LivingEquipmentChangeEvent` | 附件装配/卸下钩子（`onEquip` / `onUnequip`） |
+| `PEForgeEvents` | `ItemAttributeModifierEvent` | 附件属性修饰符（`getAttributeBonuses` 声明应用 + 护甲值/韧性合并） |
+| `PEForgeEvents` | `LivingEquipmentChangeEvent` | 附件装配/卸下钩子（`onEquip` / `onUnequip`） |
 | `PEAnvilEvents` | `AnvilUpdateEvent` | 铁砧分级修补接管 |
-| `PENetworkEvents` | `RegisterPayloadHandlersEvent` | `toggle_attachment` / `thrust_jetpack` 两个 playToServer 包 |
+| `PENetworkEvents` | SimpleChannel `registerMessage` | `ToggleAttachmentMessage` / `ThrustJetpackMessage` 两个 playToServer 包 |
 
 ## 文档
 

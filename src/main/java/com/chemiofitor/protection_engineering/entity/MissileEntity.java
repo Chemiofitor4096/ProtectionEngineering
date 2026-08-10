@@ -128,9 +128,9 @@ public class MissileEntity extends Projectile {
         double dist = this.position().distanceTo(targetPos != null ? targetPos : this.position());
 
         // 距离因子：近处收窄，远处放宽
-        double t = Math.clamp(dist / CLOSE_DIST, 0.0, 1.0);
+        double t = Mth.clamp(dist / CLOSE_DIST, 0.0, 1.0);
         // 时间渐入：爬升结束后从 0→1 平滑过渡 (RAMP_TICKS)，避免生硬切入
-        double timeRamp = Math.clamp((life - LAUNCH_PHASE) / (double) RAMP_TICKS, 0.0, 1.0);
+        double timeRamp = Mth.clamp((life - LAUNCH_PHASE) / (double) RAMP_TICKS, 0.0, 1.0);
         // 小→大→小：渐入 × 距离因子 (近处稳定)
         double turnRate = Mth.lerp(t, TURN_RATE_CLOSE, TURN_RATE) * timeRamp;
         float speed = (float) Mth.lerp(t,
@@ -138,7 +138,7 @@ public class MissileEntity extends Projectile {
 
         // 计算转向角度，限制最大转角
         double dot = currentDir.dot(desiredDir);
-        double angle = Math.acos(Math.clamp(dot, -1.0, 1.0));
+        double angle = Math.acos(Mth.clamp(dot, -1.0, 1.0));
         double turn = Math.min(angle, turnRate);
 
         if (turn < 0.001) return;
@@ -318,7 +318,7 @@ public class MissileEntity extends Projectile {
     // ── NBT ────────────────────────────────────────────────────
 
     @Override
-    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+    protected void defineSynchedData() {
     }
 
     @Override
@@ -356,7 +356,4 @@ public class MissileEntity extends Projectile {
 
     @Override
     public boolean isAttackable() { return false; }
-
-    @Override
-    protected double getDefaultGravity() { return 0; } // 导弹不落下
 }

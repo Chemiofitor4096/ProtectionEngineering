@@ -86,7 +86,8 @@ public interface IGradedRepair {
             if (getRepairUnits(stack, new ItemStack(entry.material())) <= 0) continue;
 
             MutableComponent line = Component.literal("  ");
-            line.append(entry.material().getDescription().copy().withStyle(ChatFormatting.GRAY));
+            line.append(Component.translatable(entry.material().getDescriptionId())
+                    .withStyle(ChatFormatting.GRAY));
             line.append(Component.literal(" " + Math.round(entry.ratio() * 100) + "%")
                     .withStyle(ChatFormatting.GREEN));
             lines.add(line);

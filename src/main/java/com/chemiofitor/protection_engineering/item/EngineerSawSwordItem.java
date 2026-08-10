@@ -16,8 +16,8 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.neoforged.neoforge.common.ItemAbilities;
-import net.neoforged.neoforge.common.ItemAbility;
+import net.minecraftforge.common.ToolAction;
+import net.minecraftforge.common.ToolActions;
 
 import java.util.List;
 import java.util.Optional;
@@ -36,10 +36,8 @@ public class EngineerSawSwordItem extends SwordItem implements IGradedRepair {
         @Override public int getUses() { return 2031; }            // 下界合金耐久
         @Override public float getSpeed() { return 8.0F; }         // 钻石工具挖掘速度
         @Override public float getAttackDamageBonus() { return 3.0F; } // 钻石剑 +3
+        @Override public int getLevel() { return 4; }              // 钻石等级
         @Override public int getEnchantmentValue() { return 15; }  // 钻石附魔能力
-        @Override public net.minecraft.tags.TagKey<net.minecraft.world.level.block.Block> getIncorrectBlocksForDrops() {
-            return net.minecraft.tags.BlockTags.INCORRECT_FOR_DIAMOND_TOOL;
-        }
         /** 分级材料（黄铜板/坚固板），不用钻石 */
         @Override public net.minecraft.world.item.crafting.Ingredient getRepairIngredient() {
             return PERepairMaterials.asIngredient();
@@ -47,7 +45,7 @@ public class EngineerSawSwordItem extends SwordItem implements IGradedRepair {
     };
 
     public EngineerSawSwordItem(Properties properties) {
-        super(TIER, properties.attributes(SwordItem.createAttributes(TIER, 3.0F, -2.4F)));
+        super(TIER, 3, -2.4f, properties);
     }
 
     // ── 视为斧头（砍树） ──────────────────────────────────────
@@ -76,18 +74,18 @@ public class EngineerSawSwordItem extends SwordItem implements IGradedRepair {
         BlockState state = level.getBlockState(pos);
 
         Optional<BlockState> stripped = Optional.ofNullable(
-                state.getToolModifiedState(context, ItemAbilities.AXE_STRIP, false));
+                state.getToolModifiedState(context, ToolActions.AXE_STRIP, false));
         if (stripped.isPresent()) {
             level.playSound(player, pos, SoundEvents.AXE_STRIP, SoundSource.BLOCKS, 1.0F, 1.0F);
         } else {
             stripped = Optional.ofNullable(
-                    state.getToolModifiedState(context, ItemAbilities.AXE_SCRAPE, false));
+                    state.getToolModifiedState(context, ToolActions.AXE_SCRAPE, false));
             if (stripped.isPresent()) {
                 level.playSound(player, pos, SoundEvents.AXE_SCRAPE, SoundSource.BLOCKS, 1.0F, 1.0F);
                 level.levelEvent(player, 3005, pos, 0);
             } else {
                 stripped = Optional.ofNullable(
-                        state.getToolModifiedState(context, ItemAbilities.AXE_WAX_OFF, false));
+                        state.getToolModifiedState(context, ToolActions.AXE_WAX_OFF, false));
                 if (stripped.isPresent()) {
                     level.playSound(player, pos, SoundEvents.AXE_WAX_OFF, SoundSource.BLOCKS, 1.0F, 1.0F);
                     level.levelEvent(player, 3004, pos, 0);
@@ -102,8 +100,11 @@ public class EngineerSawSwordItem extends SwordItem implements IGradedRepair {
             level.setBlock(pos, stripped.get(), 11);
             level.gameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Context.of(player, stripped.get()));
             if (player != null) {
+                // 1.20.1 的 hurtAndBreak 为 (int, LivingEntity, Consumer<LivingEntity>) 形式
                 context.getItemInHand().hurtAndBreak(1, player,
-                        LivingEntity.getSlotForHand(context.getHand()));
+                        p -> p.broadcastBreakEvent(context.getHand() == net.minecraft.world.InteractionHand.MAIN_HAND
+                                ? net.minecraft.world.entity.EquipmentSlot.MAINHAND
+                                : net.minecraft.world.entity.EquipmentSlot.OFFHAND));
             }
             return InteractionResult.sidedSuccess(level.isClientSide);
         }
@@ -111,9 +112,9 @@ public class EngineerSawSwordItem extends SwordItem implements IGradedRepair {
     }
 
     @Override
-    public boolean canPerformAction(ItemStack stack, ItemAbility ability) {
-        return ItemAbilities.DEFAULT_AXE_ACTIONS.contains(ability)
-                || ItemAbilities.DEFAULT_SWORD_ACTIONS.contains(ability);
+    public boolean canPerformAction(ItemStack stack, ToolAction ability) {
+        return ToolActions.DEFAULT_AXE_ACTIONS.contains(ability)
+                || ToolActions.DEFAULT_SWORD_ACTIONS.contains(ability);
     }
 
     // ── 兼容剑+斧附魔 ─────────────────────────────────────────
@@ -135,9 +136,9 @@ public class EngineerSawSwordItem extends SwordItem implements IGradedRepair {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context,
+    public void appendHoverText(ItemStack stack, Level level,
                                 List<Component> tooltip, TooltipFlag flag) {
-        super.appendHoverText(stack, context, tooltip, flag);
+        super.appendHoverText(stack, level, tooltip, flag);
         appendRepairTooltip(stack, tooltip);
     }
 }

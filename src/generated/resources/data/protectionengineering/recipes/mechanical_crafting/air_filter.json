@@ -1,0 +1,26 @@
+{
+  "type": "create:mechanical_crafting",
+  "acceptMirrored": true,
+  "key": {
+    "B": {
+      "item": "create:brass_sheet"
+    },
+    "C": {
+      "item": "minecraft:charcoal"
+    },
+    "O": {
+      "item": "create:powdered_obsidian"
+    },
+    "S": {
+      "item": "create:sturdy_sheet"
+    }
+  },
+  "pattern": [
+    " BSB ",
+    "SCOCS",
+    "SBSBS"
+  ],
+  "result": {
+    "item": "protectionengineering:air_filter"
+  }
+}

@@ -13,7 +13,7 @@ import net.minecraft.world.entity.Entity;
 public class PlateAttachmentModel<T extends Entity> extends EntityModel<T> {
 
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(
-            ResourceLocation.fromNamespaceAndPath("protectionengineering", "sturdy_plate"), "main");
+            new ResourceLocation("protectionengineering", "sturdy_plate"), "main");
     private final ModelPart Plate;
 
     public PlateAttachmentModel(ModelPart root) {
@@ -40,7 +40,7 @@ public class PlateAttachmentModel<T extends Entity> extends EntityModel<T> {
 
     @Override
     public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer,
-                               int packedLight, int packedOverlay, int color) {
-        Plate.render(poseStack, vertexConsumer, packedLight, packedOverlay, -1);
+                               int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+        Plate.render(poseStack, vertexConsumer, packedLight, packedOverlay);
     }
 }

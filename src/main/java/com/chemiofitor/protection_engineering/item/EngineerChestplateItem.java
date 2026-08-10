@@ -3,7 +3,6 @@ package com.chemiofitor.protection_engineering.item;
 import com.chemiofitor.protection_engineering.api.AttachmentsData;
 import com.chemiofitor.protection_engineering.api.SlotType;
 import com.chemiofitor.protection_engineering.api.SlotTypes;
-import net.minecraft.core.Holder;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.ItemStack;
@@ -16,7 +15,7 @@ public class EngineerChestplateItem extends AttachmentHostArmorItem {
             SlotTypes.SHOULDER, SlotTypes.CHESTPLATE, SlotTypes.BACK, SlotTypes.ARM, SlotTypes.LINING, SlotTypes.CHESTPLATE_DECORATION
     );
 
-    public EngineerChestplateItem(Holder<ArmorMaterial> material, Properties properties) {
+    public EngineerChestplateItem(ArmorMaterial material, Properties properties) {
         super(material, Type.CHESTPLATE, properties);
     }
 

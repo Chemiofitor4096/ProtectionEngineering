@@ -15,7 +15,7 @@ import net.minecraft.world.entity.LivingEntity;
 
 public class EngineerChestplateModel<T extends Entity> extends EntityModel<T> {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
-	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath("protectionengineering", "engineer_chestplate"), "main");
+	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation("protectionengineering", "engineer_chestplate"), "main");
 	private final ModelPart Chestplate;
 	private final ModelPart BodyCloth;
 	private final ModelPart Medal;
@@ -75,7 +75,7 @@ public class EngineerChestplateModel<T extends Entity> extends EntityModel<T> {
 	}
 
 	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, int color) {
-		Chestplate.render(poseStack, vertexConsumer, packedLight, packedOverlay, -1);
+	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+		Chestplate.render(poseStack, vertexConsumer, packedLight, packedOverlay);
 	}
 }

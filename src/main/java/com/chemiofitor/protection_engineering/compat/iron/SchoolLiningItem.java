@@ -39,8 +39,8 @@ public class SchoolLiningItem extends AttachmentItem {
         // （不参与护甲值合并：mergeArmorModifiers 只处理 ARMOR/ARMOR_TOUGHNESS）
         return List.of(IAttachment.bonus(
                 "school_lining_mana_" + BuiltInRegistries.ITEM.getKey(this).getPath(),
-                AttributeRegistry.MAX_MANA, 50.0,
-                AttributeModifier.Operation.ADD_VALUE));
+                AttributeRegistry.MAX_MANA.get(), 50.0,
+                AttributeModifier.Operation.ADDITION));
     }
 
     @Override

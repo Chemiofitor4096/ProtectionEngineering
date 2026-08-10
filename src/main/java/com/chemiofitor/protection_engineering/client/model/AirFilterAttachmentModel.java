@@ -13,7 +13,7 @@ import net.minecraft.world.entity.Entity;
 public class AirFilterAttachmentModel<T extends Entity> extends EntityModel<T> {
 
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(
-            ResourceLocation.fromNamespaceAndPath("protectionengineering", "air_filter"), "main");
+            new ResourceLocation("protectionengineering", "air_filter"), "main");
     private final ModelPart AirFilter;
 
     public AirFilterAttachmentModel(ModelPart root) {
@@ -44,7 +44,7 @@ public class AirFilterAttachmentModel<T extends Entity> extends EntityModel<T> {
 
     @Override
     public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer,
-                               int packedLight, int packedOverlay, int color) {
-        AirFilter.render(poseStack, vertexConsumer, packedLight, packedOverlay, -1);
+                               int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+        AirFilter.render(poseStack, vertexConsumer, packedLight, packedOverlay);
     }
 }

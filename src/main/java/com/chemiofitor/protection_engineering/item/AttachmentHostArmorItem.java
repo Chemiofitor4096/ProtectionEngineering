@@ -5,21 +5,24 @@ import com.chemiofitor.protection_engineering.api.IAttachment;
 import com.chemiofitor.protection_engineering.api.IAttachmentHost;
 import com.chemiofitor.protection_engineering.api.IGradedRepair;
 import com.chemiofitor.protection_engineering.api.SlotType;
+import com.chemiofitor.protection_engineering.client.PEClientExtensions;
 import com.chemiofitor.protection_engineering.registry.PERepairMaterials;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 
+import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Set;
+import java.util.function.Consumer;
 
 import static com.chemiofitor.protection_engineering.registry.PEDataComponents.ATTACHMENTS;
 
@@ -28,8 +31,26 @@ import static com.chemiofitor.protection_engineering.registry.PEDataComponents.A
  */
 public abstract class AttachmentHostArmorItem extends ArmorItem implements IAttachmentHost, IGradedRepair {
 
-    protected AttachmentHostArmorItem(Holder<ArmorMaterial> material, Type type, Properties properties) {
+    protected AttachmentHostArmorItem(ArmorMaterial material, Type type, Properties properties) {
         super(material, type, properties);
+    }
+
+    /** 隐藏原版贴片盔甲渲染，实际 3D 模型由 PEArmorLayer 负责（客户端） */
+    @Override
+    public void initializeClient(Consumer<IClientItemExtensions> consumer) {
+        consumer.accept(PEClientExtensions.INSTANCE);
+    }
+
+    /**
+     * 原版贴片盔甲层仍会解析并加载材质纹理（即使模型全隐藏），
+     * 1.20.1 默认路径落到 minecraft: 命名空间 → 纹理缺失 WARN。
+     * 指向本模组的透明占位纹理，实际渲染仍由 PEArmorLayer 负责。
+     */
+    @Override
+    public String getArmorTexture(ItemStack stack, Entity entity, EquipmentSlot slot, String type) {
+        String suffix = slot == EquipmentSlot.LEGS ? "2" : "1";
+        return "protectionengineering:textures/models/armor/engineer_layer_" + suffix
+                + (type == null ? "" : "_" + type) + ".png";
     }
 
     // ── 分级修补 ────────────────────────────────────────────────
@@ -74,13 +95,23 @@ public abstract class AttachmentHostArmorItem extends ArmorItem implements IAtta
 
     @Override
     public AttachmentsData getAttachments(ItemStack host) {
-        return host.getOrDefault(ATTACHMENTS.get(), AttachmentsData.EMPTY);
+        if (host.getTag() == null || !host.getTag().contains(ATTACHMENTS)) {
+            return AttachmentsData.EMPTY;
+        }
+        return AttachmentsData.fromTag(host.getTag().getCompound(ATTACHMENTS));
     }
 
     @Override
     public void setAttachments(ItemStack host, AttachmentsData data) {
-        host.set(ATTACHMENTS.get(), data);
+        if (data.isEmpty()) {
+            if (host.getTag() != null) {
+                host.getTag().remove(ATTACHMENTS);
+            }
+        } else {
+            host.getOrCreateTag().put(ATTACHMENTS, data.toTag());
+        }
     }
+
     // ── Tick ────────────────────────────────────────────────────
 
     @Override
@@ -110,9 +141,9 @@ public abstract class AttachmentHostArmorItem extends ArmorItem implements IAtta
     // ── Tooltip ─────────────────────────────────────────────────
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context,
+    public void appendHoverText(ItemStack stack, @Nullable Level level,
                                 List<Component> tooltip, TooltipFlag flag) {
-        super.appendHoverText(stack, context, tooltip, flag);
+        super.appendHoverText(stack, level, tooltip, flag);
 
         AttachmentsData data = getAttachments(stack);
 

@@ -1,0 +1,34 @@
+{
+  "type": "create:mechanical_crafting",
+  "acceptMirrored": true,
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "irons_spellbooks"
+    }
+  ],
+  "key": {
+    "A": {
+      "item": "irons_spellbooks:arcane_rune"
+    },
+    "B": {
+      "item": "minecraft:echo_shard"
+    },
+    "S": {
+      "item": "minecraft:sculk_shrieker"
+    },
+    "V": {
+      "item": "irons_spellbooks:arcane_essence"
+    }
+  },
+  "pattern": [
+    " BBB ",
+    "BVSVB",
+    "BSASB",
+    "BVSVB",
+    " BBB "
+  ],
+  "result": {
+    "item": "protectionengineering:eldritch_magic_lining"
+  }
+}

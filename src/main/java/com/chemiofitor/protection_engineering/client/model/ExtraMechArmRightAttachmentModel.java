@@ -13,7 +13,7 @@ import net.minecraft.world.entity.Entity;
 public class ExtraMechArmRightAttachmentModel<T extends Entity> extends EntityModel<T> {
 
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(
-            ResourceLocation.fromNamespaceAndPath("protectionengineering", "extra_mech_arm_right"), "main");
+            new ResourceLocation("protectionengineering", "extra_mech_arm_right"), "main");
     private final ModelPart RightArmArmorered;
 
     public ExtraMechArmRightAttachmentModel(ModelPart root) {
@@ -73,7 +73,7 @@ public class ExtraMechArmRightAttachmentModel<T extends Entity> extends EntityMo
 
     @Override
     public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer,
-                               int packedLight, int packedOverlay, int color) {
-        RightArmArmorered.render(poseStack, vertexConsumer, packedLight, packedOverlay, -1);
+                               int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+        RightArmArmorered.render(poseStack, vertexConsumer, packedLight, packedOverlay);
     }
 }

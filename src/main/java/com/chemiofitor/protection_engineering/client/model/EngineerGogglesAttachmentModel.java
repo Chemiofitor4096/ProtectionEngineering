@@ -15,7 +15,7 @@ import net.minecraft.world.entity.LivingEntity;
 
 public class EngineerGogglesAttachmentModel<T extends Entity> extends EntityModel<T> {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
-	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath("protectionengineering", "engineer_goggles"), "main");
+	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation("protectionengineering", "engineer_goggles"), "main");
 	private final ModelPart AttachGlass;
 
 	public EngineerGogglesAttachmentModel(ModelPart root) {
@@ -43,7 +43,7 @@ public class EngineerGogglesAttachmentModel<T extends Entity> extends EntityMode
 	}
 
 	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, int color) {
-		AttachGlass.render(poseStack, vertexConsumer, packedLight, packedOverlay, -1);
+	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+		AttachGlass.render(poseStack, vertexConsumer, packedLight, packedOverlay);
 	}
 }

@@ -7,10 +7,9 @@ import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllItems;
 import com.simibubi.create.content.decoration.palettes.AllPaletteBlocks;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
+import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeCategory;
-import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.recipes.SmithingTransformRecipeBuilder;
@@ -18,22 +17,22 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 
-import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 public class PERecipeProvider extends RecipeProvider {
 
-    public PERecipeProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
-        super(output, registries);
+    public PERecipeProvider(PackOutput output) {
+        super(output);
     }
 
     @Override
-    protected void buildRecipes(RecipeOutput output) {
+    protected void buildRecipes(Consumer<FinishedRecipe> output) {
         buildWorkbench(output);
         buildEngineerArmor(output);
         buildAttachments(output);
     }
 
-    private static void buildAttachments(RecipeOutput output) {
+    private static void buildAttachments(Consumer<FinishedRecipe> output) {
         // 下界合金防护板：锻造台升级
         SmithingTransformRecipeBuilder.smithing(
                         Ingredient.of(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE),
@@ -80,7 +79,7 @@ public class PERecipeProvider extends RecipeProvider {
                 .define('S', Items.SHIELD)
                 .define('B', AllItems.BRASS_SHEET.get())
                 .define('I', AllItems.STURDY_SHEET.get())
-                .define('G', AllPaletteBlocks.FRAMED_GLASS_PANE.asItem())
+                .define('G', AllPaletteBlocks.FRAMED_GLASS_PANE.get())
                 .unlockedBy("has_sturdy_sheet",
                         InventoryChangeTrigger.TriggerInstance.hasItems(AllItems.STURDY_SHEET.get()))
                 .save(output, rl("engineer_shield"));
@@ -98,7 +97,7 @@ public class PERecipeProvider extends RecipeProvider {
                 .save(output, rl("purity_mark"));
     }
 
-    private static void buildWorkbench(RecipeOutput output) {
+    private static void buildWorkbench(Consumer<FinishedRecipe> output) {
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, PEWorkbench.WORKBENCH_BLOCK.get())
                 .pattern(" D ")
                 .pattern("MSM")
@@ -110,12 +109,12 @@ public class PERecipeProvider extends RecipeProvider {
                 .define('P', AllItems.PRECISION_MECHANISM.get())
                 .unlockedBy("has_brass_casing",
                         InventoryChangeTrigger.TriggerInstance.hasItems(AllBlocks.BRASS_CASING.get()))
-                .save(output, ResourceLocation.fromNamespaceAndPath(ProtectionEngineering.MODID, "workbench"));
+                .save(output, new ResourceLocation(ProtectionEngineering.MODID, "workbench"));
     }
 
     // ── 工程师护甲四件套 ─────────────────────────────────────
 
-    private static void buildEngineerArmor(RecipeOutput output) {
+    private static void buildEngineerArmor(Consumer<FinishedRecipe> output) {
         var S = AllItems.STURDY_SHEET.get();
         var P = AllItems.PRECISION_MECHANISM.get();
         var W = Items.RED_WOOL;
@@ -162,6 +161,6 @@ public class PERecipeProvider extends RecipeProvider {
     }
 
     private static ResourceLocation rl(String name) {
-        return ResourceLocation.fromNamespaceAndPath(ProtectionEngineering.MODID, name);
+        return new ResourceLocation(ProtectionEngineering.MODID, name);
     }
 }

@@ -10,6 +10,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -92,8 +93,8 @@ public class ArmorEmitterBlock extends Block {
     // ── 玩家交互：Shift + 右键切换模式 ─────────────────────────
 
     @Override
-    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
-                                            Player player, BlockHitResult hit) {
+    public InteractionResult use(BlockState state, Level level, BlockPos pos,
+                                 Player player, InteractionHand hand, BlockHitResult hit) {
         if (level.isClientSide()) return InteractionResult.SUCCESS;
         if (!player.isShiftKeyDown()) return InteractionResult.PASS;
 
@@ -139,7 +140,7 @@ public class ArmorEmitterBlock extends Block {
             EquipmentSlot slot = armor.getEquipmentSlot();
             target.setItemSlot(slot, stack);
             if (armor.getEquipSound() != null) {
-                level.playSound(null, target, armor.getEquipSound().value(), SoundSource.PLAYERS, 1.0F, 1.0F);
+                level.playSound(null, target, armor.getEquipSound(), SoundSource.PLAYERS, 1.0F, 1.0F);
             }
             return;
         }
@@ -195,7 +196,7 @@ public class ArmorEmitterBlock extends Block {
                 ItemStack removed = stack.copy();
                 target.setItemSlot(slot, ItemStack.EMPTY);
                 if (stack.getItem() instanceof ArmorItem armor && armor.getEquipSound() != null) {
-                    level.playSound(null, target, armor.getEquipSound().value(), SoundSource.PLAYERS, 1.0F, 1.0F);
+                    level.playSound(null, target, armor.getEquipSound(), SoundSource.PLAYERS, 1.0F, 1.0F);
                 }
                 return removed;
             }

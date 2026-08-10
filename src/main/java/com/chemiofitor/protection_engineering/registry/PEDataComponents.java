@@ -1,55 +1,29 @@
 package com.chemiofitor.protection_engineering.registry;
 
-import com.chemiofitor.protection_engineering.ProtectionEngineering;
-import com.chemiofitor.protection_engineering.api.AttachmentsData;
-import com.mojang.serialization.Codec;
-import net.minecraft.core.component.DataComponentType;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
-
 /**
- * 自定义数据组件注册。
+ * 附件状态存储 —— 1.20.1 无 Data Component 系统，全部改用 ItemStack NBT。
+ * <p>
+ * 状态键直接写入附件 ItemStack 自身的 tag：
+ * <ul>
+ *   <li>{@code attachment_state}    Integer — 统一状态 (0=DISABLED, 1=READY, 2=ACTIVE, 3=COOLING)</li>
+ *   <li>{@code attachment_cooldown} Long — 当前阶段结束的 tick（0 = 无计时）</li>
+ *   <li>{@code attachment_active}   Boolean — 已废弃，仅用于旧存档迁移，永不写入</li>
+ * </ul>
+ * 宿主护甲的 tag 内以 {@code attachments} 键存附件表（见 {@link com.chemiofitor.protection_engineering.api.AttachmentsData}）。
  */
-public class PEDataComponents {
+public final class PEDataComponents {
 
-    public static final DeferredRegister<DataComponentType<?>> REGISTRY =
-            DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, ProtectionEngineering.MODID);
+    private PEDataComponents() {}
 
-    /** 护甲附件数据 —— 存储护甲上安装的所有附件 */
-    public static final DeferredHolder<DataComponentType<?>, DataComponentType<AttachmentsData>> ATTACHMENTS =
-            REGISTRY.register("attachments",
-                    () -> DataComponentType.<AttachmentsData>builder()
-                            .persistent(AttachmentsData.CODEC)
-                            .networkSynchronized(AttachmentsData.STREAM_CODEC)
-                            .build()
-            );
+    /** 宿主护甲 tag 中附件表的键 */
+    public static final String ATTACHMENTS = "attachments";
 
-    /** 附件开关状态 —— 可开关附件的启用/禁用标志 */
-    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Boolean>> ATTACHMENT_ACTIVE =
-            REGISTRY.register("attachment_active",
-                    () -> DataComponentType.<Boolean>builder()
-                            .persistent(Codec.BOOL)
-                            .networkSynchronized(ByteBufCodecs.BOOL)
-                            .build()
-            );
+    /** 附件状态机的键 */
+    public static final String ATTACHMENT_STATE = "attachment_state";
 
-    /** 附件冷却结束 tick —— 一次性激活附件的冷却计时 */
-    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Long>> ATTACHMENT_COOLDOWN =
-            REGISTRY.register("attachment_cooldown",
-                    () -> DataComponentType.<Long>builder()
-                            .persistent(Codec.LONG)
-                            .networkSynchronized(ByteBufCodecs.VAR_LONG)
-                            .build()
-            );
+    /** 附件冷却结束 tick 的键 */
+    public static final String ATTACHMENT_COOLDOWN = "attachment_cooldown";
 
-    /** 附件状态机 —— 统一状态标识 (0=DISABLED, 1=READY, 2=ACTIVE, 3=COOLING) */
-    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> ATTACHMENT_STATE =
-            REGISTRY.register("attachment_state",
-                    () -> DataComponentType.<Integer>builder()
-                            .persistent(Codec.INT)
-                            .networkSynchronized(ByteBufCodecs.VAR_INT)
-                            .build()
-            );
+    /** 已废弃 —— 旧存档迁移用 */
+    public static final String ATTACHMENT_ACTIVE = "attachment_active";
 }

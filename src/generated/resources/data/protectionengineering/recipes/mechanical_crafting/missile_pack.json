@@ -1,0 +1,31 @@
+{
+  "type": "create:mechanical_crafting",
+  "acceptMirrored": true,
+  "key": {
+    "B": {
+      "item": "create:brass_sheet"
+    },
+    "C": {
+      "item": "create:redstone_contact"
+    },
+    "D": {
+      "item": "minecraft:diamond"
+    },
+    "P": {
+      "item": "create:precision_mechanism"
+    },
+    "S": {
+      "item": "create:sturdy_sheet"
+    }
+  },
+  "pattern": [
+    "SS SS",
+    "S D S",
+    "S P S",
+    "SC CS",
+    "BB BB"
+  ],
+  "result": {
+    "item": "protectionengineering:missile_pack"
+  }
+}

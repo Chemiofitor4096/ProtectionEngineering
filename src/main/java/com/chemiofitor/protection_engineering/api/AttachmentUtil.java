@@ -22,7 +22,7 @@ public final class AttachmentUtil {
     /** 遍历玩家所有已安装的附件（含盔甲槽位 / 附件槽位上下文） */
     private static void forAll(Player player, Consumer<Match<?>> consumer) {
         for (EquipmentSlot slot : EquipmentSlot.values()) {
-            if (slot.getType() != EquipmentSlot.Type.HUMANOID_ARMOR) continue;
+            if (slot.getType() != EquipmentSlot.Type.ARMOR) continue;
             ItemStack armor = player.getItemBySlot(slot);
             if (!(armor.getItem() instanceof IAttachmentHost host)) continue;
             for (var entry : host.getAttachments(armor).slots().entrySet()) {

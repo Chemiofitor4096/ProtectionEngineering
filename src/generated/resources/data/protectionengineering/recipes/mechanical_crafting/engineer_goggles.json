@@ -1,0 +1,24 @@
+{
+  "type": "create:mechanical_crafting",
+  "acceptMirrored": true,
+  "key": {
+    "B": {
+      "item": "create:brass_sheet"
+    },
+    "G": {
+      "item": "create:goggles"
+    },
+    "S": {
+      "item": "create:sturdy_sheet"
+    }
+  },
+  "pattern": [
+    "  BS ",
+    "  BS ",
+    "  SG ",
+    "  BS "
+  ],
+  "result": {
+    "item": "protectionengineering:engineer_goggles"
+  }
+}

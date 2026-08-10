@@ -11,6 +11,8 @@
 
   "itemGroup.protectionengineering": "工程防护",
 
+  "attribute.name.protectionengineering.jump_strength": "跳跃强度",
+
   "item.protectionengineering.engineer_hood": "工程师兜帽",
   "item.protectionengineering.engineer_chestplate": "工程师胸甲",
   "item.protectionengineering.engineer_leggings": "工程师护腿",
@@ -79,7 +81,6 @@
   "slot.protectionengineering.chestplate_decoration": "胸甲装饰",
   "slot.protectionengineering.leggings_decoration": "护腿装饰",
   "slot.protectionengineering.boots_decoration": "靴子装饰",
-  "slot.protectionengineering.decoration": "装饰",
 
   "slot.protectionengineering.blade": "刀刃",
   "slot.protectionengineering.hilt": "刀柄",

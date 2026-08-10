@@ -1,41 +1,41 @@
 package com.chemiofitor.protection_engineering.config;
 
-import net.neoforged.neoforge.common.ModConfigSpec;
+import net.minecraftforge.common.ForgeConfigSpec;
 
 /**
  * 服务端配置 — APS、导弹等游戏玩法参数。
  */
 public class PEServerConfig {
 
-    public static final ModConfigSpec SPEC;
+    public static final ForgeConfigSpec SPEC;
 
     // ── APS ──
-    public static final ModConfigSpec.DoubleValue APS_INTERCEPT_RANGE;
-    public static final ModConfigSpec.IntValue APS_ACTIVE_DURATION;
-    public static final ModConfigSpec.IntValue APS_COOLDOWN_TICKS;
+    public static final ForgeConfigSpec.DoubleValue APS_INTERCEPT_RANGE;
+    public static final ForgeConfigSpec.IntValue APS_ACTIVE_DURATION;
+    public static final ForgeConfigSpec.IntValue APS_COOLDOWN_TICKS;
 
     // ── 导弹 ──
-    public static final ModConfigSpec.DoubleValue MISSILE_TARGET_RANGE;
-    public static final ModConfigSpec.DoubleValue MISSILE_FLIGHT_SPEED;
-    public static final ModConfigSpec.DoubleValue MISSILE_CLOSE_SPEED;
-    public static final ModConfigSpec.IntValue MISSILE_MAX_LIFE;
+    public static final ForgeConfigSpec.DoubleValue MISSILE_TARGET_RANGE;
+    public static final ForgeConfigSpec.DoubleValue MISSILE_FLIGHT_SPEED;
+    public static final ForgeConfigSpec.DoubleValue MISSILE_CLOSE_SPEED;
+    public static final ForgeConfigSpec.IntValue MISSILE_MAX_LIFE;
 
     // ── 火箭 ──
-    public static final ModConfigSpec.IntValue ROCKET_COOLDOWN_TICKS;
+    public static final ForgeConfigSpec.IntValue ROCKET_COOLDOWN_TICKS;
 
     // ── 激素针 ──
-    public static final ModConfigSpec.IntValue HORMONE_COOLDOWN_TICKS;
+    public static final ForgeConfigSpec.IntValue HORMONE_COOLDOWN_TICKS;
 
     // ── 应激背包 ──
-    public static final ModConfigSpec.DoubleValue DODGE_STRENGTH;
-    public static final ModConfigSpec.IntValue DODGE_COOLDOWN_TICKS;
+    public static final ForgeConfigSpec.DoubleValue DODGE_STRENGTH;
+    public static final ForgeConfigSpec.IntValue DODGE_COOLDOWN_TICKS;
 
     // ── 分级修补 ──
-    public static final ModConfigSpec.IntValue REPAIR_UNITS_BRASS_SHEET;
-    public static final ModConfigSpec.IntValue REPAIR_UNITS_STURDY_SHEET;
+    public static final ForgeConfigSpec.IntValue REPAIR_UNITS_BRASS_SHEET;
+    public static final ForgeConfigSpec.IntValue REPAIR_UNITS_STURDY_SHEET;
 
     static {
-        ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
+        ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
 
         builder.push("aps");
         APS_INTERCEPT_RANGE = builder

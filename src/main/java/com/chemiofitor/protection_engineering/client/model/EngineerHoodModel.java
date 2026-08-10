@@ -15,7 +15,7 @@ import net.minecraft.world.entity.LivingEntity;
 
 public class EngineerHoodModel<T extends LivingEntity> extends EntityModel<T> {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
-	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath("protectionengineering", "engineer_hood"), "main");
+	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation("protectionengineering", "engineer_hood"), "main");
 	private final ModelPart Hood;
 
 	public EngineerHoodModel(ModelPart root) {
@@ -109,7 +109,7 @@ public class EngineerHoodModel<T extends LivingEntity> extends EntityModel<T> {
 	}
 
 	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, int color) {
-		Hood.render(poseStack, vertexConsumer, packedLight, packedOverlay, -1);
+	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+		Hood.render(poseStack, vertexConsumer, packedLight, packedOverlay);
 	}
 }

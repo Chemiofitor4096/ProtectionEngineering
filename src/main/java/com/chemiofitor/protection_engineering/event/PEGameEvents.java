@@ -10,8 +10,6 @@ import com.chemiofitor.protection_engineering.item.ApsItem;
 import com.chemiofitor.protection_engineering.item.DodgeJetpackItem;
 import com.chemiofitor.protection_engineering.item.InsulatedSolesItem;
 import com.chemiofitor.protection_engineering.item.SilentSolesItem;
-import com.chemiofitor.protection_engineering.registry.PEDataComponents;
-import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.tags.GameEventTags;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -21,20 +19,22 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.VanillaGameEvent;
-import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
-import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
-import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
+import net.minecraftforge.event.VanillaGameEvent;
+import net.minecraftforge.event.entity.living.LivingDamageEvent;
+import net.minecraftforge.event.entity.living.LivingFallEvent;
+import net.minecraftforge.event.entity.living.MobEffectEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
 import static com.chemiofitor.protection_engineering.api.IAttachment.STATE_COOLING;
+import static com.chemiofitor.protection_engineering.registry.PEDataComponents.ATTACHMENT_COOLDOWN;
+import static com.chemiofitor.protection_engineering.registry.PEDataComponents.ATTACHMENT_STATE;
 
-@EventBusSubscriber(modid = ProtectionEngineering.MODID)
+@Mod.EventBusSubscriber(modid = ProtectionEngineering.MODID)
 public class PEGameEvents {
 
     public static final Set<UUID> thrustRequests = new HashSet<>();
@@ -42,13 +42,13 @@ public class PEGameEvents {
     // ── 伤害事件 ──────────────────────────────────────────────
 
     @SubscribeEvent
-    public static void onLivingIncomingDamage(LivingIncomingDamageEvent event) {
+    public static void onLivingDamage(LivingDamageEvent event) {
         if (!(event.getEntity() instanceof Player player)) return;
 
         var source = event.getSource();
 
         // ── 隔热鞋底：免疫脚下热源伤害 ──────────────────────
-        if ((source.is(DamageTypes.HOT_FLOOR) || source.is(DamageTypes.CAMPFIRE))
+        if (source.is(DamageTypes.HOT_FLOOR)
                 && AttachmentUtil.anyOnSlot(player, EquipmentSlot.FEET,
                         s -> s.getItem() instanceof InsulatedSolesItem)) {
             event.setCanceled(true);
@@ -68,8 +68,8 @@ public class PEGameEvents {
                         DodgeJetpackItem.executeDodge(player, attacker);
                         if (!player.getAbilities().instabuild) {
                             long now = player.level().getGameTime();
-                            backSlot.set(PEDataComponents.ATTACHMENT_STATE.get(), STATE_COOLING);
-                            backSlot.set(PEDataComponents.ATTACHMENT_COOLDOWN.get(),
+                            backSlot.getOrCreateTag().putInt(ATTACHMENT_STATE, STATE_COOLING);
+                            backSlot.getOrCreateTag().putLong(ATTACHMENT_COOLDOWN,
                                     now + PEServerConfig.DODGE_COOLDOWN_TICKS.get());
                             player.displayClientMessage(
                                     Component.translatable("message.protectionengineering.dodge_cooldown",
@@ -139,7 +139,7 @@ public class PEGameEvents {
     public static void onMobEffectApplicable(MobEffectEvent.Applicable event) {
         if (!(event.getEntity() instanceof Player player)) return;
         if (hasImmunity(player, event.getEffectInstance().getEffect())) {
-            event.setResult(MobEffectEvent.Applicable.Result.DO_NOT_APPLY);
+            event.setCanceled(true);
         }
     }
 
@@ -151,7 +151,7 @@ public class PEGameEvents {
         }
     }
 
-    private static boolean hasImmunity(Player player, Holder<MobEffect> effect) {
+    private static boolean hasImmunity(Player player, MobEffect effect) {
         return AttachmentUtil.any(player, stack ->
             stack.getItem() instanceof IAttachment att && att.getImmunities().contains(effect));
     }
@@ -168,7 +168,7 @@ public class PEGameEvents {
         }
     }
 
-    private static boolean isSilencedGameEvent(Holder<GameEvent> event) {
+    private static boolean isSilencedGameEvent(GameEvent event) {
         return event.is(GameEventTags.IGNORE_VIBRATIONS_SNEAKING);
     }
 }

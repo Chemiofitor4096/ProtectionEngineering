@@ -1,0 +1,30 @@
+{
+  "type": "create:mechanical_crafting",
+  "acceptMirrored": true,
+  "key": {
+    "B": {
+      "item": "create:brass_sheet"
+    },
+    "D": {
+      "item": "minecraft:diamond"
+    },
+    "P": {
+      "item": "create:precision_mechanism"
+    },
+    "S": {
+      "item": "create:sturdy_sheet"
+    },
+    "T": {
+      "item": "minecraft:tnt"
+    }
+  },
+  "pattern": [
+    "SS SS",
+    "ST TS",
+    " BDB ",
+    " BPB "
+  ],
+  "result": {
+    "item": "protectionengineering:rocket_launcher"
+  }
+}

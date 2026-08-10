@@ -13,7 +13,7 @@ import net.minecraft.world.entity.Entity;
 public class MechaKnuckleRightAttachmentModel<T extends Entity> extends EntityModel<T> {
 
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(
-            ResourceLocation.fromNamespaceAndPath("protectionengineering", "mecha_knuckle_right"), "main");
+            new ResourceLocation("protectionengineering", "mecha_knuckle_right"), "main");
     private final ModelPart GauntletRight;
 
     public MechaKnuckleRightAttachmentModel(ModelPart root) {
@@ -38,7 +38,7 @@ public class MechaKnuckleRightAttachmentModel<T extends Entity> extends EntityMo
 
     @Override
     public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer,
-                               int packedLight, int packedOverlay, int color) {
-        GauntletRight.render(poseStack, vertexConsumer, packedLight, packedOverlay, -1);
+                               int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+        GauntletRight.render(poseStack, vertexConsumer, packedLight, packedOverlay);
     }
 }

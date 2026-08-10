@@ -1,0 +1,29 @@
+{
+  "type": "create:mechanical_crafting",
+  "acceptMirrored": true,
+  "key": {
+    "C": {
+      "item": "create:redstone_contact"
+    },
+    "I": {
+      "item": "create:iron_sheet"
+    },
+    "P": {
+      "item": "create:precision_mechanism"
+    },
+    "S": {
+      "item": "create:sturdy_sheet"
+    },
+    "T": {
+      "item": "create:electron_tube"
+    }
+  },
+  "pattern": [
+    "ISCSI",
+    " IPI ",
+    " ITI "
+  ],
+  "result": {
+    "item": "protectionengineering:dodge_jetpack"
+  }
+}

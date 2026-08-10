@@ -13,7 +13,7 @@ import net.minecraft.world.entity.Entity;
 public class RocketPackAttachmentModel<T extends Entity> extends EntityModel<T> {
 
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(
-            ResourceLocation.fromNamespaceAndPath("protectionengineering", "rocket_pack"), "main");
+            new ResourceLocation("protectionengineering", "rocket_pack"), "main");
     private final ModelPart MachineBackpack;
 
     public RocketPackAttachmentModel(ModelPart root) {
@@ -137,7 +137,7 @@ public class RocketPackAttachmentModel<T extends Entity> extends EntityModel<T> 
 
     @Override
     public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer,
-                               int packedLight, int packedOverlay, int color) {
-        MachineBackpack.render(poseStack, vertexConsumer, packedLight, packedOverlay, -1);
+                               int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+        MachineBackpack.render(poseStack, vertexConsumer, packedLight, packedOverlay);
     }
 }

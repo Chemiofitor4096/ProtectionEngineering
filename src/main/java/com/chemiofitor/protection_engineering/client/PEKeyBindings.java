@@ -10,24 +10,24 @@ import com.chemiofitor.protection_engineering.item.MomentumJetpackItem;
 import com.chemiofitor.protection_engineering.item.NightVisionGogglesItem;
 import com.chemiofitor.protection_engineering.item.RocketLauncherItem;
 import com.chemiofitor.protection_engineering.item.SpyglassItem;
-import com.chemiofitor.protection_engineering.network.ToggleAttachmentPayload;
-import com.chemiofitor.protection_engineering.network.ThrustJetpackPayload;
+import com.chemiofitor.protection_engineering.network.PEChannel;
+import com.chemiofitor.protection_engineering.network.ThrustJetpackMessage;
+import com.chemiofitor.protection_engineering.network.ToggleAttachmentMessage;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import org.lwjgl.glfw.GLFW;
 
 /**
  * 客户端热键绑定 — N/H/J/K/R/G/Z 分别触发对应附件。
  */
-@EventBusSubscriber(modid = ProtectionEngineering.MODID, value = Dist.CLIENT)
+@Mod.EventBusSubscriber(modid = ProtectionEngineering.MODID, value = Dist.CLIENT)
 public class PEKeyBindings {
 
     public static final KeyMapping TOGGLE_NIGHT_VISION = new KeyMapping(
@@ -72,22 +72,29 @@ public class PEKeyBindings {
             "key.categories.protectionengineering"
     );
 
-    @SubscribeEvent
-    public static void registerKeys(RegisterKeyMappingsEvent event) {
-        event.register(TOGGLE_NIGHT_VISION);
-        event.register(ACTIVATE_HORMONE);
-        event.register(THRUST_JETPACK);
-        event.register(TOGGLE_APS);
-        event.register(ACTIVATE_ROCKET_LAUNCHER);
-        event.register(ACTIVATE_MISSILE);
-        event.register(TOGGLE_SPYGLASS);
+    /** 按键注册在 MOD 总线（RegisterKeyMappingsEvent 为 IModBusEvent） */
+    @Mod.EventBusSubscriber(modid = ProtectionEngineering.MODID, value = Dist.CLIENT,
+            bus = Mod.EventBusSubscriber.Bus.MOD)
+    public static class KeyRegistration {
+        @SubscribeEvent
+        public static void registerKeys(RegisterKeyMappingsEvent event) {
+            event.register(TOGGLE_NIGHT_VISION);
+            event.register(ACTIVATE_HORMONE);
+            event.register(THRUST_JETPACK);
+            event.register(TOGGLE_APS);
+            event.register(ACTIVATE_ROCKET_LAUNCHER);
+            event.register(ACTIVATE_MISSILE);
+            event.register(TOGGLE_SPYGLASS);
+        }
     }
 
     private static int clientThrustEndTick = 0;
     private static double clientThrustSpeed = 1.5;
 
     @SubscribeEvent
-    public static void onClientTick(ClientTickEvent.Post event) {
+    public static void onClientTick(TickEvent.ClientTickEvent event) {
+        if (event.phase != TickEvent.Phase.END) return;
+
         while (TOGGLE_NIGHT_VISION.consumeClick()) {
             tryActivateAttachment(NightVisionGogglesItem.class);
         }
@@ -112,7 +119,7 @@ public class PEKeyBindings {
 
         // 喷气背包推力：按一次 → 发包 + 客户端预测
         while (THRUST_JETPACK.consumeClick()) {
-            PacketDistributor.sendToServer(new ThrustJetpackPayload());
+            PEChannel.CHANNEL.sendToServer(new ThrustJetpackMessage());
             clientThrustEndTick = player.tickCount + (hasMomentumJetpack(player) ? 100 : 60);
             clientThrustSpeed = hasMomentumJetpack(player) ? 2.0 : 1.5;
         }
@@ -138,7 +145,7 @@ public class PEKeyBindings {
         if (player == null) return;
 
         AttachmentUtil.findFirst(player, type).ifPresent(match ->
-            PacketDistributor.sendToServer(new ToggleAttachmentPayload(
+            PEChannel.CHANNEL.sendToServer(new ToggleAttachmentMessage(
                     match.armorSlot().ordinal(), match.attachSlot().id())));
     }
 }

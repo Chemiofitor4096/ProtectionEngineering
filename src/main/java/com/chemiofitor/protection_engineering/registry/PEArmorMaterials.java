@@ -1,43 +1,82 @@
 package com.chemiofitor.protection_engineering.registry;
 
-import com.chemiofitor.protection_engineering.ProtectionEngineering;
-import net.minecraft.core.registries.Registries;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ArmorMaterial;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
-
-import java.util.List;
-import java.util.Map;
+import net.minecraft.world.item.crafting.Ingredient;
 
 /**
- * 护甲材质注册。
+ * 护甲材质 — 1.20.1（本环境）的 ArmorMaterial 为接口。
  * <p>
  * 工程师护甲 = 下界合金级别护甲值 + 150% 下界合金耐久。
  * 修补材料：黄铜板（弱）/ 坚固板（强），强度见 {@link PERepairMaterials}。
  */
-public class PEArmorMaterials {
+public final class PEArmorMaterials {
 
-    public static final DeferredRegister<ArmorMaterial> REGISTRY =
-            DeferredRegister.create(Registries.ARMOR_MATERIAL, ProtectionEngineering.MODID);
+    private PEArmorMaterials() {}
 
     /** 耐久因子: 下界合金 37 × 1.5 = 55.5 → 56 */
     public static final int DURABILITY_FACTOR = 56;
 
-    public static final DeferredHolder<ArmorMaterial, ArmorMaterial> ENGINEER_ARMOR =
-            REGISTRY.register("engineer_armor", () -> new ArmorMaterial(
-                    // 护甲值同下界合金
-                    Map.of(
-                            ArmorItem.Type.HELMET,      3,
-                            ArmorItem.Type.CHESTPLATE,  8,
-                            ArmorItem.Type.LEGGINGS,    6,
-                            ArmorItem.Type.BOOTS,       3
-                    ),
-                    15,                                 // 附魔值同下界合金
-                    PESounds.EQUIP_ENGINEER_ARMOR,       // 工程师护甲音效
-                    PERepairMaterials::asIngredient,     // 黄铜板 / 坚固板（强度分级）
-                    List.of(new ArmorMaterial.Layer(ProtectionEngineering.asResource("engineer"))),
-                    3.0F,                               // 韧性同下界合金
-                    0.1F                                // 击退抗性同下界合金
-            ));
+    /** 各部件基础耐久倍率（现代护甲重做后的取值，与 1.21.1 版本一致） */
+    private static int baseDurability(ArmorItem.Type type) {
+        return switch (type) {
+            case HELMET -> 13;
+            case CHESTPLATE -> 16;
+            case LEGGINGS -> 15;
+            case BOOTS -> 11;
+        };
+    }
+
+    /** 部件耐久 = 基础倍率 × 耐久因子 */
+    public static int typeDurability(ArmorItem.Type type) {
+        return baseDurability(type) * DURABILITY_FACTOR;
+    }
+
+    public static final ArmorMaterial ENGINEER_ARMOR = new ArmorMaterial() {
+        @Override
+        public int getDurabilityForType(ArmorItem.Type type) {
+            return typeDurability(type);
+        }
+
+        @Override
+        public int getDefenseForType(ArmorItem.Type type) {
+            return switch (type) {
+                case HELMET -> 3;
+                case CHESTPLATE -> 8;
+                case LEGGINGS -> 6;
+                case BOOTS -> 3;
+            };
+        }
+
+        @Override
+        public int getEnchantmentValue() {
+            return 15; // 附魔值同下界合金
+        }
+
+        @Override
+        public SoundEvent getEquipSound() {
+            return PESounds.EQUIP_ENGINEER_ARMOR.get();
+        }
+
+        @Override
+        public Ingredient getRepairIngredient() {
+            return PERepairMaterials.asIngredient();
+        }
+
+        @Override
+        public String getName() {
+            return "engineer";
+        }
+
+        @Override
+        public float getToughness() {
+            return 3.0F; // 韧性同下界合金
+        }
+
+        @Override
+        public float getKnockbackResistance() {
+            return 0.1F; // 击退抗性同下界合金
+        }
+    };
 }

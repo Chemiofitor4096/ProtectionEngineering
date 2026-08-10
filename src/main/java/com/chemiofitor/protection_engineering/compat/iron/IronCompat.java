@@ -1,8 +1,6 @@
 package com.chemiofitor.protection_engineering.compat.iron;
 
 import com.chemiofitor.protection_engineering.ProtectionEngineering;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.ModContainer;
 
 /**
  * 铁魔法兼容入口 — 仅当 Iron's Spells 'n Spellbooks 加载时由主类调用。
@@ -17,7 +15,7 @@ public class IronCompat {
 
     private static boolean registered = false;
 
-    public static void register(IEventBus modEventBus, ModContainer modContainer) {
+    public static void register() {
         if (registered) return;
         registered = true;
 

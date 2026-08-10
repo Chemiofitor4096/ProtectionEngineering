@@ -1,0 +1,33 @@
+{
+  "type": "create:mechanical_crafting",
+  "acceptMirrored": true,
+  "key": {
+    "B": {
+      "item": "create:brass_sheet"
+    },
+    "F": {
+      "item": "minecraft:blaze_powder"
+    },
+    "G": {
+      "item": "minecraft:glistering_melon_slice"
+    },
+    "L": {
+      "item": "minecraft:glowstone_dust"
+    },
+    "P": {
+      "item": "create:precision_mechanism"
+    },
+    "S": {
+      "item": "create:sturdy_sheet"
+    }
+  },
+  "pattern": [
+    " FBF ",
+    " GBG ",
+    " LBL ",
+    " SPS "
+  ],
+  "result": {
+    "item": "protectionengineering:hormone_injector"
+  }
+}

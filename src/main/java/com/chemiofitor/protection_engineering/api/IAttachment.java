@@ -1,7 +1,6 @@
 package com.chemiofitor.protection_engineering.api;
 
 import com.chemiofitor.protection_engineering.ProtectionEngineering;
-import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -11,7 +10,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.event.ItemAttributeModifierEvent;
+import net.minecraftforge.event.ItemAttributeModifierEvent;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -71,7 +70,7 @@ public interface IAttachment {
      * 装备此附件后，集合内的效果将被阻止应用到玩家身上。
      * 默认返回空集。
      */
-    default Set<Holder<MobEffect>> getImmunities() {
+    default Set<MobEffect> getImmunities() {
         return Set.of();
     }
 
@@ -94,19 +93,19 @@ public interface IAttachment {
      * 声明同时驱动两处：{@code addAttributeModifiers} 将声明应用到宿主护甲（实际生效），
      * 附件 tooltip 用原版"当作为部件安装时：+X 属性"风格展示。声明一次，两处复用。
      * <p>
-     * 生效的装备槽组不在此声明 —— 由附件兼容的 {@link SlotType#equipmentSlotGroup()}
-     * 自动推导（单组 → 该组；跨组 → {@code ANY}），避免手写错槽导致属性不生效。
+     * 生效的装备槽不在此声明 —— 由附件兼容的 {@link SlotType#equipmentSlot()}
+     * 自动推导，实际挂到宿主护甲穿戴的槽位，避免手写错槽导致属性不生效。
      *
      * @param id        修饰符唯一 ID（模组命名空间）
      * @param attribute 目标属性
-     * @param amount    数值（ADD_MULTIPLIED_* 为小数，如 0.2 = +20%）
+     * @param amount    数值（MULTIPLY_* 为小数，如 0.2 = +20%）
      * @param operation 操作类型
      */
-    record AttributeBonus(ResourceLocation id, Holder<Attribute> attribute,
+    record AttributeBonus(ResourceLocation id, Attribute attribute,
                           double amount, AttributeModifier.Operation operation) {}
 
     /** 便捷工厂：以模组命名空间生成修饰符 ID */
-    static AttributeBonus bonus(String path, Holder<Attribute> attribute, double amount,
+    static AttributeBonus bonus(String path, Attribute attribute, double amount,
                                 AttributeModifier.Operation operation) {
         return new AttributeBonus(ProtectionEngineering.asResource(path), attribute, amount, operation);
     }

@@ -1,19 +1,19 @@
 package com.chemiofitor.protection_engineering.config;
 
-import net.neoforged.neoforge.common.ModConfigSpec;
+import net.minecraftforge.common.ForgeConfigSpec;
 
 /**
  * 客户端配置 — HUD 覆盖层位置等。
  */
 public class PEConfig {
 
-    public static final ModConfigSpec SPEC;
+    public static final ForgeConfigSpec SPEC;
 
-    public static final ModConfigSpec.IntValue HUD_OFFSET_X;
-    public static final ModConfigSpec.IntValue HUD_OFFSET_Y;
+    public static final ForgeConfigSpec.IntValue HUD_OFFSET_X;
+    public static final ForgeConfigSpec.IntValue HUD_OFFSET_Y;
 
     static {
-        ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
+        ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
 
         builder.push("HUD");
         HUD_OFFSET_X = builder

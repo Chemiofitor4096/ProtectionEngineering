@@ -3,10 +3,10 @@ package com.chemiofitor.protection_engineering.api;
 import com.mojang.serialization.Codec;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.world.entity.EquipmentSlot;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,8 +25,8 @@ import java.util.Map;
  *   <li>record 自动提供 equals/hashCode，可作为 Map key</li>
  *   <li>CODEC 以 ResourceLocation 为持久化形式，反序列化时查注册表</li>
  *   <li>未知 id 反序列化时创建临时实例（category=UTILITY），不会丢数据</li>
- *   <li>装备槽组（{@link #equipmentSlotGroup()}）存旁路映射表而非 record component，
- *       避免参与 equals/hashCode —— 否则 byId 反序列化的临时实例会因 group 不同而失配</li>
+ *   <li>装备槽（{@link #equipmentSlot()}）存旁路映射表而非 record component，
+ *       避免参与 equals/hashCode —— 否则 byId 反序列化的临时实例会因 slot 不同而失配</li>
  * </ul>
  */
 public record SlotType(ResourceLocation id, SlotCategory category) {
@@ -40,23 +40,25 @@ public record SlotType(ResourceLocation id, SlotCategory category) {
 
     private static final Map<ResourceLocation, SlotType> REGISTRY = new HashMap<>();
 
-    /** 槽位 → 装备槽组（属性修饰符生效范围）的旁路映射，不参与 record 相等性 */
-    private static final Map<ResourceLocation, EquipmentSlotGroup> GROUPS = new HashMap<>();
+    /** 槽位 → 装备槽（属性修饰符生效范围）的旁路映射，不参与 record 相等性；null = 通用（ANY） */
+    private static final Map<ResourceLocation, EquipmentSlot> SLOTS = new HashMap<>();
 
-    /** 注册一个新槽位类型（默认 ANY），返回注册后的实例 */
+    /** 注册一个新槽位类型（通用槽，属性槽由宿主护甲推导），返回注册后的实例 */
     public static synchronized SlotType register(ResourceLocation id, SlotCategory category) {
-        return register(id, category, EquipmentSlotGroup.ANY);
+        return register(id, category, null);
     }
 
-    /** 注册一个新槽位类型并指定装备槽组，返回注册后的实例 */
+    /** 注册一个新槽位类型并指定默认装备槽，返回注册后的实例 */
     public static synchronized SlotType register(ResourceLocation id, SlotCategory category,
-                                                 EquipmentSlotGroup group) {
+                                                 @Nullable EquipmentSlot slot) {
         if (REGISTRY.containsKey(id)) {
             throw new IllegalArgumentException("SlotType already registered: " + id);
         }
         var type = new SlotType(id, category);
         REGISTRY.put(id, type);
-        GROUPS.put(id, group);
+        if (slot != null) {
+            SLOTS.put(id, slot);
+        }
         return type;
     }
 
@@ -65,15 +67,16 @@ public record SlotType(ResourceLocation id, SlotCategory category) {
         return REGISTRY.computeIfAbsent(id, k -> new SlotType(k, SlotCategory.UTILITY));
     }
 
-    /** 该槽位对应的装备槽组（附件属性修饰符的生效范围），未映射时默认 ANY */
-    public EquipmentSlotGroup equipmentSlotGroup() {
-        return GROUPS.getOrDefault(id, EquipmentSlotGroup.ANY);
+    /** 该槽位对应的装备槽（附件属性修饰符的生效范围），未映射时返回 null（由宿主护甲推导） */
+    @Nullable
+    public EquipmentSlot equipmentSlot() {
+        return SLOTS.get(id);
     }
 
     /** 通过字符串 id 查找，解析失败返回 null */
     public static SlotType byId(String id) {
         try {
-            return byId(ResourceLocation.parse(id));
+            return byId(new ResourceLocation(id));
         } catch (ResourceLocationException e) {
             return null;
         }
@@ -90,13 +93,16 @@ public record SlotType(ResourceLocation id, SlotCategory category) {
     public static final Codec<SlotType> CODEC =
             ResourceLocation.CODEC.xmap(SlotType::byId, SlotType::id);
 
-    // ── StreamCodec ────────────────────────────────────────────
+    // ── 网络编解码 ──────────────────────────────────────────────
 
-    public static final StreamCodec<FriendlyByteBuf, SlotType> STREAM_CODEC =
-            StreamCodec.of(
-                    (buf, type) -> ResourceLocation.STREAM_CODEC.encode(buf, type.id),
-                    buf -> byId(ResourceLocation.STREAM_CODEC.decode(buf))
-            );
+    /** 以 ResourceLocation 编解码 */
+    public static SlotType fromNetwork(FriendlyByteBuf buf) {
+        return byId(buf.readResourceLocation());
+    }
+
+    public static void toNetwork(FriendlyByteBuf buf, SlotType type) {
+        buf.writeResourceLocation(type.id);
+    }
 
     // ── 便利方法 ────────────────────────────────────────────────
 

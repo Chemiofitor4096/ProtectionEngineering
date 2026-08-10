@@ -19,7 +19,9 @@
         "-Dfml.modFolders\u003dprotectionengineering%%C:\\Projects\\protectionengineering-1.21.1\\bin\\main"
       ],
       "cwd": "${workspaceFolder}\\run",
-      "env": {},
+      "env": {
+        "MOD_CLASSES": "protectionengineering%%C:\\Projects\\protectionengineering-1.21.1\\bin\\main"
+      },
       "console": "internalConsole",
       "shortenCommandLine": "none"
     },
@@ -41,29 +43,9 @@
         "-Dfml.modFolders\u003dprotectionengineering%%C:\\Projects\\protectionengineering-1.21.1\\bin\\main"
       ],
       "cwd": "${workspaceFolder}\\run",
-      "env": {},
-      "console": "internalConsole",
-      "shortenCommandLine": "none"
-    },
-    {
-      "type": "java",
-      "request": "launch",
-      "name": "GameTestServer",
-      "presentation": {
-        "group": "Mod Development - protectionengineering",
-        "order": 2
+      "env": {
+        "MOD_CLASSES": "protectionengineering%%C:\\Projects\\protectionengineering-1.21.1\\bin\\main"
       },
-      "projectName": "protectionengineering",
-      "mainClass": "net.neoforged.devlaunch.Main",
-      "args": [
-        "@C:\\Projects\\protectionengineering-1.21.1\\build\\moddev\\gameTestServerRunProgramArgs.txt"
-      ],
-      "vmArgs": [
-        "@C:\\Projects\\protectionengineering-1.21.1\\build\\moddev\\gameTestServerRunVmArgs.txt",
-        "-Dfml.modFolders\u003dprotectionengineering%%C:\\Projects\\protectionengineering-1.21.1\\bin\\main"
-      ],
-      "cwd": "${workspaceFolder}\\run",
-      "env": {},
       "console": "internalConsole",
       "shortenCommandLine": "none"
     },
@@ -73,7 +55,7 @@
       "name": "Server",
       "presentation": {
         "group": "Mod Development - protectionengineering",
-        "order": 3
+        "order": 2
       },
       "projectName": "protectionengineering",
       "mainClass": "net.neoforged.devlaunch.Main",
@@ -85,7 +67,9 @@
         "-Dfml.modFolders\u003dprotectionengineering%%C:\\Projects\\protectionengineering-1.21.1\\bin\\main"
       ],
       "cwd": "${workspaceFolder}\\run",
-      "env": {},
+      "env": {
+        "MOD_CLASSES": "protectionengineering%%C:\\Projects\\protectionengineering-1.21.1\\bin\\main"
+      },
       "console": "internalConsole",
       "shortenCommandLine": "none"
     }

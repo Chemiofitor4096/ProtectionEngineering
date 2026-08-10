@@ -46,7 +46,7 @@ public class MissileRenderer extends EntityRenderer<MissileEntity> {
         VertexConsumer vertexConsumer = buffer.getBuffer(
                 RenderType.entityCutoutNoCull(TEXTURE));
         this.model.renderToBuffer(poseStack, vertexConsumer, packedLight,
-                OverlayTexture.NO_OVERLAY, -1);
+                OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, 1f);
 
         poseStack.popPose();
 

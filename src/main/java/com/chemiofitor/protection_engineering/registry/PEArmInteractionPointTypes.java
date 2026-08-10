@@ -3,7 +3,6 @@ package com.chemiofitor.protection_engineering.registry;
 import com.chemiofitor.protection_engineering.ProtectionEngineering;
 import com.chemiofitor.protection_engineering.block.ArmorEmitterBlock;
 import com.simibubi.create.api.registry.CreateRegistries;
-import com.simibubi.create.content.kinetics.mechanicalArm.ArmBlockEntity;
 import com.simibubi.create.content.kinetics.mechanicalArm.ArmInteractionPoint;
 import com.simibubi.create.content.kinetics.mechanicalArm.ArmInteractionPointType;
 import net.minecraft.core.BlockPos;
@@ -12,15 +11,15 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.RegistryObject;
 
 public class PEArmInteractionPointTypes {
     public static final DeferredRegister<ArmInteractionPointType> REGISTRY =
             DeferredRegister.create(CreateRegistries.ARM_INTERACTION_POINT_TYPE, ProtectionEngineering.MODID);
 
-    public static final DeferredHolder<ArmInteractionPointType, ArmorEmitterPointType> ARMOR_EMITTER =
+    public static final RegistryObject<ArmorEmitterPointType> ARMOR_EMITTER =
             REGISTRY.register("armor_emitter", ArmorEmitterPointType::new);
 
     public static void register(IEventBus bus) {
@@ -55,7 +54,7 @@ public class PEArmInteractionPointTypes {
         }
 
         @Override
-        public ItemStack insert(ArmBlockEntity armBlockEntity, ItemStack stack, boolean simulate) {
+        public ItemStack insert(ItemStack stack, boolean simulate) {
             LivingEntity target = ArmorEmitterBlock.findTarget(level, pos);
             if (target == null || !ArmorEmitterBlock.canEquip(target, stack)) {
                 return stack; // 不能穿戴 / 无生物 → 机械臂不选择此点
@@ -71,7 +70,7 @@ public class PEArmInteractionPointTypes {
         }
 
         @Override
-        public ItemStack extract(ArmBlockEntity armBlockEntity, int slot, int amount, boolean simulate) {
+        public ItemStack extract(int slot, int amount, boolean simulate) {
             LivingEntity target = ArmorEmitterBlock.findTarget(level, pos);
             if (target == null) return ItemStack.EMPTY;
 
@@ -87,7 +86,7 @@ public class PEArmInteractionPointTypes {
         }
 
         @Override
-        public int getSlotCount(ArmBlockEntity armBlockEntity) {
+        public int getSlotCount() {
             return 1; // 单个"槽"：每次机械臂取一件脱下 / 拆除的物品
         }
     }

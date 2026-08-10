@@ -1,15 +1,18 @@
 package com.chemiofitor.protection_engineering.api;
 
-import com.mojang.serialization.Codec;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * 宿主物品上的附件数据。自定义 equals/hashCode 用 ItemStack.matches 做值比较。
+ * <p>
+ * 1.20.1 无 Data Component 系统，序列化改用 NBT：
+ * 宿主 ItemStack 的 tag 内以 {@code attachments} 键存一张 {@code slotId -> ItemStack tag} 的表。
  */
 public final class AttachmentsData {
 
@@ -31,7 +34,7 @@ public final class AttachmentsData {
         for (var entry : slots.entrySet()) {
             ItemStack otherStack = other.slots.get(entry.getKey());
             if (otherStack == null) return false;
-            // 仅比较物品类型，忽略组件变化（防止状态更新触发装备音效）
+            // 仅比较物品类型，忽略 tag 变化（防止状态更新触发装备音效）
             if (!ItemStack.matches(entry.getValue(), otherStack)) return false;
         }
         return true;
@@ -41,68 +44,60 @@ public final class AttachmentsData {
     public int hashCode() {
         int h = 0;
         for (var entry : slots.entrySet()) {
-            h += Objects.hash(entry.getKey(), ItemStack.hashItemAndComponents(entry.getValue()));
+            h += Objects.hash(entry.getKey(), entry.getValue().hashCode());
         }
         return h;
     }
 
-    // ── Codec ──────────────────────────────────────────────────
-    // Map 的 key 以 ResourceLocation 序列化，反序列化时通过 SlotType.byId 查找
+    // ── NBT 序列化 ──────────────────────────────────────────────
+    // 序列化形式：{ slotId : { ItemStack tag } }
 
-    private static final Codec<Map<SlotType, ItemStack>> SLOTS_CODEC =
-            Codec.unboundedMap(ResourceLocation.CODEC, ItemStack.OPTIONAL_CODEC)
-                    .xmap(
-                            raw ->
-                                    raw.entrySet().stream()
-                                            .filter(e -> !e.getValue().isEmpty())
-                                            .collect(
-                                                    LinkedHashMap::new,
-                                                    (m, e) -> {
-                                                        SlotType slot = SlotType.byId(e.getKey());
-                                                        if (slot != null) m.put(slot, e.getValue());
-                                                    },
-                                                    LinkedHashMap::putAll
-                                            ),
-                            slots ->
-                                    slots.entrySet().stream()
-                                            .collect(
-                                                    LinkedHashMap::new,
-                                                    (m, e) -> m.put(e.getKey().id(), e.getValue()),
-                                                    LinkedHashMap::putAll
-                                            )
-                    );
+    /** 序列化为独立 CompoundTag（不含外层容器键） */
+    public CompoundTag toTag() {
+        CompoundTag data = new CompoundTag();
+        for (var entry : slots.entrySet()) {
+            data.put(entry.getKey().id().toString(), entry.getValue().save(new CompoundTag()));
+        }
+        return data;
+    }
 
-    public static final Codec<AttachmentsData> CODEC =
-            SLOTS_CODEC.xmap(AttachmentsData::new, AttachmentsData::slots);
+    /** 从序列化的 CompoundTag 反序列化 */
+    public static AttachmentsData fromTag(CompoundTag data) {
+        var map = new LinkedHashMap<SlotType, ItemStack>();
+        for (String key : data.getAllKeys()) {
+            SlotType slot = SlotType.byId(key);
+            ItemStack stack = ItemStack.of(data.getCompound(key));
+            if (!stack.isEmpty()) {
+                map.put(slot, stack);
+            }
+        }
+        return new AttachmentsData(map);
+    }
 
-    // ── StreamCodec ────────────────────────────────────────────
+    // ── 网络编解码 ──────────────────────────────────────────────
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, AttachmentsData> STREAM_CODEC =
-            new StreamCodec<>() {
-                @Override
-                public AttachmentsData decode(RegistryFriendlyByteBuf buf) {
-                    int size = buf.readVarInt();
-                    var map = new LinkedHashMap<SlotType, ItemStack>(size);
-                    for (int i = 0; i < size; i++) {
-                        ResourceLocation id = ResourceLocation.STREAM_CODEC.decode(buf);
-                        ItemStack stack = ItemStack.OPTIONAL_STREAM_CODEC.decode(buf);
-                        SlotType slot = SlotType.byId(id);
-                        if (slot != null && !stack.isEmpty()) {
-                            map.put(slot, stack);
-                        }
-                    }
-                    return new AttachmentsData(map);
-                }
+    /** 写入 FriendlyByteBuf（writeItem 注册表感知） */
+    public void toNetwork(FriendlyByteBuf buf) {
+        buf.writeVarInt(slots.size());
+        for (var entry : slots.entrySet()) {
+            SlotType.toNetwork(buf, entry.getKey());
+            buf.writeItem(entry.getValue());
+        }
+    }
 
-                @Override
-                public void encode(RegistryFriendlyByteBuf buf, AttachmentsData data) {
-                    buf.writeVarInt(data.slots.size());
-                    for (var entry : data.slots.entrySet()) {
-                        ResourceLocation.STREAM_CODEC.encode(buf, entry.getKey().id());
-                        ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, entry.getValue());
-                    }
-                }
-            };
+    /** 从 FriendlyByteBuf 解码 */
+    public static AttachmentsData fromNetwork(FriendlyByteBuf buf) {
+        int size = buf.readVarInt();
+        var map = new LinkedHashMap<SlotType, ItemStack>(size);
+        for (int i = 0; i < size; i++) {
+            SlotType slot = SlotType.fromNetwork(buf);
+            ItemStack stack = buf.readItem();
+            if (!stack.isEmpty()) {
+                map.put(slot, stack);
+            }
+        }
+        return new AttachmentsData(map);
+    }
 
     // ── Accessors ──────────────────────────────────────────────
 

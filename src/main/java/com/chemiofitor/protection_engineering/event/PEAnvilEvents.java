@@ -2,14 +2,13 @@ package com.chemiofitor.protection_engineering.event;
 
 import com.chemiofitor.protection_engineering.ProtectionEngineering;
 import com.chemiofitor.protection_engineering.api.IGradedRepair;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.inventory.AnvilMenu;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.AnvilUpdateEvent;
+import net.minecraftforge.event.AnvilUpdateEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
 /**
  * 铁砧分级修补 — 接管 {@link IGradedRepair} 物品的铁砧结果计算。
@@ -19,8 +18,13 @@ import net.neoforged.neoforge.event.AnvilUpdateEvent;
  * <p>
  * 未登记的材料组合不写入 output，交回原版处理（附魔书、同类合并等）。
  */
-@EventBusSubscriber(modid = ProtectionEngineering.MODID)
+@Mod.EventBusSubscriber(modid = ProtectionEngineering.MODID)
 public class PEAnvilEvents {
+
+    /** 1.20.1 的 REPAIR_COST 存于 NBT 的 RepairCost 键 */
+    private static int repairCost(ItemStack stack) {
+        return stack.getTag() != null ? stack.getTag().getInt("RepairCost") : 0;
+    }
 
     @SubscribeEvent
     public static void onAnvilUpdate(AnvilUpdateEvent event) {
@@ -47,33 +51,32 @@ public class PEAnvilEvents {
 
         // 重命名（与原版一致：+1 级）
         String name = event.getName();
-        if (name != null && !StringUtil.isBlank(name)) {
+        if (name != null && !StringUtil.isNullOrEmpty(name)) {
             if (!name.equals(left.getHoverName().getString())) {
-                output.set(DataComponents.CUSTOM_NAME, Component.literal(name));
+                output.setHoverName(Component.literal(name));
                 levels++;
             }
-        } else if (left.has(DataComponents.CUSTOM_NAME)) {
-            output.remove(DataComponents.CUSTOM_NAME);
+        } else if (left.hasCustomHoverName()) {
+            output.resetHoverName();
             levels++;
         }
 
-        int priorCost = Math.max(left.getOrDefault(DataComponents.REPAIR_COST, 0),
-                right.getOrDefault(DataComponents.REPAIR_COST, 0));
+        int priorCost = Math.max(repairCost(left), repairCost(right));
 
         // 前置工作惩罚：可附魔装备（链锯剑）跟随原版递增，
         // 不可附魔装备（护甲/盾牌）保持不变，否则修几次后会彻底无法修复
         if (graded.increasesRepairCost(left)) {
-            output.set(DataComponents.REPAIR_COST, AnvilMenu.calculateIncreasedRepairCost(priorCost));
+            output.setRepairCost(AnvilMenu.calculateIncreasedRepairCost(priorCost));
         }
 
         // 基础前置消耗 + 本次操作等级消耗（至少 1 级，否则结果不可取出）
-        long cost = event.getCost()
-                + left.getOrDefault(DataComponents.REPAIR_COST, 0)
-                + right.getOrDefault(DataComponents.REPAIR_COST, 0)
+        int cost = event.getCost()
+                + repairCost(left)
+                + repairCost(right)
                 + levels;
 
         event.setOutput(output);
         event.setMaterialCost(consumed);
-        event.setCost(Math.max(1L, cost));
+        event.setCost(Math.max(1, cost));
     }
 }

@@ -10,15 +10,16 @@ import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.EntityType;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.client.event.EntityRenderersEvent;
 
 /**
  * 客户端模型层注册 — 护甲 + 附件 3D 模型层定义及渲染层注入。
  */
-@EventBusSubscriber(modid = ProtectionEngineering.MODID, value = Dist.CLIENT)
+@Mod.EventBusSubscriber(modid = ProtectionEngineering.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class PEModelLayers {
 
     @SubscribeEvent
@@ -72,10 +73,13 @@ public class PEModelLayers {
         // 盔甲架 + 所有使用 HumanoidModel 的类人生物（僵尸、骷髅、凋灵骷髅等）
         for (EntityType<?> type : BuiltInRegistries.ENTITY_TYPE) {
             if (type == EntityType.PLAYER) continue; // 玩家已处理
-            if (event.getRenderer(type) instanceof LivingEntityRenderer<?, ?> renderer) {
-                if (renderer instanceof ArmorStandRenderer || renderer.getModel() instanceof HumanoidModel) {
-                    renderer.addLayer((RenderLayer) new PEArmorLayer(renderer, event.getEntityModels()));
-                }
+            @SuppressWarnings("unchecked")
+            EntityType<? extends LivingEntity> livingType = (EntityType<? extends LivingEntity>) type;
+            @SuppressWarnings("rawtypes")
+            LivingEntityRenderer renderer = (LivingEntityRenderer) event.getRenderer(livingType);
+            if (renderer == null) continue;
+            if (renderer instanceof ArmorStandRenderer || renderer.getModel() instanceof HumanoidModel) {
+                renderer.addLayer((RenderLayer) new PEArmorLayer(renderer, event.getEntityModels()));
             }
         }
     }

@@ -1,0 +1,25 @@
+{
+  "type": "create:mechanical_crafting",
+  "acceptMirrored": true,
+  "key": {
+    "C": {
+      "item": "create:cardboard"
+    },
+    "S": {
+      "item": "create:sturdy_sheet"
+    },
+    "W": {
+      "item": "minecraft:cyan_wool"
+    }
+  },
+  "pattern": [
+    "     ",
+    "     ",
+    " S S ",
+    "SC CS",
+    "WW WW"
+  ],
+  "result": {
+    "item": "protectionengineering:silent_soles"
+  }
+}

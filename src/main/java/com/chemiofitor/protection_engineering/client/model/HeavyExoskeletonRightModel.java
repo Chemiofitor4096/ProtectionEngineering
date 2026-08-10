@@ -13,7 +13,7 @@ import net.minecraft.world.entity.Entity;
 public class HeavyExoskeletonRightModel<T extends Entity> extends EntityModel<T> {
 
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(
-            ResourceLocation.fromNamespaceAndPath("protectionengineering", "heavy_exoskeleton_right"), "main");
+            new ResourceLocation("protectionengineering", "heavy_exoskeleton_right"), "main");
     private final ModelPart MachineLeg;
     private final ModelPart LeftMachineLeg;
     private final ModelPart LeftMachineUpperLeg;
@@ -108,7 +108,7 @@ public class HeavyExoskeletonRightModel<T extends Entity> extends EntityModel<T>
 
     @Override
     public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer,
-                               int packedLight, int packedOverlay, int color) {
-        MachineLeg.render(poseStack, vertexConsumer, packedLight, packedOverlay, -1);
+                               int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+        MachineLeg.render(poseStack, vertexConsumer, packedLight, packedOverlay);
     }
 }

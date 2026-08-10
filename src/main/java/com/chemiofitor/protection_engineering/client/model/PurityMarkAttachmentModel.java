@@ -16,7 +16,7 @@ import net.minecraft.world.entity.Entity;
 public class PurityMarkAttachmentModel<T extends Entity> extends EntityModel<T> {
 
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(
-            ResourceLocation.fromNamespaceAndPath("protectionengineering", "purity_mark"), "main");
+            new ResourceLocation("protectionengineering", "purity_mark"), "main");
 
     private final ModelPart bb_main;
 
@@ -54,7 +54,7 @@ public class PurityMarkAttachmentModel<T extends Entity> extends EntityModel<T> 
 
     @Override
     public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer,
-                               int packedLight, int packedOverlay, int color) {
-        bb_main.render(poseStack, vertexConsumer, packedLight, packedOverlay, -1);
+                               int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+        bb_main.render(poseStack, vertexConsumer, packedLight, packedOverlay);
     }
 }

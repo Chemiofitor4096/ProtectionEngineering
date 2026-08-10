@@ -13,7 +13,7 @@ import net.minecraft.world.entity.Entity;
 public class DodgeJetpackAttachmentModel<T extends Entity> extends EntityModel<T> {
 
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(
-            ResourceLocation.fromNamespaceAndPath("protectionengineering", "dodge_jetpack"), "main");
+            new ResourceLocation("protectionengineering", "dodge_jetpack"), "main");
     private final ModelPart DodgePack;
     private final ModelPart LeftWing;
     private final ModelPart LeftOuterWing;
@@ -207,7 +207,7 @@ public class DodgeJetpackAttachmentModel<T extends Entity> extends EntityModel<T
 
     @Override
     public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer,
-                               int packedLight, int packedOverlay, int color) {
-        DodgePack.render(poseStack, vertexConsumer, packedLight, packedOverlay, -1);
+                               int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+        DodgePack.render(poseStack, vertexConsumer, packedLight, packedOverlay);
     }
 }

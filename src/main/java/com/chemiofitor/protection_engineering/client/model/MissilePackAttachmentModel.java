@@ -13,7 +13,7 @@ import net.minecraft.world.entity.Entity;
 public class MissilePackAttachmentModel<T extends Entity> extends EntityModel<T> {
 
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(
-            ResourceLocation.fromNamespaceAndPath("protectionengineering", "missile_pack"), "main");
+            new ResourceLocation("protectionengineering", "missile_pack"), "main");
     private final ModelPart MachineBackpack;
 
     public MissilePackAttachmentModel(ModelPart root) {
@@ -74,7 +74,7 @@ public class MissilePackAttachmentModel<T extends Entity> extends EntityModel<T>
 
     @Override
     public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer,
-                               int packedLight, int packedOverlay, int color) {
-        MachineBackpack.render(poseStack, vertexConsumer, packedLight, packedOverlay, -1);
+                               int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+        MachineBackpack.render(poseStack, vertexConsumer, packedLight, packedOverlay);
     }
 }

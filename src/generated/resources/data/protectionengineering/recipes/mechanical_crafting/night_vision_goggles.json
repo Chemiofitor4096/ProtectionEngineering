@@ -1,0 +1,30 @@
+{
+  "type": "create:mechanical_crafting",
+  "acceptMirrored": true,
+  "key": {
+    "A": {
+      "item": "minecraft:amethyst_shard"
+    },
+    "B": {
+      "item": "create:brass_sheet"
+    },
+    "G": {
+      "item": "minecraft:glowstone_dust"
+    },
+    "S": {
+      "item": "create:sturdy_sheet"
+    },
+    "Z": {
+      "item": "create:zinc_ingot"
+    }
+  },
+  "pattern": [
+    "  BS ",
+    "  BZ ",
+    "  GA ",
+    "  BS "
+  ],
+  "result": {
+    "item": "protectionengineering:night_vision_goggles"
+  }
+}

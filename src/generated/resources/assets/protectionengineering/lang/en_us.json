@@ -1,4 +1,5 @@
 {
+  "attribute.name.protectionengineering.jump_strength": "Jump Strength",
   "block.protectionengineering.armor_emitter": "Armor Emitter",
   "block.protectionengineering.armor_emitter.tooltip.behaviour1": "armor equips to the matching slot, PE attachments install to compatible slots",
   "block.protectionengineering.armor_emitter.tooltip.condition1": "When an entity that can wear equipment stands on top,",

@@ -4,52 +4,50 @@ import com.chemiofitor.protection_engineering.ProtectionEngineering;
 import com.chemiofitor.protection_engineering.api.AttachmentUtil;
 import com.chemiofitor.protection_engineering.api.IAttachment;
 import com.chemiofitor.protection_engineering.config.PEServerConfig;
+import com.chemiofitor.protection_engineering.item.AttachmentItem;
 import com.chemiofitor.protection_engineering.item.HormoneInjectorItem;
 import com.chemiofitor.protection_engineering.item.SpyglassItem;
-import com.chemiofitor.protection_engineering.registry.PEDataComponents;
-import com.chemiofitor.protection_engineering.registry.PEItems;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ComputeFovModifierEvent;
-import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.ComputeFovModifierEvent;
+import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
+import net.minecraftforge.client.gui.overlay.ForgeGui;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+
+import static com.chemiofitor.protection_engineering.registry.PEDataComponents.ATTACHMENT_COOLDOWN;
 
 /**
  * 激素针 HUD 叠加层 + FOV 缩放效果。
  */
-@EventBusSubscriber(modid = ProtectionEngineering.MODID, value = Dist.CLIENT)
+@Mod.EventBusSubscriber(modid = ProtectionEngineering.MODID, value = Dist.CLIENT,
+        bus = Mod.EventBusSubscriber.Bus.MOD)
 public class PEHormoneOverlay {
 
     public static final ResourceLocation OVERLAY_TEX =
             ProtectionEngineering.asResource("textures/gui/hormone_overlay.png");
-    public static final ResourceLocation LAYER_ID =
-            ResourceLocation.fromNamespaceAndPath(ProtectionEngineering.MODID, "hormone_overlay");
-    public static final ResourceLocation SPYGLASS_LAYER_ID =
-            ResourceLocation.fromNamespaceAndPath(ProtectionEngineering.MODID, "spyglass_scope");
     private static final ResourceLocation SPYGLASS_SCOPE_TEX =
-            ResourceLocation.withDefaultNamespace("textures/misc/spyglass_scope.png");
+            new ResourceLocation("textures/misc/spyglass_scope.png");
 
     // ── 叠加层注册 (MOD bus) ────────────────────────────────
 
     @SubscribeEvent
-    public static void registerOverlay(RegisterGuiLayersEvent event) {
-        event.registerAboveAll(LAYER_ID,
-                (gui, delta) -> renderOverlay(gui, delta));
-        event.registerAboveAll(SPYGLASS_LAYER_ID,
-                (gui, delta) -> renderSpyglassScope(gui));
+    public static void registerOverlay(RegisterGuiOverlaysEvent event) {
+        event.registerAboveAll("hormone_overlay",
+                (gui, graphics, partialTick, w, h) -> renderOverlay(graphics));
+        event.registerAboveAll("spyglass_scope",
+                (gui, graphics, partialTick, w, h) -> renderSpyglassScope(graphics));
     }
 
     // ── 叠加层渲染 ──────────────────────────────────────────
 
-    private static void renderOverlay(GuiGraphics gui, DeltaTracker delta) {
+    private static void renderOverlay(GuiGraphics gui) {
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
         if (player == null) return;
@@ -95,10 +93,10 @@ public class PEHormoneOverlay {
         RenderSystem.enableBlend();
         gui.blit(SPYGLASS_SCOPE_TEX, k, l, -90, 0, 0, i, j, i, j);
         RenderSystem.disableBlend();
-        gui.fill(net.minecraft.client.renderer.RenderType.guiOverlay(), 0, j1, w, h, -90, 0xFF000000);
-        gui.fill(net.minecraft.client.renderer.RenderType.guiOverlay(), 0, 0, w, l, -90, 0xFF000000);
-        gui.fill(net.minecraft.client.renderer.RenderType.guiOverlay(), 0, l, k, j1, -90, 0xFF000000);
-        gui.fill(net.minecraft.client.renderer.RenderType.guiOverlay(), i1, l, w, j1, -90, 0xFF000000);
+        gui.fill(0, j1, w, h, -90, 0xFF000000);
+        gui.fill(0, 0, w, l, -90, 0xFF000000);
+        gui.fill(0, l, k, j1, -90, 0xFF000000);
+        gui.fill(i1, l, w, j1, -90, 0xFF000000);
     }
 
     private static boolean isSpyglassActive(LocalPlayer player) {
@@ -126,7 +124,7 @@ public class PEHormoneOverlay {
 
     // ── FOV 缩放 (FORGE bus) ─────────────────────────────────
 
-    @EventBusSubscriber(modid = ProtectionEngineering.MODID, value = Dist.CLIENT)
+    @Mod.EventBusSubscriber(modid = ProtectionEngineering.MODID, value = Dist.CLIENT)
     public static class FovHandler {
         @SubscribeEvent
         public static void onFovModifier(ComputeFovModifierEvent event) {
@@ -163,7 +161,14 @@ public class PEHormoneOverlay {
 
     private static long getHormoneCooldownEnd(LocalPlayer player) {
         return AttachmentUtil.findFirst(player, HormoneInjectorItem.class)
-                .map(m -> m.stack().getOrDefault(PEDataComponents.ATTACHMENT_COOLDOWN.get(), 0L))
+                .map(m -> hormoneCooldown(m.stack()))
                 .orElse(0L);
+    }
+
+    private static long hormoneCooldown(ItemStack stack) {
+        if (stack.getItem() instanceof AttachmentItem ai) {
+            return ai.getTimer(stack);
+        }
+        return stack.getTag() != null ? stack.getTag().getLong(ATTACHMENT_COOLDOWN) : 0L;
     }
 }

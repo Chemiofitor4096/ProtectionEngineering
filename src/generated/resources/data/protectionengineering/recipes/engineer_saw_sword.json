@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "A": {
+      "item": "create:precision_mechanism"
+    },
+    "B": {
+      "item": "create:brass_sheet"
+    },
+    "I": {
+      "item": "create:sturdy_sheet"
+    },
+    "S": {
+      "item": "create:iron_sheet"
+    },
+    "T": {
+      "item": "minecraft:stick"
+    }
+  },
+  "pattern": [
+    " SI",
+    "SA ",
+    "TB "
+  ],
+  "result": {
+    "item": "protectionengineering:engineer_saw_sword"
+  },
+  "show_notification": true
+}

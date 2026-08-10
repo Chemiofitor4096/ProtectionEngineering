@@ -1,0 +1,28 @@
+{
+  "type": "create:mechanical_crafting",
+  "acceptMirrored": true,
+  "key": {
+    "A": {
+      "item": "protectionengineering:aps"
+    },
+    "I": {
+      "item": "create:iron_sheet"
+    },
+    "P": {
+      "item": "create:precision_mechanism"
+    },
+    "S": {
+      "item": "create:sturdy_sheet"
+    },
+    "T": {
+      "item": "create:electron_tube"
+    }
+  },
+  "pattern": [
+    "SSPSS",
+    "ITATI"
+  ],
+  "result": {
+    "item": "protectionengineering:advanced_aps"
+  }
+}

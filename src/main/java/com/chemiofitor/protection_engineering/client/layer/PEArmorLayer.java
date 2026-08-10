@@ -23,7 +23,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.fml.ModList;
+import net.minecraftforge.fml.ModList;
 
 /**
  * 工程护甲 & 附件渲染层 — 同时支持玩家和盔甲架。
@@ -66,10 +66,11 @@ public class PEArmorLayer extends RenderLayer<LivingEntity, HumanoidModel<Living
     public void render(PoseStack pose, MultiBufferSource buf, int light,
                        LivingEntity entity, float limbSwing, float limbSwingAmount,
                        float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
-        if (!(getParentModel() instanceof HumanoidModel humanoidModel)) return;
+        HumanoidModel<?> humanoidModel = getParentModel();
+        if (humanoidModel == null) return;
 
         for (EquipmentSlot slot : EquipmentSlot.values()) {
-            if (slot.getType() != EquipmentSlot.Type.HUMANOID_ARMOR) continue;
+            if (slot.getType() != EquipmentSlot.Type.ARMOR) continue;
             ItemStack armor = entity.getItemBySlot(slot);
             if (!(armor.getItem() instanceof AttachmentHostArmorItem)) continue;
 
@@ -124,7 +125,7 @@ public class PEArmorLayer extends RenderLayer<LivingEntity, HumanoidModel<Living
         pose.pushPose();
         rotateAtPart(pose, part, origPx, origPy, origPz);
         model.renderToBuffer(pose, buf.getBuffer(RenderType.entityCutoutNoCull(tex)),
-                light, OverlayTexture.NO_OVERLAY, -1);
+                light, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, 1f);
         pose.popPose();
     }
 
@@ -193,7 +194,7 @@ public class PEArmorLayer extends RenderLayer<LivingEntity, HumanoidModel<Living
                 pose.pushPose();
                 rotateAtPart(pose, leftArm, L_ARM_PX, L_ARM_PY, L_ARM_PZ);
                 leftModel.renderToBuffer(pose, buf.getBuffer(RenderType.entityCutoutNoCull(tex)),
-                        light, OverlayTexture.NO_OVERLAY, -1);
+                        light, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, 1f);
                 pose.popPose();
             }
 
@@ -202,7 +203,7 @@ public class PEArmorLayer extends RenderLayer<LivingEntity, HumanoidModel<Living
                 pose.pushPose();
                 rotateAtPart(pose, rightArm, R_ARM_PX, R_ARM_PY, R_ARM_PZ);
                 rightModel.renderToBuffer(pose, buf.getBuffer(RenderType.entityCutoutNoCull(tex)),
-                        light, OverlayTexture.NO_OVERLAY, -1);
+                        light, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, 1f);
                 pose.popPose();
             }
         }
@@ -227,7 +228,7 @@ public class PEArmorLayer extends RenderLayer<LivingEntity, HumanoidModel<Living
             pose.pushPose();
             rotateAtPart(pose, leftLeg, L_LEG_PX, L_LEG_PY, L_LEG_PZ);
             leftModel.renderToBuffer(pose, buf.getBuffer(RenderType.entityCutoutNoCull(legTex)),
-                    light, OverlayTexture.NO_OVERLAY, -1);
+                    light, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, 1f);
             pose.popPose();
 
             // 右腿 — X 轴镜像（使用左腿模型或独立右腿模型）
@@ -237,7 +238,7 @@ public class PEArmorLayer extends RenderLayer<LivingEntity, HumanoidModel<Living
             rotateAtPart(pose, rightLeg, R_LEG_PX, R_LEG_PY, R_LEG_PZ);
             if (rightModel == leftModel) pose.scale(-1, 1, 1);
             rightModel.renderToBuffer(pose, buf.getBuffer(RenderType.entityCutoutNoCull(legTex)),
-                    light, OverlayTexture.NO_OVERLAY, -1);
+                    light, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, 1f);
             pose.popPose();
         }
     }
@@ -261,7 +262,7 @@ public class PEArmorLayer extends RenderLayer<LivingEntity, HumanoidModel<Living
             pose.pushPose();
             rotateAtPart(pose, part, origPx, origPy, origPz);
             model.renderToBuffer(pose, buf.getBuffer(RenderType.entityCutoutNoCull(texture)),
-                    light, OverlayTexture.NO_OVERLAY, -1);
+                    light, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, 1f);
             pose.popPose();
         }
     }

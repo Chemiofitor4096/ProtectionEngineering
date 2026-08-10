@@ -1,6 +1,7 @@
 package com.chemiofitor.protection_engineering.mixin;
 
 import com.chemiofitor.protection_engineering.item.EngineerShieldItem;
+import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -28,7 +29,9 @@ public class ShieldAngleMixin {
         Vec3 srcPos = source.getSourcePosition();
         if (srcPos == null) return;
 
-        Vec3 look = player.calculateViewVector(0.0F, player.getYHeadRot());
+        // 1.20.1 的 calculateViewVector 为 protected，改用手动水平朝向向量（等价 pitch=0）
+        float yawRad = player.getYHeadRot() * ((float) Math.PI / 180F);
+        Vec3 look = new Vec3(-Mth.sin(yawRad), 0, Mth.cos(yawRad));
         Vec3 toPlayer = srcPos.vectorTo(player.position());
         toPlayer = new Vec3(toPlayer.x, 0.0, toPlayer.z).normalize();
 

@@ -1,11 +1,12 @@
 package com.chemiofitor.protection_engineering.item;
 
 import com.chemiofitor.protection_engineering.api.SlotTypes;
-import com.chemiofitor.protection_engineering.registry.PEDataComponents;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
+
+import static com.chemiofitor.protection_engineering.registry.PEDataComponents.ATTACHMENT_STATE;
 
 /**
  * 单筒望远镜 —— 眼部附件，可按键开关。
@@ -20,7 +21,7 @@ public class SpyglassItem extends AttachmentItem {
     /** 默认关闭，需手动开启 */
     @Override
     public void onEquip(ItemStack attachment, ItemStack host, LivingEntity entity) {
-        if (!attachment.has(PEDataComponents.ATTACHMENT_STATE.get())) {
+        if (attachment.getTag() == null || !attachment.getTag().contains(ATTACHMENT_STATE)) {
             setState(attachment, STATE_DISABLED);
         }
     }

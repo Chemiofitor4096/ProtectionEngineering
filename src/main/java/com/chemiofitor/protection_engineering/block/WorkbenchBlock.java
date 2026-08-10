@@ -5,6 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
@@ -26,7 +27,6 @@ import javax.annotation.Nullable;
 
 public class WorkbenchBlock extends BaseEntityBlock {
 
-    public static final MapCodec<WorkbenchBlock> CODEC = simpleCodec(WorkbenchBlock::new);
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 
     private static final Component TITLE = Component.translatable("block.protectionengineering.workbench");
@@ -36,7 +36,6 @@ public class WorkbenchBlock extends BaseEntityBlock {
         registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH));
     }
 
-    @Override protected MapCodec<WorkbenchBlock> codec() { return CODEC; }
     @Override public RenderShape getRenderShape(BlockState state) { return RenderShape.MODEL; }
 
     @Override
@@ -50,12 +49,12 @@ public class WorkbenchBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected BlockState rotate(BlockState state, Rotation rotation) {
+    public BlockState rotate(BlockState state, Rotation rotation) {
         return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
     }
 
     @Override
-    protected BlockState mirror(BlockState state, Mirror mirror) {
+    public BlockState mirror(BlockState state, Mirror mirror) {
         return state.rotate(mirror.getRotation(state.getValue(FACING)));
     }
 
@@ -65,20 +64,20 @@ public class WorkbenchBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
-                                               Player player, BlockHitResult hit) {
+    public InteractionResult use(BlockState state, Level level, BlockPos pos,
+                                 Player player, InteractionHand hand, BlockHitResult hit) {
         if (level.isClientSide) return InteractionResult.SUCCESS;
 
         BlockEntity be = level.getBlockEntity(pos);
         if (be instanceof WorkbenchBlockEntity wbe && player instanceof ServerPlayer sp) {
             sp.openMenu(new SimpleMenuProvider(
-                    (windowId, inv, p) -> wbe.createMenu(windowId, inv), TITLE), pos);
+                    (windowId, inv, p) -> wbe.createMenu(windowId, inv), TITLE));
         }
         return InteractionResult.CONSUME;
     }
 
     @Override
-    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return Shapes.or(
                 Shapes.box(0.0D / 16, 0.0D / 16, 0.0D / 16, 16.0D / 16, 9.0D / 16, 16.0D / 16),
                 Shapes.box(1.0D / 16, 9.0D / 16, 1.0D / 16, 15.0D / 16, 11.0D / 16, 15.0D / 16)

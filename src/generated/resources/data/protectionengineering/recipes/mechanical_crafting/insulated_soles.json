@@ -1,0 +1,22 @@
+{
+  "type": "create:mechanical_crafting",
+  "acceptMirrored": true,
+  "key": {
+    "M": {
+      "item": "minecraft:magma_cream"
+    },
+    "S": {
+      "item": "create:sturdy_sheet"
+    }
+  },
+  "pattern": [
+    "     ",
+    "     ",
+    "     ",
+    " S S ",
+    "SM MS"
+  ],
+  "result": {
+    "item": "protectionengineering:insulated_soles"
+  }
+}

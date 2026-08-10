@@ -3,7 +3,7 @@ package com.chemiofitor.protection_engineering.data;
 import com.tterrag.registrate.providers.ProviderType;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
-import net.neoforged.neoforge.data.event.GatherDataEvent;
+import net.minecraftforge.data.event.GatherDataEvent;
 
 import java.util.function.BiConsumer;
 
@@ -23,8 +23,8 @@ public class PEDataGen {
         PackOutput output = generator.getPackOutput();
 
         if (event.includeServer()) {
-            generator.addProvider(true, new PERecipeProvider(output, event.getLookupProvider()));
-            generator.addProvider(true, new PEMechanicalCraftingRecipeGen(output, event.getLookupProvider()));
+            generator.addProvider(true, new PERecipeProvider(output));
+            generator.addProvider(true, new PEMechanicalCraftingRecipeGen(output));
         }
     }
 
@@ -34,6 +34,9 @@ public class PEDataGen {
 
             // ── Item Group ─────────────────────────────────────────
             add.accept("itemGroup.protectionengineering", "Protection Engineering");
+
+            // ── Attributes ──────────────────────────────────────────
+            add.accept("attribute.name.protectionengineering.jump_strength", "Jump Strength");
 
             // ── Slots ──────────────────────────────────────────────
             add.accept("slot.protectionengineering.eyes", "Eyes");

@@ -15,7 +15,7 @@ import net.minecraft.world.entity.LivingEntity;
 
 public class EngineerChestplateRightArmModel<T extends Entity> extends EntityModel<T> {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
-	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath("protectionengineering", "engineer_chestplate_rightarm"), "main");
+	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation("protectionengineering", "engineer_chestplate_rightarm"), "main");
 	private final ModelPart RightArm;
 
 	public EngineerChestplateRightArmModel(ModelPart root) {
@@ -45,7 +45,7 @@ public class EngineerChestplateRightArmModel<T extends Entity> extends EntityMod
 	}
 
 	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, int color) {
-		RightArm.render(poseStack, vertexConsumer, packedLight, packedOverlay, -1);
+	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+		RightArm.render(poseStack, vertexConsumer, packedLight, packedOverlay);
 	}
 }

@@ -13,7 +13,7 @@ import net.minecraft.world.entity.Entity;
 public class AdvancedApsAttachmentModel<T extends Entity> extends EntityModel<T> {
 
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(
-            ResourceLocation.fromNamespaceAndPath("protectionengineering", "advanced_aps"), "main");
+            new ResourceLocation("protectionengineering", "advanced_aps"), "main");
     private final ModelPart APS;
 
     public AdvancedApsAttachmentModel(ModelPart root) {
@@ -44,7 +44,7 @@ public class AdvancedApsAttachmentModel<T extends Entity> extends EntityModel<T>
 
     @Override
     public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer,
-                               int packedLight, int packedOverlay, int color) {
-        APS.render(poseStack, vertexConsumer, packedLight, packedOverlay, -1);
+                               int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+        APS.render(poseStack, vertexConsumer, packedLight, packedOverlay);
     }
 }

@@ -17,7 +17,7 @@ import net.minecraft.world.entity.Entity;
 public class SpyglassAttachmentModel<T extends Entity> extends EntityModel<T> {
 
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(
-            ResourceLocation.fromNamespaceAndPath("protectionengineering", "spyglass"), "main");
+            new ResourceLocation("protectionengineering", "spyglass"), "main");
 
     private final ModelPart AttachGlass;
 
@@ -47,7 +47,7 @@ public class SpyglassAttachmentModel<T extends Entity> extends EntityModel<T> {
 
     @Override
     public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer,
-                               int packedLight, int packedOverlay, int color) {
-        AttachGlass.render(poseStack, vertexConsumer, packedLight, packedOverlay, -1);
+                               int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+        AttachGlass.render(poseStack, vertexConsumer, packedLight, packedOverlay);
     }
 }

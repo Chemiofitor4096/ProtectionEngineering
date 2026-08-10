@@ -34,7 +34,7 @@ public class EngineerShieldItem extends Item implements Equipable, IGradedRepair
     }
 
     @Override
-    public int getUseDuration(ItemStack stack, LivingEntity entity) {
+    public int getUseDuration(ItemStack stack) {
         return 72000;
     }
 
@@ -59,9 +59,9 @@ public class EngineerShieldItem extends Item implements Equipable, IGradedRepair
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context,
+    public void appendHoverText(ItemStack stack, Level level,
                                 List<Component> tooltip, TooltipFlag flag) {
-        super.appendHoverText(stack, context, tooltip, flag);
+        super.appendHoverText(stack, level, tooltip, flag);
         appendRepairTooltip(stack, tooltip);
     }
 
@@ -71,7 +71,7 @@ public class EngineerShieldItem extends Item implements Equipable, IGradedRepair
     }
 
     @Override
-    public boolean canPerformAction(ItemStack stack, net.neoforged.neoforge.common.ItemAbility itemAbility) {
-        return net.neoforged.neoforge.common.ItemAbilities.DEFAULT_SHIELD_ACTIONS.contains(itemAbility);
+    public boolean canPerformAction(ItemStack stack, net.minecraftforge.common.ToolAction toolAction) {
+        return net.minecraftforge.common.ToolActions.DEFAULT_SHIELD_ACTIONS.contains(toolAction);
     }
 }

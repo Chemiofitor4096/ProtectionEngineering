@@ -1,0 +1,31 @@
+{
+  "type": "create:mechanical_crafting",
+  "acceptMirrored": true,
+  "key": {
+    "F": {
+      "item": "create:encased_fan"
+    },
+    "I": {
+      "item": "create:iron_sheet"
+    },
+    "N": {
+      "item": "minecraft:nether_star"
+    },
+    "S": {
+      "item": "create:sturdy_sheet"
+    },
+    "W": {
+      "item": "create:steam_whistle"
+    }
+  },
+  "pattern": [
+    " SSS ",
+    "ISNSI",
+    "ISSSI",
+    "IF FI",
+    " W W "
+  ],
+  "result": {
+    "item": "protectionengineering:jetpack"
+  }
+}

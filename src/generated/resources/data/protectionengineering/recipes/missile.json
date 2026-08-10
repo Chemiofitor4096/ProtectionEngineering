@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "B": {
+      "item": "create:brass_sheet"
+    },
+    "G": {
+      "item": "minecraft:gunpowder"
+    },
+    "O": {
+      "item": "minecraft:observer"
+    },
+    "S": {
+      "item": "create:sturdy_sheet"
+    }
+  },
+  "pattern": [
+    " O ",
+    "BGB",
+    "S S"
+  ],
+  "result": {
+    "count": 4,
+    "item": "protectionengineering:missile"
+  },
+  "show_notification": true
+}

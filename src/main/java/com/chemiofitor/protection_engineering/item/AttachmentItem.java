@@ -4,12 +4,10 @@ import com.chemiofitor.protection_engineering.api.IAttachment;
 import com.chemiofitor.protection_engineering.api.SlotType;
 import com.chemiofitor.protection_engineering.registry.PEDataComponents;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
@@ -17,12 +15,17 @@ import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.neoforged.neoforge.event.ItemAttributeModifierEvent;
+import net.minecraft.world.level.Level;
+import net.minecraftforge.event.ItemAttributeModifierEvent;
 
+import javax.annotation.Nullable;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
+import static com.chemiofitor.protection_engineering.registry.PEDataComponents.ATTACHMENT_ACTIVE;
 import static com.chemiofitor.protection_engineering.registry.PEDataComponents.ATTACHMENT_COOLDOWN;
 import static com.chemiofitor.protection_engineering.registry.PEDataComponents.ATTACHMENT_STATE;
 
@@ -32,7 +35,7 @@ import static com.chemiofitor.protection_engineering.registry.PEDataComponents.A
 public abstract class AttachmentItem extends Item implements IAttachment {
 
     private final Set<SlotType> compatibleSlots;
-    private final Set<Holder<MobEffect>> immunities;
+    private final Set<MobEffect> immunities;
 
     /** 无状态效果免疫的附件 */
     public AttachmentItem(Properties properties, SlotType... slots) {
@@ -40,7 +43,7 @@ public abstract class AttachmentItem extends Item implements IAttachment {
     }
 
     /** 带状态效果免疫的附件 */
-    public AttachmentItem(Properties properties, Set<Holder<MobEffect>> immunities, SlotType... slots) {
+    public AttachmentItem(Properties properties, Set<MobEffect> immunities, SlotType... slots) {
         super(properties);
         this.compatibleSlots = Set.of(slots);
         this.immunities = Set.copyOf(immunities);
@@ -53,43 +56,47 @@ public abstract class AttachmentItem extends Item implements IAttachment {
     public Set<SlotType> compatibleSlots() { return compatibleSlots; }
 
     @Override
-    public Set<Holder<MobEffect>> getImmunities() { return immunities; }
+    public Set<MobEffect> getImmunities() { return immunities; }
 
-    // ── 状态机：读写 ──────────────────────────────────────────
+    // ── 状态机：读写（NBT 持久化） ──────────────────────────────
 
     public int getState(ItemStack stack) {
-        Integer s = stack.get(ATTACHMENT_STATE.get());
-        if (s != null) return s;
+        if (stack.getTag() != null && stack.getTag().contains(ATTACHMENT_STATE)) {
+            return stack.getTag().getInt(ATTACHMENT_STATE);
+        }
         return migrateState(stack);
     }
 
     protected void setState(ItemStack stack, int state) {
-        stack.set(ATTACHMENT_STATE.get(), state);
+        stack.getOrCreateTag().putInt(ATTACHMENT_STATE, state);
         // 进入无限状态时清计时器
         if (state == STATE_DISABLED || state == STATE_READY) {
-            stack.remove(ATTACHMENT_COOLDOWN.get());
+            if (stack.getTag() != null) {
+                stack.getTag().remove(ATTACHMENT_COOLDOWN);
+            }
         }
     }
 
     public long getTimer(ItemStack stack) {
-        return stack.getOrDefault(ATTACHMENT_COOLDOWN.get(), 0L);
+        if (stack.getTag() == null) return 0L;
+        return stack.getTag().getLong(ATTACHMENT_COOLDOWN);
     }
 
     protected void setTimer(ItemStack stack, long endTick) {
-        stack.set(ATTACHMENT_COOLDOWN.get(), endTick);
+        stack.getOrCreateTag().putLong(ATTACHMENT_COOLDOWN, endTick);
     }
 
     // ── 旧存档迁移 ────────────────────────────────────────────
 
     private int migrateState(ItemStack stack) {
-        Boolean active = stack.get(PEDataComponents.ATTACHMENT_ACTIVE.get());
-        if (active == null) {
+        if (stack.getTag() == null || !stack.getTag().contains(ATTACHMENT_ACTIVE)) {
             return getControlPattern() == ControlPattern.ALWAYS_ON ? STATE_READY : STATE_DISABLED;
         }
+        boolean active = stack.getTag().getBoolean(ATTACHMENT_ACTIVE);
         switch (getControlPattern()) {
             case ACTIVE_COOLDOWN: {
                 // 有旧冷却计时器 → 迁移到 COOLING
-                long oldTimer = stack.getOrDefault(ATTACHMENT_COOLDOWN.get(), 0L);
+                long oldTimer = getTimer(stack);
                 if (!active && oldTimer > 0) return STATE_COOLING;
                 return STATE_READY; // 激活窗口中或就绪，下个 tick 修正
             }
@@ -144,8 +151,8 @@ public abstract class AttachmentItem extends Item implements IAttachment {
 
     @Override
     public void onEquip(ItemStack attachment, ItemStack host, LivingEntity entity) {
-        if (attachment.has(ATTACHMENT_STATE.get())) return;
-        if (attachment.has(PEDataComponents.ATTACHMENT_ACTIVE.get())) return; // 旧数据，等迁移
+        if (attachment.getTag() != null && attachment.getTag().contains(ATTACHMENT_STATE)) return;
+        if (attachment.getTag() != null && attachment.getTag().contains(ATTACHMENT_ACTIVE)) return; // 旧数据，等迁移
 
         switch (getControlPattern()) {
             case FREE_TOGGLE, ONE_SHOT_COOLDOWN, ACTIVE_COOLDOWN, ALWAYS_ON ->
@@ -279,54 +286,52 @@ public abstract class AttachmentItem extends Item implements IAttachment {
 
     @Override
     public void addAttributeModifiers(ItemAttributeModifierEvent event) {
-        EquipmentSlotGroup group = resolveSlotGroup(event);
+        EquipmentSlot slot = resolveSlot(event);
+        if (slot == null || event.getSlotType() != slot) return;
         // 修饰符 ID 追加宿主装备部件后缀（chest/legs/feet/head…）：
         // 同一附件装到不同护甲部件时 ID 唯一，可跨护甲堆叠（实体属性按 ID 去重）。
-        String hostSuffix = group.getSerializedName();
+        String hostSuffix = slot.getName();
         for (IAttachment.AttributeBonus bonus : getAttributeBonuses()) {
-            ResourceLocation id = ResourceLocation.fromNamespaceAndPath(
-                    bonus.id().getNamespace(), bonus.id().getPath() + "_" + hostSuffix);
-            event.replaceModifier(bonus.attribute(),
-                    new AttributeModifier(id, bonus.amount(), bonus.operation()),
-                    group);
+            String id = bonus.id().toString() + "_" + hostSuffix;
+            // ⚠️ 1.20.1 的 AttributeModifier(String,double,Operation) 构造器生成随机 UUID：
+            // 卸载装备时 LivingEntity 会重新触发事件并按 UUID 匹配移除修饰符，
+            // 随机 UUID 会导致旧修饰符无法移除、属性随换装次数叠加。必须用确定性 UUID。
+            UUID uuid = UUID.nameUUIDFromBytes(id.getBytes(StandardCharsets.UTF_8));
+            event.addModifier(bonus.attribute(),
+                    new AttributeModifier(uuid, id, bonus.amount(), bonus.operation()));
         }
     }
 
     /**
-     * 属性生效的装备槽组：优先按宿主护甲的实际部件决定 —— 通用槽附件（LINING/装饰）
+     * 属性生效的装备槽：优先按宿主护甲的实际部件决定 —— 通用槽附件（LINING/装饰）
      * 装到胸甲→CHEST、护腿→LEGS、靴子→FEET、头盔→HEAD，精确跟随安装位置；
      * 非护甲宿主（武器附件等预留）回退到兼容槽位的静态推导。
      */
-    private EquipmentSlotGroup resolveSlotGroup(ItemAttributeModifierEvent event) {
+    private EquipmentSlot resolveSlot(ItemAttributeModifierEvent event) {
         if (event.getItemStack().getItem() instanceof ArmorItem armor) {
-            return switch (armor.getEquipmentSlot()) {
-                case HEAD -> EquipmentSlotGroup.HEAD;
-                case CHEST -> EquipmentSlotGroup.CHEST;
-                case LEGS -> EquipmentSlotGroup.LEGS;
-                case FEET -> EquipmentSlotGroup.FEET;
-                default -> EquipmentSlotGroup.ANY;
-            };
+            return armor.getEquipmentSlot();
         }
-        return resolveSlotGroupFromSlots();
+        return resolveSlotFromSlots();
     }
 
-    /** 按兼容槽位静态推导（非护甲宿主兜底）：同组 → 该组；跨组 / 未映射 → ANY */
-    private EquipmentSlotGroup resolveSlotGroupFromSlots() {
-        EquipmentSlotGroup result = null;
+    /** 按兼容槽位静态推导（非护甲宿主兜底）：同槽 → 该槽；跨槽 / 未映射 → null（不生效） */
+    private EquipmentSlot resolveSlotFromSlots() {
+        EquipmentSlot result = null;
         for (SlotType slot : compatibleSlots) {
-            EquipmentSlotGroup group = slot.equipmentSlotGroup();
-            if (result == null) result = group;
-            else if (result != group) return EquipmentSlotGroup.ANY;
+            EquipmentSlot es = slot.equipmentSlot();
+            if (es == null) return null;
+            if (result == null) result = es;
+            else if (result != es) return null;
         }
-        return result != null ? result : EquipmentSlotGroup.ANY;
+        return result;
     }
 
     // ── Tooltip ────────────────────────────────────────────────
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context,
+    public void appendHoverText(ItemStack stack, @Nullable Level level,
                                 List<Component> tooltip, TooltipFlag flag) {
-        super.appendHoverText(stack, context, tooltip, flag);
+        super.appendHoverText(stack, level, tooltip, flag);
 
         tooltip.add(Component.translatable("tooltip.protectionengineering.slot")
                 .withStyle(ChatFormatting.GOLD));
@@ -340,10 +345,10 @@ public abstract class AttachmentItem extends Item implements IAttachment {
         if (!immunities.isEmpty()) {
             MutableComponent line = Component.literal("  ");
             boolean first = true;
-            for (Holder<MobEffect> effect : immunities) {
+            for (MobEffect effect : immunities) {
                 if (!first) line.append(Component.literal(" "));
                 first = false;
-                line.append(Component.translatable(effect.value().getDescriptionId()));
+                line.append(Component.translatable(effect.getDescriptionId()));
             }
             tooltip.add(Component.translatable("tooltip.protectionengineering.immunities")
                     .withStyle(ChatFormatting.GOLD));
@@ -376,15 +381,15 @@ public abstract class AttachmentItem extends Item implements IAttachment {
     private static Component formatAttributeBonus(IAttachment.AttributeBonus bonus) {
         AttributeModifier.Operation operation = bonus.operation();
         boolean positive = bonus.amount() >= 0;
-        int opIndex = operation == AttributeModifier.Operation.ADD_VALUE ? 0 : 1;
-        double display = operation == AttributeModifier.Operation.ADD_VALUE
+        int opIndex = operation == AttributeModifier.Operation.ADDITION ? 0 : 1;
+        double display = operation == AttributeModifier.Operation.ADDITION
                 ? bonus.amount() : bonus.amount() * 100;
         String key = positive ? "attribute.modifier.plus." + opIndex
                               : "attribute.modifier.takes." + opIndex;
         // 原版格式是 "+%s %s"（plus.1 为 "+%s%% %s"）：数值与属性名都必须作为占位参数传入
         return Component.translatable(key,
                 formatDecimal(Math.abs(display)),
-                Component.translatable(bonus.attribute().value().getDescriptionId()))
+                Component.translatable(bonus.attribute().getDescriptionId()))
                 .withStyle(ChatFormatting.BLUE);
     }
 

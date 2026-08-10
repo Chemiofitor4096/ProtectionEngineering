@@ -5,18 +5,17 @@ import com.chemiofitor.protection_engineering.api.AttachmentUtil;
 import com.chemiofitor.protection_engineering.api.IAttachment;
 import com.chemiofitor.protection_engineering.config.PEConfig;
 import com.chemiofitor.protection_engineering.item.AttachmentItem;
-import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
+import net.minecraftforge.client.gui.overlay.ForgeGui;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -26,20 +25,19 @@ import java.util.List;
  * 附件状态 HUD 覆盖层 — 右上角显示激活/冷却倒计时。
  * 直接读取统一状态机，无需逆向推导。
  */
-@EventBusSubscriber(modid = ProtectionEngineering.MODID, value = Dist.CLIENT)
+@Mod.EventBusSubscriber(modid = ProtectionEngineering.MODID, value = Dist.CLIENT,
+        bus = Mod.EventBusSubscriber.Bus.MOD)
 public class PECooldownOverlay {
-
-    public static final ResourceLocation LAYER_ID =
-            ResourceLocation.fromNamespaceAndPath(ProtectionEngineering.MODID, "cooldown_overlay");
 
     private static final int LINE_HEIGHT = 12;
 
     @SubscribeEvent
-    public static void registerOverlay(RegisterGuiLayersEvent event) {
-        event.registerAboveAll(LAYER_ID, PECooldownOverlay::render);
+    public static void registerOverlay(RegisterGuiOverlaysEvent event) {
+        event.registerAboveAll("cooldown_overlay", PECooldownOverlay::render);
     }
 
-    private static void render(GuiGraphics gui, DeltaTracker delta) {
+    private static void render(ForgeGui gui, GuiGraphics graphics, float partialTick,
+                               int screenWidth, int screenHeight) {
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
         if (player == null || mc.options.hideGui) return;
@@ -48,16 +46,16 @@ public class PECooldownOverlay {
         if (entries.isEmpty()) return;
 
         Font font = mc.font;
-        int screenW = gui.guiWidth();
+        int screenW = graphics.guiWidth();
         int xOffset = PEConfig.HUD_OFFSET_X.get();
         int y = PEConfig.HUD_OFFSET_Y.get();
 
         Component title = Component.translatable("hud.protectionengineering.cooldown_title");
-        gui.drawString(font, title, screenW - xOffset - 120, y, 0xFFCCCCCC, false);
+        graphics.drawString(font, title, screenW - xOffset - 120, y, 0xFFCCCCCC, false);
         y += LINE_HEIGHT;
 
         for (StatusEntry e : entries) {
-            gui.drawString(font, e.text, screenW - xOffset - font.width(e.text), y, e.color, false);
+            graphics.drawString(font, e.text, screenW - xOffset - font.width(e.text), y, e.color, false);
             y += LINE_HEIGHT;
         }
     }

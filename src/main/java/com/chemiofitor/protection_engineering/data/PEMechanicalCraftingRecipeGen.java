@@ -7,18 +7,15 @@ import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllItems;
 import com.simibubi.create.api.data.recipe.MechanicalCraftingRecipeGen;
 import io.redspace.ironsspellbooks.registries.ItemRegistry;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 
-import java.util.concurrent.CompletableFuture;
-
 public class PEMechanicalCraftingRecipeGen extends MechanicalCraftingRecipeGen {
 
-    public PEMechanicalCraftingRecipeGen(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
-        super(output, registries, ProtectionEngineering.MODID);
+    public PEMechanicalCraftingRecipeGen(PackOutput output) {
+        super(output, ProtectionEngineering.MODID);
 
         // ── 空气过滤器 ───────────────────────────────────────
         create(PEItems.AIR_FILTER::get)

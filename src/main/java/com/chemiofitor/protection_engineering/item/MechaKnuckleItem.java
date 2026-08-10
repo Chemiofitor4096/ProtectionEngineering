@@ -19,6 +19,6 @@ public class MechaKnuckleItem extends AttachmentItem {
     @Override
     public List<IAttachment.AttributeBonus> getAttributeBonuses() {
         return List.of(IAttachment.bonus("mecha_knuckle_damage", Attributes.ATTACK_DAMAGE, 0.2,
-                AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
+                AttributeModifier.Operation.MULTIPLY_BASE));
     }
 }
